@@ -9,30 +9,30 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.0.4",
-    "react": "^18",
-    "react-dom": "^18",
-    "openai": "^4.20.1",
-    "stripe": "^14.7.0",
-    "@stripe/stripe-js": "^2.2.0",
-    "nodemailer": "^6.9.7",
-    "nodemailer-express-handlebars": "^1.0.0",
-    "handlebars": "^4.7.8",
-    "zod": "^3.22.4",
-    "react-hook-form": "^7.48.2",
-    "@hookform/resolvers": "^3.3.2",
-    "lucide-react": "^0.294.0",
-    "tailwindcss": "^3.3.6",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/nodemailer": "^6.4.14",
-    "typescript": "^5"
+    "next": "15.3.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "openai": "5.8.1",
+    "stripe": "18.2.1",
+    "@stripe/stripe-js": "7.4.0",
+    "nodemailer": "7.0.3",
+    "nodemailer-express-handlebars": "7.0.0",
+    "handlebars": "4.7.8",
+    "zod": "3.22.4",
+    "react-hook-form": "^7.55.0",
+    "@hookform/resolvers": "5.1.1",
+    "lucide-react": "0.523.0",
+    "tailwindcss": "3.3.6",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.32",
+    "typescript": "5.4.5"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.0.4"
+    "eslint": "9.29.0",
+    "eslint-config-next": "15.3.4",
+    "@types/node": "24.0.4",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@types/nodemailer": "6.4.14"
   }
 } 
