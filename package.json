@@ -18,7 +18,7 @@
     "nodemailer": "7.0.3",
     "nodemailer-express-handlebars": "7.0.0",
     "handlebars": "4.7.8",
-    "zod": "3.22.4",
+    "zod": "^3.25.7",
     "react-hook-form": "^7.55.0",
     "@hookform/resolvers": "5.1.1",
     "lucide-react": "0.523.0",
