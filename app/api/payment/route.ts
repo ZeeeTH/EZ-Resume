@@ -46,7 +46,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<PaymentRe
 
     return NextResponse.json({
       success: true,
-      clientSecret: paymentResult.clientSecret,
+      clientSecret: paymentResult.clientSecret ?? undefined,
     })
 
   } catch (error) {
