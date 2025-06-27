@@ -2,7 +2,7 @@
 // Vercel rebuild cache buster - local fix successful, forcing clean deploy
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FileText, Mail, Sparkles, CheckCircle, Loader2, Star, Zap, Shield, Users, TrendingUp } from 'lucide-react'
@@ -10,26 +10,43 @@ import React from 'react'
 import ContactModal from './ContactModal'
 import { useContactModal } from './ContactModalContext'
 
+const workExperienceSchema = z.object({
+  title: z.string().min(2, 'Job title is required'),
+  company: z.string().min(2, 'Company is required'),
+  startMonth: z.string().min(1, 'Start month is required'),
+  startYear: z.string().min(1, 'Start year is required'),
+  endMonth: z.string().optional(),
+  endYear: z.string().optional(),
+  description: z.string().min(10, 'Description is required'),
+});
+const educationSchema = z.object({
+  degree: z.string().min(2, 'Degree is required'),
+  school: z.string().min(2, 'School is required'),
+  startMonth: z.string().min(1, 'Start month is required'),
+  startYear: z.string().min(1, 'Start year is required'),
+  endMonth: z.string().optional(),
+  endYear: z.string().optional(),
+});
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().optional(),
   jobTitle: z.string().optional(),
   company: z.string().optional(),
-  experience: z.string().min(50, 'Please provide at least 50 characters of experience'),
-  education: z.string().min(20, 'Please provide at least 20 characters of education'),
-  skills: z.string().min(20, 'Please provide at least 20 characters of skills'),
-  achievements: z.string().min(30, 'Please provide at least 30 characters of achievements'),
-  coverLetter: z.boolean()
+  skills: z.string().min(2, 'Please provide at least 2 characters of skills'),
+  achievements: z.string().min(2, 'Please provide at least 2 characters of achievements'),
+  coverLetter: z.boolean(),
+  location: z.string().optional(),
+  workExperience: z.array(workExperienceSchema).min(1, 'At least one work experience is required'),
+  education: z.array(educationSchema).min(1, 'At least one education entry is required'),
 }).refine((data) => {
-  // If cover letter is selected, jobTitle and company are required
   if (data.coverLetter) {
     return data.jobTitle && data.jobTitle.length >= 3 && data.company && data.company.length >= 2;
   }
   return true;
 }, {
   message: "Job title and company are required when generating a cover letter",
-  path: ["jobTitle"] // This will show the error on the jobTitle field
+  path: ["jobTitle"]
 });
 
 interface WorkExperience {
@@ -57,12 +74,12 @@ interface FormData {
   phone?: string
   jobTitle?: string
   company?: string
-  experience: string
-  education: string
   skills: string
   achievements: string
   coverLetter: boolean
   location?: string
+  workExperience: WorkExperience[]
+  education: Education[]
 }
 
 // Helper arrays for months and years
@@ -71,7 +88,10 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 56 }, (_, i) => currentYear - 50 + i);
+const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
+
+// Restore the isFieldMissing helper for red border UX
+const isFieldMissing = (value: string) => !value || value.trim() === '';
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
@@ -81,70 +101,68 @@ export default function Home() {
   const [formProgress, setFormProgress] = useState(0)
   const { open, closeModal, openModal } = useContactModal();
 
-  // New state for dynamic work experience and education
-  const [workExperience, setWorkExperience] = useState<WorkExperience[]>([
-    { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
-  ]);
-  const [education, setEducation] = useState<Education[]>([
-    { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
-  ]);
+  // PDF Preview Modal States
+  const [showResumePreview, setShowResumePreview] = useState(false)
+  const [showCoverLetterPreview, setShowCoverLetterPreview] = useState(false)
 
-  const handleWorkChange = (idx: number, field: keyof WorkExperience, value: string) => {
-    const updated = [...workExperience];
-    updated[idx][field] = value;
-    setWorkExperience(updated);
-  };
-  const addJob = () => {
-    setWorkExperience([
-      ...workExperience,
-      { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
-    ]);
-  };
-
-  const handleEduChange = (idx: number, field: keyof Education, value: string) => {
-    const updated = [...education];
-    updated[idx][field] = value;
-    setEducation(updated);
-  };
-  const addEducation = () => {
-    setEducation([
-      ...education,
-      { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
-    ]);
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid, isDirty },
-    watch,
-    trigger
-  } = useForm<FormData>({
+  // useFieldArray for dynamic work experience and education
+  const { control, ...formMethods } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      coverLetter: false
+      coverLetter: false,
+      workExperience: [
+        { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
+      ],
+      education: [
+        { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
+      ]
     },
-    mode: 'onChange' // Enable real-time validation
-  })
+    mode: 'onChange'
+  });
+  const { register, handleSubmit, formState: { errors, isValid, isDirty, touchedFields }, watch, trigger } = formMethods;
+  const workExpFieldArray = useFieldArray({ control, name: 'workExperience' });
+  const eduFieldArray = useFieldArray({ control, name: 'education' });
 
   const coverLetter = watch('coverLetter')
   const watchedFields = watch()
 
   // Calculate form progress
   React.useEffect(() => {
-    const requiredFields = ['name', 'email', 'experience', 'education', 'skills', 'achievements']
-    const optionalFields = ['phone', 'location']
-    const coverLetterFields = coverLetter ? ['jobTitle', 'company'] : []
-    
-    const allFields = [...requiredFields, ...optionalFields, ...coverLetterFields]
-    const filledFields = allFields.filter(field => {
-      const value = watchedFields[field as keyof FormData]
-      return value && value.toString().trim().length > 0
-    })
-    
-    const progress = Math.round((filledFields.length / allFields.length) * 100)
-    setFormProgress(progress)
-  }, [watchedFields, coverLetter])
+    // Count all required top-level fields
+    const requiredFields = ['name', 'email', 'skills', 'achievements'];
+    const coverLetterFields = coverLetter ? ['jobTitle', 'company'] : [];
+    let totalFields = requiredFields.length + coverLetterFields.length;
+    let filledFields = 0;
+    requiredFields.forEach(field => {
+      const value = watchedFields[field as keyof FormData];
+      if (value && value.toString().trim().length > 0) filledFields++;
+    });
+    coverLetterFields.forEach(field => {
+      const value = watchedFields[field as keyof FormData];
+      if (value && value.toString().trim().length > 0) filledFields++;
+    });
+    // Count dynamic work experience fields
+    const workExp = watchedFields.workExperience || [];
+    totalFields += workExp.length * 5; // 5 required fields per job
+    workExp.forEach((job: any) => {
+      if (job.title?.trim()) filledFields++;
+      if (job.company?.trim()) filledFields++;
+      if (job.startMonth?.trim()) filledFields++;
+      if (job.startYear?.trim()) filledFields++;
+      if (job.description?.trim()) filledFields++;
+    });
+    // Count dynamic education fields
+    const eduArr = watchedFields.education || [];
+    totalFields += eduArr.length * 4; // 4 required fields per edu
+    eduArr.forEach((edu: any) => {
+      if (edu.degree?.trim()) filledFields++;
+      if (edu.school?.trim()) filledFields++;
+      if (edu.startMonth?.trim()) filledFields++;
+      if (edu.startYear?.trim()) filledFields++;
+    });
+    const progress = totalFields === 0 ? 0 : Math.round((filledFields / totalFields) * 100);
+    setFormProgress(progress);
+  }, [watchedFields, coverLetter]);
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index)
@@ -153,6 +171,18 @@ export default function Home() {
   const getFieldStatus = (fieldName: keyof FormData) => {
     const value = watchedFields[fieldName]
     const hasError = errors[fieldName]
+    
+    // Handle arrays (workExperience, education) differently
+    if (Array.isArray(value)) {
+      const isFilled = value.length > 0 && value.some(item => 
+        Object.values(item).some(val => val && val.toString().trim().length > 0)
+      )
+      if (hasError) return 'error'
+      if (isFilled) return 'success'
+      return 'default'
+    }
+    
+    // Handle regular string fields
     const isFilled = value && value.toString().trim().length > 0
     
     if (hasError) return 'error'
@@ -165,12 +195,19 @@ export default function Home() {
     setError('')
 
     try {
+      // Transform the data to match the API expectations
+      const apiData = {
+        ...data,
+        workExperience: data.workExperience,
+        educationData: data.education
+      }
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(apiData),
       })
 
       if (!response.ok) {
@@ -190,6 +227,32 @@ export default function Home() {
       setIsGenerating(false)
     }
   }
+
+  // Helper to check if a work experience entry is valid
+  const isWorkValid = (job: WorkExperience) => {
+    return (
+      job.title.trim() &&
+      job.company.trim() &&
+      job.startMonth.trim() &&
+      job.startYear.trim() &&
+      job.description.trim()
+    );
+  };
+
+  // Helper to check if an education entry is valid
+  const isEduValid = (edu: Education) => {
+    return (
+      edu.degree.trim() &&
+      edu.school.trim() &&
+      edu.startMonth.trim() &&
+      edu.startYear.trim()
+    );
+  };
+
+  const addJob = () => workExpFieldArray.append({ title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' });
+  const removeJob = (idx: number) => workExpFieldArray.remove(idx);
+  const addEducation = () => eduFieldArray.append({ degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' });
+  const removeEducation = (idx: number) => eduFieldArray.remove(idx);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
@@ -264,13 +327,7 @@ export default function Home() {
                           <input
                             {...register('name')}
                             id="name"
-                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                              getFieldStatus('name') === 'error' 
-                                ? 'border-red-400' 
-                                : getFieldStatus('name') === 'success'
-                                ? 'border-green-400'
-                                : 'border-white/20'
-                            }`}
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.name && isFieldMissing(watchedFields.name) ? 'border-red-400' : 'border-white/20'}`}
                             placeholder="Enter your full name"
                             aria-describedby="name-error"
                           />
@@ -294,13 +351,7 @@ export default function Home() {
                             {...register('email')}
                             id="email"
                             type="email"
-                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                              getFieldStatus('email') === 'error' 
-                                ? 'border-red-400' 
-                                : getFieldStatus('email') === 'success'
-                                ? 'border-green-400'
-                                : 'border-white/20'
-                            }`}
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.email && isFieldMissing(watchedFields.email) ? 'border-red-400' : 'border-white/20'}`}
                             placeholder="your.email@example.com"
                             aria-describedby="email-error"
                           />
@@ -361,20 +412,32 @@ export default function Home() {
                   {/* Work Experience Section */}
                   <div className="mb-10">
                     <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Work Experience</h2>
-                    {workExperience.map((job, idx) => (
+                    {workExpFieldArray.fields.map((job, idx) => (
                       <div
                         key={idx}
-                        className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
+                        className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border shadow-2xl flex flex-col gap-4 transition-all duration-200 ${isWorkValid(job) ? 'border-green-400' : 'border-white/10'}`}
+                        style={{ position: 'relative' }}
                       >
+                        {workExpFieldArray.fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeJob(idx)}
+                            className="absolute top-3 right-3 text-red-400 hover:text-red-600 text-lg font-bold bg-transparent border-none p-0 m-0 focus:outline-none z-10"
+                            aria-label="Remove job"
+                          >
+                            ×
+                          </button>
+                        )}
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Job Title
                           </label>
                           <input
-                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            {...register(`workExperience.${idx}.title` as const)}
+                            className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              !!touchedFields.workExperience?.[idx]?.title && isFieldMissing(watchedFields.workExperience?.[idx]?.title) ? 'border-red-400' : 'border-white/20'
+                            }`}
                             placeholder="e.g., Senior Software Engineer"
-                            value={job.title}
-                            onChange={e => handleWorkChange(idx, 'title', e.target.value)}
                           />
                         </div>
                         <div>
@@ -382,10 +445,11 @@ export default function Home() {
                             Company
                           </label>
                           <input
-                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            {...register(`workExperience.${idx}.company` as const)}
+                            className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              !!touchedFields.workExperience?.[idx]?.company && isFieldMissing(watchedFields.workExperience?.[idx]?.company) ? 'border-red-400' : 'border-white/20'
+                            }`}
                             placeholder="e.g., Google, Microsoft"
-                            value={job.company}
-                            onChange={e => handleWorkChange(idx, 'company', e.target.value)}
                           />
                         </div>
                         <div className="flex gap-6 w-full">
@@ -393,9 +457,10 @@ export default function Home() {
                             <label className="text-sm font-medium text-gray-300 mb-2">Start Date</label>
                             <div className="flex gap-2">
                               <select
-                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={job.startMonth}
-                                onChange={e => handleWorkChange(idx, 'startMonth', e.target.value)}
+                                {...register(`workExperience.${idx}.startMonth` as const)}
+                                className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                  !!touchedFields.workExperience?.[idx]?.startMonth && isFieldMissing(watchedFields.workExperience?.[idx]?.startMonth) ? 'border-red-400' : 'border-white/20'
+                                }`}
                               >
                                 <option value="">Month</option>
                                 {months.map((month, index) => (
@@ -403,9 +468,10 @@ export default function Home() {
                                 ))}
                               </select>
                               <select
-                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={job.startYear}
-                                onChange={e => handleWorkChange(idx, 'startYear', e.target.value)}
+                                {...register(`workExperience.${idx}.startYear` as const)}
+                                className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                  !!touchedFields.workExperience?.[idx]?.startYear && isFieldMissing(watchedFields.workExperience?.[idx]?.startYear) ? 'border-red-400' : 'border-white/20'
+                                }`}
                               >
                                 <option value="">Year</option>
                                 {years.map((year) => (
@@ -418,9 +484,8 @@ export default function Home() {
                             <label className="text-sm font-medium text-gray-300 mb-2">End Date</label>
                             <div className="flex gap-2">
                               <select
+                                {...register(`workExperience.${idx}.endMonth` as const)}
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={job.endMonth}
-                                onChange={e => handleWorkChange(idx, 'endMonth', e.target.value)}
                               >
                                 <option value="">Month</option>
                                 {months.map((month, index) => (
@@ -428,9 +493,8 @@ export default function Home() {
                                 ))}
                               </select>
                               <select
+                                {...register(`workExperience.${idx}.endYear` as const)}
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={job.endYear}
-                                onChange={e => handleWorkChange(idx, 'endYear', e.target.value)}
                               >
                                 <option value="">Year</option>
                                 {years.map((year) => (
@@ -438,6 +502,7 @@ export default function Home() {
                                 ))}
                               </select>
                             </div>
+                            <span className="text-xs text-gray-400 mt-1">(Leave blank if still present)</span>
                           </div>
                         </div>
                         <div>
@@ -445,10 +510,11 @@ export default function Home() {
                             Job Description
                           </label>
                           <textarea
-                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                            {...register(`workExperience.${idx}.description` as const)}
+                            className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                              !!touchedFields.workExperience?.[idx]?.description && isFieldMissing(watchedFields.workExperience?.[idx]?.description) ? 'border-red-400' : 'border-white/20'
+                            }`}
                             placeholder="Describe your responsibilities, achievements, and key contributions in this role"
-                            value={job.description}
-                            onChange={e => handleWorkChange(idx, 'description', e.target.value)}
                           />
                         </div>
                       </div>
@@ -465,20 +531,32 @@ export default function Home() {
                   {/* Education Section */}
                   <div className="mb-10">
                     <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Education</h2>
-                    {education.map((edu, idx) => (
+                    {eduFieldArray.fields.map((edu, idx) => (
                       <div
                         key={idx}
-                        className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
+                        className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border shadow-2xl flex flex-col gap-4 transition-all duration-200 ${isEduValid(edu) ? 'border-green-400' : 'border-white/10'}`}
+                        style={{ position: 'relative' }}
                       >
+                        {eduFieldArray.fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeEducation(idx)}
+                            className="absolute top-3 right-3 text-red-400 hover:text-red-600 text-lg font-bold bg-transparent border-none p-0 m-0 focus:outline-none z-10"
+                            aria-label="Remove education"
+                          >
+                            ×
+                          </button>
+                        )}
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Degree
                           </label>
                           <input
-                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            {...register(`education.${idx}.degree` as const)}
+                            className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              !!touchedFields.education?.[idx]?.degree && isFieldMissing(watchedFields.education?.[idx]?.degree) ? 'border-red-400' : 'border-white/20'
+                            }`}
                             placeholder="e.g., Bachelor of Science in Computer Science"
-                            value={edu.degree}
-                            onChange={e => handleEduChange(idx, 'degree', e.target.value)}
                           />
                         </div>
                         <div>
@@ -486,10 +564,11 @@ export default function Home() {
                             School/University
                           </label>
                           <input
-                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            {...register(`education.${idx}.school` as const)}
+                            className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              !!touchedFields.education?.[idx]?.school && isFieldMissing(watchedFields.education?.[idx]?.school) ? 'border-red-400' : 'border-white/20'
+                            }`}
                             placeholder="e.g., Stanford University"
-                            value={edu.school}
-                            onChange={e => handleEduChange(idx, 'school', e.target.value)}
                           />
                         </div>
                         <div className="flex gap-6 w-full">
@@ -497,9 +576,10 @@ export default function Home() {
                             <label className="text-sm font-medium text-gray-300 mb-2">Start Date</label>
                             <div className="flex gap-2">
                               <select
-                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={edu.startMonth}
-                                onChange={e => handleEduChange(idx, 'startMonth', e.target.value)}
+                                {...register(`education.${idx}.startMonth` as const)}
+                                className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                  !!touchedFields.education?.[idx]?.startMonth && isFieldMissing(watchedFields.education?.[idx]?.startMonth) ? 'border-red-400' : 'border-white/20'
+                                }`}
                               >
                                 <option value="">Month</option>
                                 {months.map((month, index) => (
@@ -507,9 +587,10 @@ export default function Home() {
                                 ))}
                               </select>
                               <select
-                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={edu.startYear}
-                                onChange={e => handleEduChange(idx, 'startYear', e.target.value)}
+                                {...register(`education.${idx}.startYear` as const)}
+                                className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                  !!touchedFields.education?.[idx]?.startYear && isFieldMissing(watchedFields.education?.[idx]?.startYear) ? 'border-red-400' : 'border-white/20'
+                                }`}
                               >
                                 <option value="">Year</option>
                                 {years.map((year) => (
@@ -522,9 +603,8 @@ export default function Home() {
                             <label className="text-sm font-medium text-gray-300 mb-2">End Date</label>
                             <div className="flex gap-2">
                               <select
+                                {...register(`education.${idx}.endMonth` as const)}
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={edu.endMonth}
-                                onChange={e => handleEduChange(idx, 'endMonth', e.target.value)}
                               >
                                 <option value="">Month</option>
                                 {months.map((month, index) => (
@@ -532,9 +612,8 @@ export default function Home() {
                                 ))}
                               </select>
                               <select
+                                {...register(`education.${idx}.endYear` as const)}
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={edu.endYear}
-                                onChange={e => handleEduChange(idx, 'endYear', e.target.value)}
                               >
                                 <option value="">Year</option>
                                 {years.map((year) => (
@@ -542,6 +621,7 @@ export default function Home() {
                                 ))}
                               </select>
                             </div>
+                            <span className="text-xs text-gray-400 mt-1">(Leave blank if still present)</span>
                           </div>
                         </div>
                       </div>
@@ -563,13 +643,7 @@ export default function Home() {
                         {...register('skills')}
                         id="skills"
                         rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('skills') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('skills') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${!!touchedFields.skills && isFieldMissing(watchedFields.skills) ? 'border-red-400' : 'border-white/20'}`}
                         placeholder="e.g., JavaScript, React, Node.js, Python, AWS, Docker, Git, Agile methodologies, Team leadership, Problem-solving, Communication"
                         aria-describedby="skills-error"
                       />
@@ -593,13 +667,7 @@ export default function Home() {
                         {...register('achievements')}
                         id="achievements"
                         rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('achievements') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('achievements') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${!!touchedFields.achievements && isFieldMissing(watchedFields.achievements) ? 'border-red-400' : 'border-white/20'}`}
                         placeholder="e.g., Increased website conversion rate by 25% through A/B testing. Won 'Employee of the Year' award. Reduced system downtime by 60%. Launched 3 successful products generating $2M in revenue."
                         aria-describedby="achievements-error"
                       />
@@ -640,13 +708,7 @@ export default function Home() {
                             <input
                               {...register('jobTitle')}
                               id="jobTitle"
-                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                                getFieldStatus('jobTitle') === 'error' 
-                                  ? 'border-red-400' 
-                                  : getFieldStatus('jobTitle') === 'success'
-                                  ? 'border-green-400'
-                                  : 'border-white/20'
-                              }`}
+                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.jobTitle && isFieldMissing(watchedFields.jobTitle) ? 'border-red-400' : 'border-white/20'}`}
                               placeholder="e.g., Software Engineer, Marketing Manager"
                               aria-describedby="jobTitle-error"
                             />
@@ -669,13 +731,7 @@ export default function Home() {
                             <input
                               {...register('company')}
                               id="company"
-                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                                getFieldStatus('company') === 'error' 
-                                  ? 'border-red-400' 
-                                  : getFieldStatus('company') === 'success'
-                                  ? 'border-green-400'
-                                  : 'border-white/20'
-                              }`}
+                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.company && isFieldMissing(watchedFields.company) ? 'border-red-400' : 'border-white/20'}`}
                               placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
                               aria-describedby="company-error"
                             />
@@ -712,40 +768,37 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Enhanced Submit Button */}
-                  <div className="space-y-3">
-                    <button
-                      type="submit"
-                      disabled={isGenerating || !isValid || formProgress < 100}
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                          <span>Generating your {coverLetter ? 'resume & cover letter' : 'resume'}...</span>
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="h-6 w-6" />
-                          <span>Generate My {coverLetter ? 'Resume & Cover Letter' : 'Resume'}</span>
-                        </>
-                      )}
-                    </button>
-                    
-                    {!isValid && formProgress > 0 && (
-                      <p className="text-sm text-yellow-400 text-center">
-                        Please complete all required fields to continue
-                      </p>
+                  <button
+                    type="submit"
+                    disabled={isGenerating || !isValid || formProgress < 100}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span>Generating your {coverLetter ? 'resume & cover letter' : 'resume'}...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-6 w-6" />
+                        <span>Generate My {coverLetter ? 'Resume & Cover Letter' : 'Resume'}</span>
+                      </>
                     )}
-                    
-                    {formProgress < 100 && (
-                      <p className="text-sm text-gray-400 text-center">
-                        {formProgress === 0 && "Start filling out the form above"}
-                        {formProgress > 0 && formProgress < 50 && "Keep going! You're making great progress."}
-                        {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details needed."}
-                      </p>
-                    )}
-                  </div>
+                  </button>
+                  
+                  {!isValid && formProgress > 0 && (
+                    <p className="text-sm text-yellow-400 text-center">
+                      Please complete all required fields to continue
+                    </p>
+                  )}
+                  
+                  {formProgress < 100 && (
+                    <p className="text-sm text-gray-400 text-center">
+                      {formProgress === 0 && "Start filling out the form above"}
+                      {formProgress > 0 && formProgress < 50 && "Keep going! You're making great progress."}
+                      {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details needed."}
+                    </p>
+                  )}
                 </form>
               ) : (
                 <div className="text-center py-12">
@@ -782,7 +835,10 @@ export default function Home() {
               
               <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                 {/* Resume Preview */}
-                <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <div 
+                  className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200 cursor-pointer"
+                  onClick={() => setShowResumePreview(true)}
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-lg font-bold text-gray-800">Professional Resume</h4>
                     <FileText className="h-5 w-5 text-blue-600" />
@@ -801,10 +857,16 @@ export default function Home() {
                       <p>Industry-standard sections</p>
                     </div>
                   </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-blue-600 text-sm font-medium">Click to preview →</span>
+                  </div>
                 </div>
 
                 {/* Cover Letter Preview */}
-                <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <div 
+                  className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200 cursor-pointer"
+                  onClick={() => setShowCoverLetterPreview(true)}
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-lg font-bold text-gray-800">Cover Letter</h4>
                     <Mail className="h-5 w-5 text-purple-600" />
@@ -822,6 +884,9 @@ export default function Home() {
                       <p className="font-semibold">Professional Tone</p>
                       <p>Perfect for any industry</p>
                     </div>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-purple-600 text-sm font-medium">Click to preview →</span>
                   </div>
                 </div>
               </div>
@@ -935,7 +1000,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      How does the AI resume generator work?
+                      How does the resume generator actually work?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 0 ? 'rotate-0' : ''}`}>
                       {openFAQ === 0 ? '−' : '+'}
@@ -943,9 +1008,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 0 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Our AI analyzes your experience, skills, and achievements to create a professional, 
-                      ATS-optimized resume. It uses industry best practices and keyword optimization to 
-                      ensure your resume gets past applicant tracking systems and into human hands.
+                      Our AI takes your responses and builds a fully-formatted, ATS-optimized resume in seconds. No templates, no fluff — just clean, job-ready results.
                     </p>
                   )}
                 </div>
@@ -956,7 +1019,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      What makes your resumes different from others?
+                      Why should I use EZ Resume instead of doing it myself?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 1 ? 'rotate-0' : ''}`}>
                       {openFAQ === 1 ? '−' : '+'}
@@ -964,9 +1027,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 1 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Our resumes are specifically designed to pass ATS systems while maintaining a 
-                      professional, modern appearance. We use advanced AI to optimize content for your 
-                      target industry and role, ensuring maximum impact with hiring managers.
+                      We combine AI with proven resume writing techniques to give you a professionally written resume in less time than it takes to brew a coffee.
                     </p>
                   )}
                 </div>
@@ -977,7 +1038,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      How long does it take to generate my resume?
+                      How fast will I get my resume?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 2 ? 'rotate-0' : ''}`}>
                       {openFAQ === 2 ? '−' : '+'}
@@ -985,9 +1046,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 2 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Your resume is generated instantly! Once you submit your information, our AI 
-                      processes it immediately and sends you a download link via email within seconds. 
-                      No waiting, no delays.
+                      Instantly. As soon as you hit "Generate," your resume is created and sent to your email/downloaded on the spot.
                     </p>
                   )}
                 </div>
@@ -998,7 +1057,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      Is my personal information secure?
+                      Will my information be safe?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 3 ? 'rotate-0' : ''}`}>
                       {openFAQ === 3 ? '−' : '+'}
@@ -1006,9 +1065,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 3 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Absolutely. We take your privacy seriously. Your data is encrypted, never shared 
-                      with third parties, and automatically deleted after processing. We only use your 
-                      information to generate your resume and is deleted after processing.
+                      100%. We don't store or share your data. Everything you enter stays private and is used only to generate your resume.
                     </p>
                   )}
                 </div>
@@ -1019,7 +1076,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      Can I edit my resume after generation?
+                      Can I make changes to my resume after it's generated?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 4 ? 'rotate-0' : ''}`}>
                       {openFAQ === 4 ? '−' : '+'}
@@ -1027,8 +1084,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 4 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Yes! You'll receive an editable version along with the final PDF. You can make 
-                      any adjustments you want to perfectly match your preferences and requirements.
+                      Yes! You'll get a fully editable PDF — perfect for small tweaks or tailoring it to other jobs later.
                     </p>
                   )}
                 </div>
@@ -1039,7 +1095,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      What if I'm not satisfied with my resume?
+                      What if I don't like the result?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 5 ? 'rotate-0' : ''}`}>
                       {openFAQ === 5 ? '−' : '+'}
@@ -1047,9 +1103,45 @@ export default function Home() {
                   </div>
                   {openFAQ === 5 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      We offer a 100% satisfaction guarantee. If you're not completely happy with your 
-                      resume, we'll regenerate it for free or provide a full refund. Your success is 
-                      our priority.
+                      If you're not happy, reach out. We offer one free revision or refund — your satisfaction matters.
+                    </p>
+                  )}
+                </div>
+
+                <div 
+                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                  onClick={() => toggleFAQ(6)}
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-bold text-white">
+                      Is this resume ATS-friendly?
+                    </h4>
+                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 6 ? 'rotate-0' : ''}`}>
+                      {openFAQ === 6 ? '−' : '+'}
+                    </span>
+                  </div>
+                  {openFAQ === 6 && (
+                    <p className="text-gray-300 mt-3 leading-relaxed">
+                      Yes — all resumes are formatted to pass Applicant Tracking Systems and help you stand out to recruiters.
+                    </p>
+                  )}
+                </div>
+
+                <div 
+                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                  onClick={() => toggleFAQ(7)}
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-bold text-white">
+                      Do you support cover letters too?
+                    </h4>
+                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 7 ? 'rotate-0' : ''}`}>
+                      {openFAQ === 7 ? '−' : '+'}
+                    </span>
+                  </div>
+                  {openFAQ === 7 && (
+                    <p className="text-gray-300 mt-3 leading-relaxed">
+                      Absolutely. Choose the "Resume + Cover Letter" option and we'll generate a personalized letter tailored to your role.
                     </p>
                   )}
                 </div>
@@ -1095,6 +1187,69 @@ export default function Home() {
         </div>
       </div>
       <ContactModal open={open} onClose={closeModal} />
+
+      {/* PDF Preview Modals */}
+      {showResumePreview && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-xl font-bold text-gray-800">Resume Preview</h3>
+              <button
+                onClick={() => setShowResumePreview(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
+              <img 
+                src="/resume-preview.png" 
+                alt="Resume Preview" 
+                className="w-full h-auto rounded-lg shadow-lg"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling!.style.display = 'block';
+                }}
+              />
+              <div className="hidden text-center py-12 text-gray-500">
+                <p className="text-lg mb-4">Resume Preview</p>
+                <p className="text-sm">Sample resume preview image will be displayed here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCoverLetterPreview && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-xl font-bold text-gray-800">Cover Letter Preview</h3>
+              <button
+                onClick={() => setShowCoverLetterPreview(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
+              <img 
+                src="/cover-letter-preview.png" 
+                alt="Cover Letter Preview" 
+                className="w-full h-auto rounded-lg shadow-lg"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling!.style.display = 'block';
+                }}
+              />
+              <div className="hidden text-center py-12 text-gray-500">
+                <p className="text-lg mb-4">Cover Letter Preview</p>
+                <p className="text-sm">Sample cover letter preview image will be displayed here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
