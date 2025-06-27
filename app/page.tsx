@@ -46,6 +46,14 @@ interface FormData {
   location?: string
 }
 
+// Helper arrays for months and years
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 56 }, (_, i) => currentYear - 50 + i);
+
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -53,6 +61,38 @@ export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [formProgress, setFormProgress] = useState(0)
   const { open, closeModal, openModal } = useContactModal();
+
+  // New state for dynamic work experience and education
+  const [workExperience, setWorkExperience] = useState([
+    { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
+  ]);
+  const [education, setEducation] = useState([
+    { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
+  ]);
+
+  const handleWorkChange = (idx, field, value) => {
+    const updated = [...workExperience];
+    updated[idx][field] = value;
+    setWorkExperience(updated);
+  };
+  const addJob = () => {
+    setWorkExperience([
+      ...workExperience,
+      { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
+    ]);
+  };
+
+  const handleEduChange = (idx, field, value) => {
+    const updated = [...education];
+    updated[idx][field] = value;
+    setEducation(updated);
+  };
+  const addEducation = () => {
+    setEducation([
+      ...education,
+      { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
+    ]);
+  };
 
   const {
     register,
@@ -296,68 +336,176 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Experience */}
-                  <div>
-                    <label htmlFor="experience" className="block text-sm font-medium text-gray-300 mb-2">
-                      Work Experience *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('experience')}
-                        id="experience"
-                        rows={4}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('experience') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('experience') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., Led a 10-person development team to deliver a mobile app that increased user engagement by 40%. Managed project timeline, coordinated with stakeholders, and implemented agile methodologies."
-                        aria-describedby="experience-error"
-                      />
-                      {getFieldStatus('experience') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.experience && (
-                      <p id="experience-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.experience.message}
-                      </p>
-                    )}
+                  {/* Work Experience Section */}
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Work Experience</h2>
+                    {workExperience.map((job, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
+                      >
+                        <input
+                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Job Title"
+                          value={job.title}
+                          onChange={e => handleWorkChange(idx, 'title', e.target.value)}
+                        />
+                        <input
+                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Company"
+                          value={job.company}
+                          onChange={e => handleWorkChange(idx, 'company', e.target.value)}
+                        />
+                        <div className="flex gap-6 w-full">
+                          <div className="flex flex-col w-1/2">
+                            <label className="text-xs text-gray-300 mb-1">Start</label>
+                            <div className="flex gap-2">
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={job.startMonth}
+                                onChange={e => handleWorkChange(idx, 'startMonth', e.target.value)}
+                              >
+                                <option value="">Month</option>
+                                {months.map((month, index) => (
+                                  <option key={index} value={month}>{month}</option>
+                                ))}
+                              </select>
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={job.startYear}
+                                onChange={e => handleWorkChange(idx, 'startYear', e.target.value)}
+                              >
+                                <option value="">Year</option>
+                                {years.map((year) => (
+                                  <option key={year} value={year}>{year}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex flex-col w-1/2">
+                            <label className="text-xs text-gray-300 mb-1">End</label>
+                            <div className="flex gap-2">
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={job.endMonth}
+                                onChange={e => handleWorkChange(idx, 'endMonth', e.target.value)}
+                              >
+                                <option value="">Month</option>
+                                {months.map((month, index) => (
+                                  <option key={index} value={month}>{month}</option>
+                                ))}
+                              </select>
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={job.endYear}
+                                onChange={e => handleWorkChange(idx, 'endYear', e.target.value)}
+                              >
+                                <option value="">Year</option>
+                                {years.map((year) => (
+                                  <option key={year} value={year}>{year}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <textarea
+                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                          placeholder="Description"
+                          value={job.description}
+                          onChange={e => handleWorkChange(idx, 'description', e.target.value)}
+                        />
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addJob}
+                      className="mt-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      + Add Job
+                    </button>
                   </div>
 
-                  {/* Education */}
-                  <div>
-                    <label htmlFor="education" className="block text-sm font-medium text-gray-300 mb-2">
-                      Education *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('education')}
-                        id="education"
-                        rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('education') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('education') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., Bachelor of Science in Computer Science, University of California (2018-2022). Relevant coursework: Data Structures, Algorithms, Web Development. Dean's List recipient."
-                        aria-describedby="education-error"
-                      />
-                      {getFieldStatus('education') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.education && (
-                      <p id="education-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.education.message}
-                      </p>
-                    )}
+                  {/* Education Section */}
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Education</h2>
+                    {education.map((edu, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
+                      >
+                        <input
+                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="Degree"
+                          value={edu.degree}
+                          onChange={e => handleEduChange(idx, 'degree', e.target.value)}
+                        />
+                        <input
+                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="School"
+                          value={edu.school}
+                          onChange={e => handleEduChange(idx, 'school', e.target.value)}
+                        />
+                        <div className="flex gap-6 w-full">
+                          <div className="flex flex-col w-1/2">
+                            <label className="text-xs text-gray-300 mb-1">Start</label>
+                            <div className="flex gap-2">
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={edu.startMonth}
+                                onChange={e => handleEduChange(idx, 'startMonth', e.target.value)}
+                              >
+                                <option value="">Month</option>
+                                {months.map((month, index) => (
+                                  <option key={index} value={month}>{month}</option>
+                                ))}
+                              </select>
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={edu.startYear}
+                                onChange={e => handleEduChange(idx, 'startYear', e.target.value)}
+                              >
+                                <option value="">Year</option>
+                                {years.map((year) => (
+                                  <option key={year} value={year}>{year}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex flex-col w-1/2">
+                            <label className="text-xs text-gray-300 mb-1">End</label>
+                            <div className="flex gap-2">
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={edu.endMonth}
+                                onChange={e => handleEduChange(idx, 'endMonth', e.target.value)}
+                              >
+                                <option value="">Month</option>
+                                {months.map((month, index) => (
+                                  <option key={index} value={month}>{month}</option>
+                                ))}
+                              </select>
+                              <select
+                                className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                value={edu.endYear}
+                                onChange={e => handleEduChange(idx, 'endYear', e.target.value)}
+                              >
+                                <option value="">Year</option>
+                                {years.map((year) => (
+                                  <option key={year} value={year}>{year}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addEducation}
+                      className="mt-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      + Add Education
+                    </button>
                   </div>
 
                   {/* Skills */}
@@ -526,7 +674,7 @@ export default function Home() {
                     <button
                       type="submit"
                       disabled={isGenerating || !isValid || formProgress < 100}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
                     >
                       {isGenerating ? (
                         <>
@@ -568,7 +716,7 @@ export default function Home() {
                   </p>
                   <button
                     onClick={() => setIsSuccess(false)}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
                   >
                     Generate Another Resume
                   </button>
