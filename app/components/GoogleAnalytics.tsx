@@ -3,6 +3,13 @@
 import Script from 'next/script'
 import { useEffect } from 'react'
 
+// Type declaration for gtag
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_ID: string }) {
   useEffect(() => {
     // Check cookie consent
