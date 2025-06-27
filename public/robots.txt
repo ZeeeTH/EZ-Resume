@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Disallow admin or private areas (if any)
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://ez-resume.xyz/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1 
