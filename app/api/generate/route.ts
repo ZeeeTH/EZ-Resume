@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import nodemailer from 'nodemailer'
-import { getTemplateById } from '../../data/templates'
+import { getTemplateById } from '../../../data/templates'
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -333,7 +333,7 @@ Education Details:
 ${formatEducationForPrompt(formData.education)}
 
 ---
-🎯 OUTPUT INSTRUCTIONS:
+�� OUTPUT INSTRUCTIONS:
 Return the resume as a single JSON object with the following structure. Do not include any extra text or explanation:
 
 {
