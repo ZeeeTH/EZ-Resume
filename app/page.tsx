@@ -219,21 +219,21 @@ export default function Home() {
   // Helper to check if a work experience entry is valid
   const isWorkValid = (job: WorkExperience) => {
     return (
-      job.title.trim() &&
-      job.company.trim() &&
-      job.startMonth.trim() &&
-      job.startYear.trim() &&
-      job.description.trim()
+      (job.title?.trim() ?? '') &&
+      (job.company?.trim() ?? '') &&
+      (job.startMonth?.trim() ?? '') &&
+      (job.startYear?.trim() ?? '') &&
+      (job.description?.trim() ?? '')
     );
   };
 
   // Helper to check if an education entry is valid
   const isEduValid = (edu: Education) => {
     return (
-      edu.degree.trim() &&
-      edu.school.trim() &&
-      edu.startMonth.trim() &&
-      edu.startYear.trim()
+      (edu.degree?.trim() ?? '') &&
+      (edu.school?.trim() ?? '') &&
+      (edu.startMonth?.trim() ?? '') &&
+      (edu.startYear?.trim() ?? '')
     );
   };
 
