@@ -1180,7 +1180,8 @@ export default function Home() {
                 className="w-full h-auto rounded-lg shadow-lg"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling!.style.display = 'block';
+                  const sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                  if (sibling) sibling.style.display = 'block';
                 }}
               />
               <div className="hidden text-center py-12 text-gray-500">
@@ -1211,7 +1212,8 @@ export default function Home() {
                 className="w-full h-auto rounded-lg shadow-lg"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling!.style.display = 'block';
+                  const sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                  if (sibling) sibling.style.display = 'block';
                 }}
               />
               <div className="hidden text-center py-12 text-gray-500">
