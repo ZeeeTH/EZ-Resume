@@ -568,7 +568,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern'): Pr
   const secondaryRGB = hexToRgb(secondaryColor) || { r: 100, g: 116, b: 139 }
   
   // Choose fonts based on template
-  let font, boldFont;
+  let font: any, boldFont: any;
   switch (fontFamily.toLowerCase()) {
     case 'times new roman':
       font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
