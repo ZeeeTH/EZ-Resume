@@ -49,6 +49,8 @@ const formSchema = z.object({
   path: ["jobTitle"]
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 interface WorkExperience {
   title: string
   company: string
@@ -66,20 +68,6 @@ interface Education {
   startYear: string
   endMonth: string
   endYear: string
-}
-
-interface FormData {
-  name: string
-  email: string
-  phone?: string
-  jobTitle?: string
-  company?: string
-  skills: string
-  achievements: string
-  coverLetter: boolean
-  location?: string
-  workExperience: WorkExperience[]
-  education: Education[]
 }
 
 // Helper arrays for months and years
