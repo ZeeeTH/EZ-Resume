@@ -63,7 +63,7 @@ const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
 
 // Restore the isFieldMissing helper for red border UX
-const isFieldMissing = (value: string) => !value || value.trim() === '';
+const isFieldMissing = (value: string | undefined) => !value || value.trim() === '';
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
