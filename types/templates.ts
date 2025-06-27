@@ -2,61 +2,39 @@ export interface ResumeTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'modern' | 'classic' | 'creative' | 'minimalist' | 'professional';
-  preview: string; // URL to preview image
-  sections: {
-    header: {
-      name: string;
-      email: string;
-      phone: string;
-      location: string;
-      linkedin?: string;
-      website?: string;
-    };
-    summary: string;
-    experience: Array<{
-      company: string;
-      position: string;
-      startDate: string;
-      endDate?: string;
-      current: boolean;
-      description: string[];
-    }>;
-    education: Array<{
-      institution: string;
-      degree: string;
-      field: string;
-      startDate: string;
-      endDate?: string;
-      current: boolean;
-      gpa?: string;
-      honors?: string[];
-    }>;
-    skills: {
-      technical: string[];
-      soft: string[];
-      languages?: string[];
-    };
-    projects?: Array<{
-      name: string;
-      description: string;
-      technologies: string[];
-      url?: string;
-    }>;
-    certifications?: Array<{
-      name: string;
-      issuer: string;
-      date: string;
-      url?: string;
-    }>;
-    achievements?: string[];
-  };
+  popularity: number;
+  category: string;
   styling: {
     primaryColor: string;
     secondaryColor: string;
     fontFamily: string;
     spacing: 'compact' | 'standard' | 'spacious';
-    layout: 'single-column' | 'two-column' | 'modern-grid';
+    layout: 'modern' | 'classic' | 'minimalist';
+  };
+  sampleData: {
+    name: string;
+    contact: {
+      email: string;
+      phone: string;
+      location: string;
+    };
+    sections: Array<{
+      title: string;
+      content?: string;
+      jobs?: Array<{
+        title: string;
+        company: string;
+        location: string;
+        dates: string;
+        bullets: string[];
+      }>;
+      education?: Array<{
+        degree: string;
+        institution: string;
+        dates: string;
+      }>;
+      categories?: Record<string, string[]>;
+    }>;
   };
 }
 
@@ -64,8 +42,6 @@ export interface TemplateMetadata {
   id: string;
   name: string;
   description: string;
-  category: ResumeTemplate['category'];
-  preview: string;
-  popularity: number; // 1-10 scale
-  tags: string[];
+  popularity: number;
+  category: string;
 } 

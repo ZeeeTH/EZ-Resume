@@ -1,61 +1,94 @@
-import { ResumeTemplate, TemplateMetadata } from '../../types/templates';
 import modernTemplate from './modern.json';
 import classicTemplate from './classic.json';
 import minimalistTemplate from './minimalist.json';
 
-// Import all templates
+export interface ResumeTemplate {
+  id: string;
+  name: string;
+  description: string;
+  popularity: number;
+  category: string;
+  styling: {
+    primaryColor: string;
+    secondaryColor: string;
+    fontFamily: string;
+    spacing: 'compact' | 'standard' | 'spacious';
+    layout: 'modern' | 'classic' | 'minimalist';
+  };
+  sampleData: {
+    name: string;
+    contact: {
+      email: string;
+      phone: string;
+      location: string;
+    };
+    sections: Array<{
+      title: string;
+      content?: string;
+      jobs?: Array<{
+        title: string;
+        company: string;
+        location: string;
+        dates: string;
+        bullets: string[];
+      }>;
+      education?: Array<{
+        degree: string;
+        institution: string;
+        dates: string;
+      }>;
+      categories?: Record<string, string[]>;
+    }>;
+  };
+}
+
 export const templates: ResumeTemplate[] = [
   modernTemplate as ResumeTemplate,
   classicTemplate as ResumeTemplate,
   minimalistTemplate as ResumeTemplate,
 ];
 
-// Template metadata for the template picker
-export const templateMetadata: TemplateMetadata[] = [
+export const templateMetadata = [
   {
     id: 'modern',
-    name: 'Modern Professional',
-    description: 'A sleek, contemporary design with clean lines and modern typography. Perfect for tech and creative industries.',
-    category: 'modern',
-    preview: '/templates/modern-preview.png',
-    popularity: 9,
-    tags: ['tech', 'creative', 'modern', 'professional']
+    name: 'Modern',
+    description: 'Contemporary design with bold typography and clean lines',
+    popularity: 5,
+    category: 'Professional',
   },
   {
     id: 'classic',
-    name: 'Classic Professional',
-    description: 'A traditional, conservative design that\'s perfect for corporate environments and traditional industries.',
-    category: 'classic',
-    preview: '/templates/classic-preview.png',
-    popularity: 8,
-    tags: ['corporate', 'traditional', 'conservative', 'business']
+    name: 'Classic',
+    description: 'Traditional format with formal typography and professional layout',
+    popularity: 4,
+    category: 'Traditional',
   },
   {
     id: 'minimalist',
-    name: 'Minimalist Clean',
-    description: 'A clean, minimalist design with plenty of white space. Perfect for creative professionals and modern workplaces.',
-    category: 'minimalist',
-    preview: '/templates/minimalist-preview.png',
-    popularity: 7,
-    tags: ['minimalist', 'clean', 'creative', 'modern']
-  }
+    name: 'Minimalist',
+    description: 'Clean design with maximum white space and subtle typography',
+    popularity: 3,
+    category: 'Clean',
+  },
 ];
 
-// Helper functions
-export const getTemplateById = (id: string): ResumeTemplate | undefined => {
+export function getTemplateById(id: string): ResumeTemplate | undefined {
   return templates.find(template => template.id === id);
-};
+}
 
-export const getTemplatesByCategory = (category: ResumeTemplate['category']): ResumeTemplate[] => {
-  return templates.filter(template => template.category === category);
-};
+export function getTemplateMetadata() {
+  return templateMetadata;
+}
 
-export const getPopularTemplates = (limit: number = 3): ResumeTemplate[] => {
-  return templateMetadata
+export function getPopularTemplates(limit: number = 3): ResumeTemplate[] {
+  return templates
     .sort((a, b) => b.popularity - a.popularity)
-    .slice(0, limit)
-    .map(meta => getTemplateById(meta.id)!);
-};
+    .slice(0, limit);
+}
+
+export function getTemplatesByCategory(category: string): ResumeTemplate[] {
+  return templates.filter(template => template.category === category);
+}
 
 export const searchTemplates = (query: string): ResumeTemplate[] => {
   const lowercaseQuery = query.toLowerCase();

@@ -1,112 +1,75 @@
 {
   "id": "minimalist",
-  "name": "Minimalist Clean",
-  "description": "A clean, minimalist design with plenty of white space. Perfect for creative professionals and modern workplaces.",
-  "category": "minimalist",
-  "preview": "/templates/minimalist-preview.png",
-  "sections": {
-    "header": {
-      "name": "Alex Chen",
-      "email": "alex.chen@email.com",
-      "phone": "+1 (555) 456-7890",
-      "location": "Austin, TX",
-      "linkedin": "linkedin.com/in/alexchen",
-      "website": "alexchen.design"
-    },
-    "summary": "Product designer with 4+ years creating user-centered digital experiences. Specialized in mobile app design and design systems. Passionate about solving complex problems through intuitive interfaces.",
-    "experience": [
-      {
-        "company": "Design Studio Pro",
-        "position": "Senior Product Designer",
-        "startDate": "2022-03",
-        "current": true,
-        "description": [
-          "Lead design for mobile app with 500K+ active users",
-          "Created comprehensive design system used across 5 products",
-          "Collaborated with engineering team to ensure design feasibility",
-          "Conducted user research and usability testing sessions"
-        ]
-      },
-      {
-        "company": "Creative Agency",
-        "position": "UI/UX Designer",
-        "startDate": "2020-06",
-        "endDate": "2022-02",
-        "current": false,
-        "description": [
-          "Designed user interfaces for web and mobile applications",
-          "Created wireframes, prototypes, and high-fidelity mockups",
-          "Worked with clients to understand requirements and goals",
-          "Presented design solutions to stakeholders and clients"
-        ]
-      }
-    ],
-    "education": [
-      {
-        "institution": "Parsons School of Design",
-        "degree": "Bachelor of Fine Arts",
-        "field": "Design and Technology",
-        "startDate": "2016-09",
-        "endDate": "2020-05",
-        "current": false,
-        "gpa": "3.8/4.0",
-        "honors": ["Dean's List", "Design Excellence Award"]
-      }
-    ],
-    "skills": {
-      "technical": [
-        "Figma",
-        "Sketch",
-        "Adobe Creative Suite",
-        "InVision",
-        "Principle",
-        "HTML/CSS",
-        "Design Systems"
-      ],
-      "soft": [
-        "User Research",
-        "Design Thinking",
-        "Collaboration",
-        "Presentation",
-        "Problem Solving",
-        "Visual Communication"
-      ],
-      "languages": ["English (Native)", "Mandarin (Conversational)"]
-    },
-    "projects": [
-      {
-        "name": "Fitness App Redesign",
-        "description": "Complete redesign of fitness tracking app improving user engagement by 40%",
-        "technologies": ["Figma", "Principle", "User Research"],
-        "url": "behance.net/alexchen/fitness-app"
-      },
-      {
-        "name": "E-commerce Design System",
-        "description": "Comprehensive design system for online retail platform",
-        "technologies": ["Figma", "Design Tokens", "Component Library"],
-        "url": "behance.net/alexchen/design-system"
-      }
-    ],
-    "certifications": [
-      {
-        "name": "Google UX Design Certificate",
-        "issuer": "Google",
-        "date": "2021-08",
-        "url": "coursera.org/google-ux-design"
-      }
-    ],
-    "achievements": [
-      "Featured in Design Weekly magazine",
-      "Speaker at Design Conference 2023",
-      "Mentor for junior designers",
-      "Portfolio featured on Dribbble"
-    ]
-  },
+  "name": "Minimalist",
+  "description": "Clean design with maximum white space and subtle typography",
+  "popularity": 3,
+  "category": "Clean",
   "styling": {
-    "primaryColor": "#000000",
-    "secondaryColor": "#666666",
+    "primaryColor": "#374151",
+    "secondaryColor": "#9CA3AF",
     "fontFamily": "Helvetica",
-    "spacing": "spacious",
-    "layout": "single-column"
+    "spacing": "compact",
+    "layout": "minimalist"
+  },
+  "sampleData": {
+    "name": "Emily Chen",
+    "contact": {
+      "email": "emily.chen@email.com",
+      "phone": "(555) 456-7890",
+      "location": "Seattle, WA"
+    },
+    "sections": [
+      {
+        "title": "Professional Summary",
+        "content": "Creative UX designer with 4+ years of experience crafting user-centered digital experiences. Specialized in mobile app design and user research. Passionate about creating intuitive interfaces that solve real user problems."
+      },
+      {
+        "title": "Professional Experience",
+        "jobs": [
+          {
+            "title": "Senior UX Designer",
+            "company": "Design Studio",
+            "location": "Seattle, WA",
+            "dates": "2022 - Present",
+            "bullets": [
+              "Designed user interfaces for mobile apps used by 2M+ users",
+              "Conducted user research and usability testing to inform design decisions",
+              "Collaborated with product managers and developers to implement designs",
+              "Mentored junior designers and established design system guidelines"
+            ]
+          },
+          {
+            "title": "UX Designer",
+            "company": "Creative Agency",
+            "location": "Portland, OR",
+            "dates": "2020 - 2022",
+            "bullets": [
+              "Created wireframes, prototypes, and high-fidelity mockups",
+              "Performed user interviews and analyzed user behavior data",
+              "Designed responsive web interfaces for e-commerce clients",
+              "Presented design solutions to clients and stakeholders"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "education": [
+          {
+            "degree": "Bachelor of Design, Interaction Design",
+            "institution": "Art Institute of Seattle",
+            "dates": "2016 - 2020"
+          }
+        ]
+      },
+      {
+        "title": "Skills",
+        "categories": {
+          "Design Tools": ["Figma", "Sketch", "Adobe XD", "InVision", "Principle"],
+          "Research": ["User Interviews", "Usability Testing", "A/B Testing", "Analytics", "Personas"],
+          "Technical": ["HTML/CSS", "JavaScript", "React", "Prototyping", "Design Systems"]
+        }
+      }
+    ]
   }
 } 
