@@ -868,14 +868,14 @@ async function sendEmailWithTwoPdfs(
   const attachments = [
     {
       filename: 'Resume.pdf',
-      content: resumePdf,
+      content: Buffer.from(resumePdf),
       contentType: 'application/pdf',
     },
   ];
   if (coverLetterPdf) {
     attachments.push({
       filename: 'CoverLetter.pdf',
-      content: coverLetterPdf,
+      content: Buffer.from(coverLetterPdf),
       contentType: 'application/pdf',
     });
   }
