@@ -70,7 +70,7 @@ export default function Home() {
     { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
   ]);
 
-  const handleWorkChange = (idx, field, value) => {
+  const handleWorkChange = (idx: number, field: string, value: string) => {
     const updated = [...workExperience];
     updated[idx][field] = value;
     setWorkExperience(updated);
@@ -82,7 +82,7 @@ export default function Home() {
     ]);
   };
 
-  const handleEduChange = (idx, field, value) => {
+  const handleEduChange = (idx: number, field: string, value: string) => {
     const updated = [...education];
     updated[idx][field] = value;
     setEducation(updated);
