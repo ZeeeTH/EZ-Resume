@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
       await transporter.verify()
       console.log('Email transporter verified successfully')
       
-      await sendEmailWithTwoPdfs(formData.email, resumePdf, coverLetterPdf, formData.name)
+      await sendEmailWithTwoPdfs(formData.email, resumePdf, coverLetterPdf, formData.name, formData.coverLetter)
     } catch (emailError) {
       console.error('Email sending failed:', emailError)
       return NextResponse.json(
@@ -850,51 +850,43 @@ function wrapText(text: string, maxWidth: number, font: any, fontSize: number): 
   return lines;
 }
 
-async function sendEmailWithTwoPdfs(email: string, resumePdf: Uint8Array, coverLetterPdf: Uint8Array | null, name?: string): Promise<void> {
+async function sendEmailWithTwoPdfs(
+  email: string,
+  resumePdf: Uint8Array,
+  coverLetterPdf: Uint8Array | null,
+  name: string,
+  coverLetter: boolean
+): Promise<void> {
   const subject = coverLetterPdf
     ? 'Your New Resume is Ready!'
     : 'Your New Resume is Ready!';
 
   const text = coverLetterPdf
-    ? 'Please find your generated resume and cover letter attached.'
-    : 'Please find your generated resume attached.';
-
-  // Sanitize and format the user's name for filenames
-  const safeName = (name || '').replace(/[^a-zA-Z0-9]/g, '') || 'User';
+    ? 'Your professionally formatted resume and cover letter are attached as PDFs.'
+    : 'Your professionally formatted resume is attached as a PDF.';
 
   const attachments = [
     {
-      filename: `${safeName}_Resume.pdf`,
-      content: Buffer.from(resumePdf),
+      filename: 'Resume.pdf',
+      content: resumePdf,
       contentType: 'application/pdf',
     },
   ];
-  
   if (coverLetterPdf) {
     attachments.push({
-      filename: `${safeName}_Cover_Letter.pdf`,
-      content: Buffer.from(coverLetterPdf),
+      filename: 'CoverLetter.pdf',
+      content: coverLetterPdf,
       contentType: 'application/pdf',
     });
   }
 
-  console.log(`Sending email to ${email} with ${attachments.length} attachments:`, attachments.map(a => a.filename));
-
-  try {
-    await transporter.sendMail({
-      from: `"EZ Resume" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: subject,
-      text: text,
-      html: buildEmailHtml({ name: formData.name, coverLetter: formData.coverLetter }),
-      attachments,
-    });
-    
-    console.log('Email sent successfully with attachments');
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
-  }
+  await transporter.sendMail({
+    to: email,
+    subject: subject,
+    text: text,
+    html: buildEmailHtml({ name, coverLetter }),
+    attachments,
+  });
 }
 
 // Helper function to capitalize the first letter of each bullet point
