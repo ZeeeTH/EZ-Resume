@@ -288,7 +288,7 @@ export default function Home() {
                     <p className="text-xs text-gray-400 mt-2">
                       {formProgress < 50 && "Keep going! You're making great progress."}
                       {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details."}
-                      {formProgress === 100 && "Perfect! Your form is complete and ready to generate."}
+                      {formProgress === 100 && "🎉 Perfect! Your form is complete and ready to generate! 🚀"}
                     </p>
                   </div>
 
@@ -1012,7 +1012,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      How does the resume generator actually work?
+                      How does the AI resume generator work?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 0 ? 'rotate-0' : ''}`}>
                       {openFAQ === 0 ? '−' : '+'}
@@ -1020,7 +1020,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 0 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Our AI takes your responses and builds a fully-formatted, ATS-optimized resume in seconds. No templates, no fluff — just clean, job-ready results.
+                      Our advanced AI analyzes your experience, skills, and achievements to create a professionally formatted, ATS-optimized resume. It uses industry best practices and proven resume writing techniques to highlight your strengths and maximize your chances of getting interviews. Unlike template-based builders, our AI actually writes and optimizes your content, creating personalized, compelling resumes that stand out to both human recruiters and ATS systems across all industries and career levels.
                     </p>
                   )}
                 </div>
@@ -1031,7 +1031,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      Why should I use EZ Resume instead of doing it myself?
+                      How fast will I get my resume and cover letter?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 1 ? 'rotate-0' : ''}`}>
                       {openFAQ === 1 ? '−' : '+'}
@@ -1039,7 +1039,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 1 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      We combine AI with proven resume writing techniques to give you a professionally written resume in less time than it takes to brew a coffee.
+                      Instantly! As soon as you hit "Generate," your documents are created and sent to your email as high-quality PDF files within seconds. PDFs are the industry standard for job applications because they maintain perfect formatting across all devices and are universally accepted by employers and ATS systems. You can generate as many resumes as you need for different positions, companies, or industries.
                     </p>
                   )}
                 </div>
@@ -1050,7 +1050,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      How fast will I get my resume?
+                      Is my information secure and private?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 2 ? 'rotate-0' : ''}`}>
                       {openFAQ === 2 ? '−' : '+'}
@@ -1058,7 +1058,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 2 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Instantly. As soon as you hit "Generate," your resume is created and sent to your email/downloaded on the spot.
+                      Absolutely. We take your privacy seriously and never store or share your data. Everything you enter stays private and is used only to generate your resume. We use industry-standard encryption and follow GDPR compliance standards to protect your information. Your data is processed securely and deleted immediately after generation.
                     </p>
                   )}
                 </div>
@@ -1069,7 +1069,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      Will my information be safe?
+                      Are the resumes ATS-friendly and can I edit them?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 3 ? 'rotate-0' : ''}`}>
                       {openFAQ === 3 ? '−' : '+'}
@@ -1077,7 +1077,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 3 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      100%. We don't store or share your data. Everything you enter stays private and is used only to generate your resume.
+                      Yes! All our resumes are specifically designed to pass Applicant Tracking Systems with clean formatting, relevant keywords, and industry-standard sections. We offer three distinct professional templates: Modern (contemporary and bold), Classic (traditional and formal), and Minimalist (clean and spacious). You'll receive fully editable PDF files that you can modify in any PDF editor for quick adjustments or tailoring to specific job postings.
                     </p>
                   )}
                 </div>
@@ -1088,7 +1088,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      Can I make changes to my resume after it's generated?
+                      Do you offer cover letters and what makes you different?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 4 ? 'rotate-0' : ''}`}>
                       {openFAQ === 4 ? '−' : '+'}
@@ -1096,7 +1096,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 4 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      Yes! You'll get a fully editable PDF — perfect for small tweaks or tailoring it to other jobs later.
+                      Yes! When you select the "Resume + Cover Letter" option, our AI creates a personalized cover letter that complements your resume and is tailored to your target role and company. Both documents work together to tell your professional story. What makes us different is that we combine cutting-edge AI with proven resume writing techniques to create personalized, compelling content that stands out from generic template-based builders.
                     </p>
                   )}
                 </div>
@@ -1107,7 +1107,7 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-lg font-bold text-white">
-                      What if I don't like the result?
+                      What if I'm not satisfied with the results?
                     </h4>
                     <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 5 ? 'rotate-0' : ''}`}>
                       {openFAQ === 5 ? '−' : '+'}
@@ -1115,45 +1115,7 @@ export default function Home() {
                   </div>
                   {openFAQ === 5 && (
                     <p className="text-gray-300 mt-3 leading-relaxed">
-                      If you're not happy, reach out. We offer one free revision or refund — your satisfaction matters.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(6)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      Is this resume ATS-friendly?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 6 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 6 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 6 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Yes — all resumes are formatted to pass Applicant Tracking Systems and help you stand out to recruiters.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(7)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      Do you support cover letters too?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 7 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 7 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 7 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Absolutely. Choose the "Resume + Cover Letter" option and we'll generate a personalized letter tailored to your role.
+                      Your satisfaction is our priority. If you're not completely happy with your resume, we offer one free revision or a full refund. Simply contact us and we'll work to make it right. We're constantly improving our AI and may expand our services in the future, but for now, we focus on delivering exceptional resume and cover letter generation that provides everything you need to create professional, job-winning documents.
                     </p>
                   )}
                 </div>

@@ -1259,16 +1259,21 @@ async function sendEmailWithTwoPdfs(
     ? 'Your professionally formatted resume and cover letter are attached as PDFs.'
     : 'Your professionally formatted resume is attached as a PDF.';
 
+  // Create FirstLast filename format
+  const firstName = name.split(' ')[0] || 'Resume';
+  const lastName = name.split(' ').slice(1).join('') || 'Document';
+  const fileName = `${firstName}${lastName}`;
+
   const attachments = [
     {
-      filename: 'Resume.pdf',
+      filename: `${fileName}_Resume.pdf`,
       content: Buffer.from(resumePdf),
       contentType: 'application/pdf',
     },
   ];
   if (coverLetterPdf) {
     attachments.push({
-      filename: 'CoverLetter.pdf',
+      filename: `${fileName}_CoverLetter.pdf`,
       content: Buffer.from(coverLetterPdf),
       contentType: 'application/pdf',
     });
