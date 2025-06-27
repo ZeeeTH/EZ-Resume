@@ -32,6 +32,25 @@ const formSchema = z.object({
   path: ["jobTitle"] // This will show the error on the jobTitle field
 });
 
+interface WorkExperience {
+  title: string
+  company: string
+  startMonth: string
+  startYear: string
+  endMonth: string
+  endYear: string
+  description: string
+}
+
+interface Education {
+  degree: string
+  school: string
+  startMonth: string
+  startYear: string
+  endMonth: string
+  endYear: string
+}
+
 interface FormData {
   name: string
   email: string
@@ -63,14 +82,14 @@ export default function Home() {
   const { open, closeModal, openModal } = useContactModal();
 
   // New state for dynamic work experience and education
-  const [workExperience, setWorkExperience] = useState([
+  const [workExperience, setWorkExperience] = useState<WorkExperience[]>([
     { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
   ]);
-  const [education, setEducation] = useState([
+  const [education, setEducation] = useState<Education[]>([
     { degree: '', school: '', startMonth: '', startYear: '', endMonth: '', endYear: '' }
   ]);
 
-  const handleWorkChange = (idx: number, field: string, value: string) => {
+  const handleWorkChange = (idx: number, field: keyof WorkExperience, value: string) => {
     const updated = [...workExperience];
     updated[idx][field] = value;
     setWorkExperience(updated);
@@ -82,7 +101,7 @@ export default function Home() {
     ]);
   };
 
-  const handleEduChange = (idx: number, field: string, value: string) => {
+  const handleEduChange = (idx: number, field: keyof Education, value: string) => {
     const updated = [...education];
     updated[idx][field] = value;
     setEducation(updated);
