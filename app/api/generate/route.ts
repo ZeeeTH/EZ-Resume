@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import nodemailer from 'nodemailer'
+import { getTemplateById } from '../../data/templates'
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -50,6 +51,7 @@ interface FormData {
   skills: string
   achievements: string
   coverLetter: boolean
+  template: string
   location?: string
   workExperience: WorkExperience[]
   education: Education[]
@@ -130,6 +132,7 @@ function validateAndSanitizeInput(data: unknown): FormData | null {
       skills,
       achievements,
       coverLetter: Boolean(d.coverLetter),
+      template: sanitizeString(d.template, 50) || 'modern',
       location: sanitizeString(d.location, 100),
       workExperience,
       education
@@ -240,7 +243,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create PDFs using AI-generated content
-    const resumePdf = await createResumePDF(resumeJson)
+    const resumePdf = await createResumePDF(resumeJson, formData.template)
     let coverLetterPdf: Uint8Array | null = null
 
     if (formData.coverLetter && formData.jobTitle && formData.company) {
@@ -487,246 +490,196 @@ function formatMonthYear(dateStr: string): string {
   return dateStr;
 }
 
-async function createResumePDF(resumeJson: any): Promise<Uint8Array> {
+async function createResumePDF(resumeJson: any, template: string = 'modern'): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([612, 792]); // US Letter size
-  const { width, height } = page.getSize();
-
+  
+  // Get template styling
+  const templateData = getTemplateById(template) || getTemplateById('modern')!
+  const { primaryColor, secondaryColor, fontFamily, spacing } = templateData.styling
+  
+  // Parse colors
+  const primaryRGB = hexToRgb(primaryColor) || { r: 37, g: 99, b: 235 } // Default blue
+  const secondaryRGB = hexToRgb(secondaryColor) || { r: 100, g: 116, b: 139 } // Default gray
+  
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  let yPosition = height - 50;
+  
+  let y = 750; // Start position
   const margin = 50;
-  const lineHeight = 14;
-  const sectionSpacing = 20;
-  const minY = margin + 50;
-
+  const lineHeight = spacing === 'compact' ? 14 : spacing === 'spacious' ? 18 : 16;
+  
   function ensureSpace(neededSpace = 20) {
-    if (yPosition < minY + neededSpace) {
+    if (y - neededSpace < margin) {
       page = pdfDoc.addPage([612, 792]);
-      yPosition = height - 50;
+      y = 750;
     }
   }
 
-  // Header with name
-  ensureSpace(35);
-  page.drawText(resumeJson.name || '', {
-    x: margin,
-    y: yPosition,
-    size: 28,
-    font: boldFont,
-    color: rgb(0.1, 0.1, 0.1),
-  });
-  yPosition -= 35;
+  // Helper function to convert hex to RGB
+  function hexToRgb(hex: string) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
 
-  // Contact info
-  const contact = resumeJson.contact || {};
-  const contactInfo = [
-    contact.email,
-    contact.phone,
-    contact.location
-  ].filter(Boolean).join(' • ');
-  ensureSpace(sectionSpacing);
-  page.drawText(contactInfo, {
+  // Header with name
+  ensureSpace(40);
+  page.drawText(resumeJson.name || 'Your Name', {
     x: margin,
-    y: yPosition,
-    size: 12,
-    font: font,
-    color: rgb(0.4, 0.4, 0.4),
+    y: y,
+    size: 24,
+    font: boldFont,
+    color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
   });
-  yPosition -= sectionSpacing + 10;
+  y -= 30;
+
+  // Contact information
+  if (resumeJson.contact) {
+    const contactInfo = [
+      resumeJson.contact.email,
+      resumeJson.contact.phone,
+      resumeJson.contact.location
+    ].filter(Boolean).join(' • ');
+    
+    page.drawText(contactInfo, {
+      x: margin,
+      y: y,
+      size: 10,
+      font: font,
+      color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+    });
+    y -= 25;
+  }
 
   // Sections
-  for (const section of resumeJson.sections || []) {
-    if (section.title && section.title.toLowerCase().includes('summary')) {
-      ensureSpace(20);
-      page.drawText(section.title.toUpperCase(), {
+  if (resumeJson.sections) {
+    for (const section of resumeJson.sections) {
+      ensureSpace(30);
+      
+      // Section title
+      page.drawText(section.title, {
         x: margin,
-        y: yPosition,
-        size: 16,
+        y: y,
+        size: 14,
         font: boldFont,
-        color: rgb(0.2, 0.2, 0.2),
+        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
       });
-      yPosition -= 20;
-      const summaryLines = wrapText(section.content || '', width - 2 * margin, font, 11);
-      for (const line of summaryLines) {
-        ensureSpace(14);
-        page.drawText(line, {
-          x: margin,
-          y: yPosition,
-          size: 11,
-          font: font,
-          color: rgb(0.3, 0.3, 0.3),
-        });
-        yPosition -= 14;
-      }
-      yPosition -= sectionSpacing;
-    }
-    if (section.title && section.title.toLowerCase().includes('experience')) {
-      ensureSpace(20);
-      page.drawText(section.title.toUpperCase(), {
-        x: margin,
-        y: yPosition,
-        size: 16,
-        font: boldFont,
-        color: rgb(0.2, 0.2, 0.2),
-      });
-      yPosition -= 20;
-      for (const job of section.jobs || []) {
-        ensureSpace(42);
-        // Job title (bold)
-        page.drawText(job.title, {
-          x: margin,
-          y: yPosition,
-          size: 13,
-          font: boldFont,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-        yPosition -= 16;
-        // Company | Location (regular)
-        const companyLoc = [job.company, job.location].filter(Boolean).join(' | ');
-        if (companyLoc) {
-          page.drawText(companyLoc, {
+      y -= 20;
+
+      // Section content
+      if (section.title === 'Professional Summary') {
+        const lines = wrapText(section.content, 500, font, 11);
+        for (const line of lines) {
+          ensureSpace(15);
+          page.drawText(line, {
             x: margin,
-            y: yPosition,
+            y: y,
             size: 11,
             font: font,
-            color: rgb(0.4, 0.4, 0.4),
+            color: rgb(0, 0, 0)
           });
-          yPosition -= 14;
+          y -= 15;
         }
-        // Dates
-        if (job.dates) {
-          ensureSpace(16);
-          page.drawText(formatMonthYear(job.dates), {
+        y -= 10;
+      } else if (section.title === 'Professional Experience' && section.jobs) {
+        for (const job of section.jobs) {
+          ensureSpace(40);
+          
+          // Job title and company
+          page.drawText(job.title, {
             x: margin,
-            y: yPosition,
-            size: 11,
-            font: font,
-            color: rgb(0.5, 0.5, 0.5),
-          });
-          yPosition -= 16;
-        }
-        // Bullets
-        for (const bullet of job.bullets || []) {
-          const bulletLines = wrapText(capitalizeFirst(bullet), width - 2 * margin - 10, font, 11);
-          for (const line of bulletLines) {
-            ensureSpace(14);
-            page.drawText(`• ${line}`, {
-              x: margin + 10,
-              y: yPosition,
-              size: 11,
-              font: font,
-              color: rgb(0.3, 0.3, 0.3),
-            });
-            yPosition -= 14;
-          }
-        }
-        yPosition -= 10;
-      }
-      yPosition -= sectionSpacing;
-    }
-    if (section.title && section.title.toLowerCase().includes('education')) {
-      ensureSpace(20);
-      page.drawText(section.title.toUpperCase(), {
-        x: margin,
-        y: yPosition,
-        size: 16,
-        font: boldFont,
-        color: rgb(0.2, 0.2, 0.2),
-      });
-      yPosition -= 20;
-      for (const edu of section.education || []) {
-        ensureSpace(42);
-        // Degree (bold)
-        page.drawText(edu.degree, {
-          x: margin,
-          y: yPosition,
-          size: 13,
-          font: boldFont,
-          color: rgb(0.2, 0.2, 0.2),
-        });
-        yPosition -= 16;
-        // School/Institution (regular)
-        if (edu.institution) {
-          page.drawText(edu.institution, {
-            x: margin,
-            y: yPosition,
-            size: 11,
-            font: font,
-            color: rgb(0.4, 0.4, 0.4),
-          });
-          yPosition -= 14;
-        }
-        // Dates
-        if (edu.dates) {
-          ensureSpace(16);
-          page.drawText(formatMonthYear(edu.dates), {
-            x: margin,
-            y: yPosition,
-            size: 11,
-            font: font,
-            color: rgb(0.5, 0.5, 0.5),
-          });
-          yPosition -= 16;
-        }
-        // Details
-        if (edu.details) {
-          const detailsLines = wrapText(edu.details, width - 2 * margin, font, 11);
-          for (const line of detailsLines) {
-            ensureSpace(14);
-            page.drawText(line, {
-              x: margin,
-              y: yPosition,
-              size: 11,
-              font: font,
-              color: rgb(0.3, 0.3, 0.3),
-            });
-            yPosition -= 14;
-          }
-        }
-        yPosition -= 10;
-      }
-      yPosition -= sectionSpacing;
-    }
-    if (section.title && section.title.toLowerCase().includes('skills')) {
-      ensureSpace(20);
-      page.drawText(section.title.toUpperCase(), {
-        x: margin,
-        y: yPosition,
-        size: 16,
-        font: boldFont,
-        color: rgb(0.2, 0.2, 0.2),
-      });
-      yPosition -= 20;
-      if (section.categories) {
-        for (const [cat, skills] of Object.entries(section.categories)) {
-          ensureSpace(14);
-          page.drawText(cat + ':', {
-            x: margin,
-            y: yPosition,
+            y: y,
             size: 12,
             font: boldFont,
-            color: rgb(0.3, 0.3, 0.3),
+            color: rgb(0, 0, 0)
           });
-          yPosition -= 14;
-          const skillsLine = (skills as string[]).join(', ');
-          const skillsLines = wrapText(skillsLine, width - 2 * margin, font, 11);
-          for (const line of skillsLines) {
-            ensureSpace(14);
-            page.drawText(line, {
-              x: margin + 10,
-              y: yPosition,
-              size: 11,
-              font: font,
-              color: rgb(0.3, 0.3, 0.3),
-            });
-            yPosition -= 14;
+          y -= 15;
+          
+          page.drawText(`${job.company} | ${job.location} | ${job.dates}`, {
+            x: margin,
+            y: y,
+            size: 10,
+            font: font,
+            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+          });
+          y -= 15;
+
+          // Job bullets
+          if (job.bullets) {
+            for (const bullet of job.bullets) {
+              const lines = wrapText(`• ${bullet}`, 480, font, 10);
+              for (const line of lines) {
+                ensureSpace(12);
+                page.drawText(line, {
+                  x: margin + 10,
+                  y: y,
+                  size: 10,
+                  font: font,
+                  color: rgb(0, 0, 0)
+                });
+                y -= 12;
+              }
+            }
           }
-          yPosition -= 8;
+          y -= 5;
+        }
+      } else if (section.title === 'Education' && section.education) {
+        for (const edu of section.education) {
+          ensureSpace(25);
+          
+          page.drawText(edu.degree, {
+            x: margin,
+            y: y,
+            size: 12,
+            font: boldFont,
+            color: rgb(0, 0, 0)
+          });
+          y -= 15;
+          
+          page.drawText(`${edu.institution} | ${edu.dates}`, {
+            x: margin,
+            y: y,
+            size: 10,
+            font: font,
+            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+          });
+          y -= 15;
+        }
+      } else if (section.title === 'Skills' && section.categories) {
+        for (const [category, skills] of Object.entries(section.categories)) {
+          ensureSpace(20);
+          
+          page.drawText(category, {
+            x: margin,
+            y: y,
+            size: 11,
+            font: boldFont,
+            color: rgb(0, 0, 0)
+          });
+          y -= 15;
+          
+          if (Array.isArray(skills)) {
+            const skillsText = skills.join(', ');
+            const lines = wrapText(skillsText, 500, font, 10);
+            for (const line of lines) {
+              ensureSpace(12);
+              page.drawText(line, {
+                x: margin,
+                y: y,
+                size: 10,
+                font: font,
+                color: rgb(0, 0, 0)
+              });
+              y -= 12;
+            }
+          }
+          y -= 5;
         }
       }
-      yPosition -= sectionSpacing;
     }
   }
 

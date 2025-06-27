@@ -2,13 +2,14 @@
 // Vercel rebuild cache buster - local fix successful, forcing clean deploy
 
 import { useState } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { FileText, Mail, Sparkles, CheckCircle, Loader2, Star, Zap, Shield, Users, TrendingUp } from 'lucide-react'
+import { FileText, Mail, Sparkles, CheckCircle, Loader2, Star, Zap, Shield, Users, TrendingUp, Palette } from 'lucide-react'
 import React from 'react'
 import ContactModal from './ContactModal'
 import { useContactModal } from './ContactModalContext'
+import { templateMetadata } from '../data/templates'
 
 const workExperienceSchema = z.object({
   title: z.string().min(2, 'Job title is required'),
@@ -36,6 +37,7 @@ const formSchema = z.object({
   skills: z.string().min(2, 'Please provide at least 2 characters of skills'),
   achievements: z.string().min(2, 'Please provide at least 2 characters of achievements'),
   coverLetter: z.boolean(),
+  template: z.string().min(1, 'Please select a template'),
   location: z.string().optional(),
   workExperience: z.array(workExperienceSchema).min(1, 'At least one work experience is required'),
   education: z.array(educationSchema).min(1, 'At least one education entry is required'),
@@ -71,6 +73,8 @@ export default function Home() {
   const [error, setError] = useState('')
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [formProgress, setFormProgress] = useState(0)
+  const [selectedTemplate, setSelectedTemplate] = useState('modern')
+  const [coverLetterChecked, setCoverLetterChecked] = useState(false)
   const { open, closeModal, openModal } = useContactModal();
 
   // PDF Preview Modal States
@@ -82,6 +86,7 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       coverLetter: false,
+      template: 'modern',
       workExperience: [
         { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
       ],
@@ -91,18 +96,17 @@ export default function Home() {
     },
     mode: 'onChange'
   });
-  const { register, handleSubmit, formState: { errors, isValid, isDirty, touchedFields }, watch, trigger } = formMethods;
+  const { register, handleSubmit, formState: { errors, isValid, isDirty, touchedFields }, trigger, setValue, watch } = formMethods;
   const workExpFieldArray = useFieldArray({ control, name: 'workExperience' });
   const eduFieldArray = useFieldArray({ control, name: 'education' });
 
-  const coverLetter = watch('coverLetter')
-  const watchedFields = watch()
+  const watchedFields = watch();
 
   // Calculate form progress
   React.useEffect(() => {
     // Count all required top-level fields
     const requiredFields = ['name', 'email', 'skills', 'achievements'];
-    const coverLetterFields = coverLetter ? ['jobTitle', 'company'] : [];
+    const coverLetterFields = coverLetterChecked ? ['jobTitle', 'company'] : [];
     let totalFields = requiredFields.length + coverLetterFields.length;
     let filledFields = 0;
     requiredFields.forEach(field => {
@@ -134,7 +138,7 @@ export default function Home() {
     });
     const progress = totalFields === 0 ? 0 : Math.round((filledFields / totalFields) * 100);
     setFormProgress(progress);
-  }, [watchedFields, coverLetter]);
+  }, [watchedFields, coverLetterChecked]);
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index)
@@ -170,6 +174,7 @@ export default function Home() {
       // Transform the data to match the API expectations
       const apiData = {
         ...data,
+        template: selectedTemplate,
         workExperience: data.workExperience,
         educationData: data.education
       }
@@ -662,6 +667,11 @@ export default function Home() {
                       type="checkbox"
                       id="coverLetter"
                       className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
+                      checked={coverLetterChecked}
+                      onChange={(e) => {
+                        setCoverLetterChecked(e.target.checked);
+                        setValue('coverLetter', e.target.checked);
+                      }}
                     />
                     <label htmlFor="coverLetter" className="text-sm text-gray-300">
                       Also generate a cover letter for this position
@@ -669,7 +679,7 @@ export default function Home() {
                   </div>
 
                   {/* Conditional Job Title and Company Fields */}
-                  {coverLetter && (
+                  {coverLetterChecked && (
                     <>
                       <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                         <div>
@@ -722,6 +732,36 @@ export default function Home() {
                     </>
                   )}
 
+                  {/* Template Selector */}
+                  <input type="hidden" {...register('template')} />
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Choose Your Template</h2>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      {templateMetadata.map((template) => (
+                        <div
+                          key={template.id}
+                          onClick={() => {
+                            setSelectedTemplate(template.id);
+                            setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
+                          }}
+                          className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 ${
+                            selectedTemplate === template.id
+                              ? 'border-green-400 bg-green-500/10 shadow-lg'
+                              : 'border-white/20 bg-white/5 hover:border-purple-500/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-white text-sm">{template.name}</h3>
+                            {selectedTemplate === template.id && (
+                              <CheckCircle className="h-5 w-5 text-green-400" />
+                            )}
+                          </div>
+                          <p className="text-gray-400 text-xs">{template.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Privacy Statement */}
                   <div className="flex items-start space-x-3 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
                     <Shield className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -748,12 +788,12 @@ export default function Home() {
                     {isGenerating ? (
                       <>
                         <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>Generating your {coverLetter ? 'resume & cover letter' : 'resume'}...</span>
+                        <span>Generating your {coverLetterChecked ? 'resume & cover letter' : 'resume'}...</span>
                       </>
                     ) : (
                       <>
                         <FileText className="h-6 w-6" />
-                        <span>Generate My {coverLetter ? 'Resume & Cover Letter' : 'Resume'}</span>
+                        <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'}</span>
                       </>
                     )}
                   </button>

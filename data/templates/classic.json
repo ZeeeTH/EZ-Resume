@@ -1,0 +1,128 @@
+{
+  "id": "classic",
+  "name": "Classic Professional",
+  "description": "A traditional, conservative design that's perfect for corporate environments and traditional industries.",
+  "category": "classic",
+  "preview": "/templates/classic-preview.png",
+  "sections": {
+    "header": {
+      "name": "Sarah Johnson",
+      "email": "sarah.johnson@email.com",
+      "phone": "+1 (555) 987-6543",
+      "location": "New York, NY",
+      "linkedin": "linkedin.com/in/sarahjohnson",
+      "website": null
+    },
+    "summary": "Dedicated marketing professional with over 7 years of experience in digital marketing, brand strategy, and campaign management. Proven track record of increasing brand awareness and driving revenue growth through data-driven marketing initiatives.",
+    "experience": [
+      {
+        "company": "Global Marketing Solutions",
+        "position": "Senior Marketing Manager",
+        "startDate": "2021-06",
+        "endDate": null,
+        "current": true,
+        "description": [
+          "Manage a team of 5 marketing specialists and coordinate cross-functional campaigns",
+          "Develop and execute comprehensive marketing strategies for Fortune 500 clients",
+          "Increase client ROI by 35% through targeted digital advertising campaigns",
+          "Oversee $2M annual marketing budget and ensure optimal resource allocation"
+        ]
+      },
+      {
+        "company": "Digital Innovations Corp",
+        "position": "Marketing Specialist",
+        "startDate": "2019-01",
+        "endDate": "2021-05",
+        "current": false,
+        "description": [
+          "Created and managed social media campaigns across multiple platforms",
+          "Conducted market research and competitor analysis to inform strategy",
+          "Collaborated with creative team to develop compelling marketing materials",
+          "Tracked and reported on campaign performance metrics and KPIs"
+        ]
+      },
+      {
+        "company": "Brand Partners Agency",
+        "position": "Marketing Assistant",
+        "startDate": "2017-08",
+        "endDate": "2018-12",
+        "current": false,
+        "description": [
+          "Supported senior marketing team with campaign execution and coordination",
+          "Managed client relationships and ensured project deliverables were met",
+          "Assisted with content creation for various marketing channels",
+          "Maintained marketing databases and CRM systems"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "New York University",
+        "degree": "Master of Business Administration",
+        "field": "Marketing",
+        "startDate": "2015-09",
+        "endDate": "2017-05",
+        "current": false,
+        "gpa": "3.9/4.0",
+        "honors": ["Beta Gamma Sigma", "Dean's List"]
+      },
+      {
+        "institution": "Boston University",
+        "degree": "Bachelor of Arts",
+        "field": "Communications",
+        "startDate": "2011-09",
+        "endDate": "2015-05",
+        "current": false,
+        "gpa": "3.7/4.0",
+        "honors": ["Magna Cum Laude", "Communications Department Award"]
+      }
+    ],
+    "skills": {
+      "technical": [
+        "Google Analytics",
+        "Facebook Ads Manager",
+        "Mailchimp",
+        "HubSpot",
+        "Adobe Creative Suite",
+        "Salesforce",
+        "Google Ads"
+      ],
+      "soft": [
+        "Strategic Planning",
+        "Team Leadership",
+        "Client Relations",
+        "Data Analysis",
+        "Project Management",
+        "Presentation Skills"
+      ],
+      "languages": ["English (Native)", "French (Fluent)"]
+    },
+    "certifications": [
+      {
+        "name": "Google Ads Certification",
+        "issuer": "Google",
+        "date": "2022-03",
+        "url": "skillshop.withgoogle.com"
+      },
+      {
+        "name": "HubSpot Marketing Certification",
+        "issuer": "HubSpot",
+        "date": "2021-11",
+        "url": "academy.hubspot.com"
+      }
+    ],
+    "achievements": [
+      "Led award-winning campaign that increased brand awareness by 150%",
+      "Recognized as 'Employee of the Year' 2023",
+      "Published article in Marketing Week magazine",
+      "Speaker at Digital Marketing Conference 2022"
+    ]
+  },
+  "styling": {
+    "primaryColor": "#1f2937",
+    "secondaryColor": "#6b7280",
+    "fontFamily": "Times New Roman",
+    "spacing": "standard",
+    "layout": "single-column"
+  }
+} 

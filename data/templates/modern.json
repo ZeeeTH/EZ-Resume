@@ -1,0 +1,111 @@
+{
+  "id": "modern",
+  "name": "Modern Professional",
+  "description": "A sleek, contemporary design with clean lines and modern typography. Perfect for tech and creative industries.",
+  "category": "modern",
+  "preview": "/templates/modern-preview.png",
+  "sections": {
+    "header": {
+      "name": "John Smith",
+      "email": "john.smith@email.com",
+      "phone": "+1 (555) 123-4567",
+      "location": "San Francisco, CA",
+      "linkedin": "linkedin.com/in/johnsmith",
+      "website": "johnsmith.dev"
+    },
+    "summary": "Experienced software engineer with 5+ years developing scalable web applications. Passionate about clean code, user experience, and emerging technologies. Proven track record of leading development teams and delivering high-impact projects.",
+    "experience": [
+      {
+        "company": "TechCorp Inc.",
+        "position": "Senior Software Engineer",
+        "startDate": "2022-01",
+        "endDate": null,
+        "current": true,
+        "description": [
+          "Lead development of microservices architecture serving 1M+ users",
+          "Mentored 3 junior developers and conducted code reviews",
+          "Reduced API response time by 40% through optimization",
+          "Implemented CI/CD pipeline reducing deployment time by 60%"
+        ]
+      },
+      {
+        "company": "StartupXYZ",
+        "position": "Full Stack Developer",
+        "startDate": "2020-03",
+        "endDate": "2021-12",
+        "current": false,
+        "description": [
+          "Built responsive web applications using React and Node.js",
+          "Collaborated with design team to implement user interfaces",
+          "Integrated third-party APIs and payment systems",
+          "Participated in agile development process with 2-week sprints"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "University of California",
+        "degree": "Bachelor of Science",
+        "field": "Computer Science",
+        "startDate": "2016-09",
+        "endDate": "2020-05",
+        "current": false,
+        "gpa": "3.8/4.0",
+        "honors": ["Dean's List", "Computer Science Department Award"]
+      }
+    ],
+    "skills": {
+      "technical": [
+        "JavaScript/TypeScript",
+        "React/Next.js",
+        "Node.js/Express",
+        "Python/Django",
+        "PostgreSQL/MongoDB",
+        "AWS/Docker",
+        "Git/GitHub"
+      ],
+      "soft": [
+        "Team Leadership",
+        "Problem Solving",
+        "Communication",
+        "Agile/Scrum",
+        "Technical Writing"
+      ],
+      "languages": ["English (Native)", "Spanish (Conversational)"]
+    },
+    "projects": [
+      {
+        "name": "E-Commerce Platform",
+        "description": "Full-stack e-commerce solution with payment integration and admin dashboard",
+        "technologies": ["React", "Node.js", "Stripe", "MongoDB"],
+        "url": "github.com/johnsmith/ecommerce"
+      },
+      {
+        "name": "Task Management App",
+        "description": "Real-time collaborative task management application with drag-and-drop interface",
+        "technologies": ["React", "Socket.io", "Express", "PostgreSQL"],
+        "url": "github.com/johnsmith/taskapp"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Developer",
+        "issuer": "Amazon Web Services",
+        "date": "2023-06",
+        "url": "aws.amazon.com/certification"
+      }
+    ],
+    "achievements": [
+      "Led team that won company hackathon 2023",
+      "Published 3 technical articles on Medium",
+      "Speaker at local JavaScript meetup group"
+    ]
+  },
+  "styling": {
+    "primaryColor": "#2563eb",
+    "secondaryColor": "#64748b",
+    "fontFamily": "Inter",
+    "spacing": "standard",
+    "layout": "single-column"
+  }
+} 
