@@ -7,6 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { FileText, Mail, Sparkles, CheckCircle, Loader2, Star, Zap, Shield, Users, TrendingUp } from 'lucide-react'
 import React from 'react'
+import ContactModal from './ContactModal'
+import { ContactModalProvider, useContactModal } from './ContactModalContext'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -50,6 +52,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [formProgress, setFormProgress] = useState(0)
+  const { open, closeModal } = useContactModal ? useContactModal() : { open: false, closeModal: () => {} };
 
   const {
     register,
@@ -130,763 +133,774 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5"></div>
-      
-      <div className="relative z-10">
-        {/* Hero Section */}
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-              Get Hired Faster with
-              <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                AI-Powered Resumes
-              </span>
-            </h2>
-            <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto px-4">
-              Create professional resumes and cover letters in minutes. 
-              Stand out to employers with our AI-driven approach. ✨
-            </p>
-            
-            {/* Enhanced Social Proof */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 text-gray-400 mb-8">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-400" />
-                <span className="text-sm md:text-base">1,000+ Resumes Generated</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Zap className="h-5 w-5 text-yellow-400" />
-                <span className="text-sm md:text-base">95% Success Rate</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-blue-400" />
-                <span className="text-sm md:text-base">Trusted by Job Seekers</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Form Card */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
-              {!isSuccess ? (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Progress Indicator */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-300">Form Progress</span>
-                      <span className="text-sm text-gray-400">{formProgress}% Complete</span>
-                    </div>
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${formProgress}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {formProgress < 50 && "Keep going! You're making great progress."}
-                      {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details."}
-                      {formProgress === 100 && "Perfect! Your form is complete and ready to generate."}
-                    </p>
-                  </div>
-
-                  {/* Personal Information */}
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                        Full Name *
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('name')}
-                          id="name"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('name') === 'error' 
-                              ? 'border-red-400' 
-                              : getFieldStatus('name') === 'success'
-                              ? 'border-green-400'
-                              : 'border-white/20'
-                          }`}
-                          placeholder="Enter your full name"
-                          aria-describedby="name-error"
-                        />
-                        {getFieldStatus('name') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
-                      </div>
-                      {errors.name && (
-                        <p id="name-error" className="mt-1 text-sm text-red-400 flex items-center">
-                          <span className="mr-1">⚠</span>
-                          {errors.name.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                        Email Address *
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('email')}
-                          id="email"
-                          type="email"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('email') === 'error' 
-                              ? 'border-red-400' 
-                              : getFieldStatus('email') === 'success'
-                              ? 'border-green-400'
-                              : 'border-white/20'
-                          }`}
-                          placeholder="your.email@example.com"
-                          aria-describedby="email-error"
-                        />
-                        {getFieldStatus('email') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
-                      </div>
-                      {errors.email && (
-                        <p id="email-error" className="mt-1 text-sm text-red-400 flex items-center">
-                          <span className="mr-1">⚠</span>
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
-                        Phone Number
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('phone')}
-                          id="phone"
-                          type="tel"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'
-                          }`}
-                          placeholder="+1 (555) 123-4567 (optional)"
-                        />
-                        {getFieldStatus('phone') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-300 mb-2">
-                        Location
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('location')}
-                          id="location"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'
-                          }`}
-                          placeholder="City, State (optional)"
-                        />
-                        {getFieldStatus('location') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Experience */}
-                  <div>
-                    <label htmlFor="experience" className="block text-sm font-medium text-gray-300 mb-2">
-                      Work Experience *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('experience')}
-                        id="experience"
-                        rows={4}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('experience') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('experience') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., Led a 10-person development team to deliver a mobile app that increased user engagement by 40%. Managed project timeline, coordinated with stakeholders, and implemented agile methodologies."
-                        aria-describedby="experience-error"
-                      />
-                      {getFieldStatus('experience') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.experience && (
-                      <p id="experience-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.experience.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Education */}
-                  <div>
-                    <label htmlFor="education" className="block text-sm font-medium text-gray-300 mb-2">
-                      Education *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('education')}
-                        id="education"
-                        rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('education') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('education') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., Bachelor of Science in Computer Science, University of California (2018-2022). Relevant coursework: Data Structures, Algorithms, Web Development. Dean's List recipient."
-                        aria-describedby="education-error"
-                      />
-                      {getFieldStatus('education') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.education && (
-                      <p id="education-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.education.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Skills */}
-                  <div>
-                    <label htmlFor="skills" className="block text-sm font-medium text-gray-300 mb-2">
-                      Skills *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('skills')}
-                        id="skills"
-                        rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('skills') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('skills') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., JavaScript, React, Node.js, Python, AWS, Docker, Git, Agile methodologies, Team leadership, Problem-solving, Communication"
-                        aria-describedby="skills-error"
-                      />
-                      {getFieldStatus('skills') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.skills && (
-                      <p id="skills-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.skills.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Achievements */}
-                  <div>
-                    <label htmlFor="achievements" className="block text-sm font-medium text-gray-300 mb-2">
-                      Key Achievements *
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        {...register('achievements')}
-                        id="achievements"
-                        rows={3}
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
-                          getFieldStatus('achievements') === 'error' 
-                            ? 'border-red-400' 
-                            : getFieldStatus('achievements') === 'success'
-                            ? 'border-green-400'
-                            : 'border-white/20'
-                        }`}
-                        placeholder="e.g., Increased website conversion rate by 25% through A/B testing. Won 'Employee of the Year' award. Reduced system downtime by 60%. Launched 3 successful products generating $2M in revenue."
-                        aria-describedby="achievements-error"
-                      />
-                      {getFieldStatus('achievements') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.achievements && (
-                      <p id="achievements-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.achievements.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Cover Letter Option */}
-                  <div className="flex items-center space-x-3 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <input
-                      {...register('coverLetter')}
-                      type="checkbox"
-                      id="coverLetter"
-                      className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
-                    />
-                    <label htmlFor="coverLetter" className="text-sm text-gray-300">
-                      Also generate a cover letter for this position
-                    </label>
-                  </div>
-
-                  {/* Conditional Job Title and Company Fields */}
-                  {coverLetter && (
-                    <>
-                      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                        <div>
-                          <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-300 mb-2">
-                            Desired Job Title *
-                          </label>
-                          <div className="relative">
-                            <input
-                              {...register('jobTitle')}
-                              id="jobTitle"
-                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                                getFieldStatus('jobTitle') === 'error' 
-                                  ? 'border-red-400' 
-                                  : getFieldStatus('jobTitle') === 'success'
-                                  ? 'border-green-400'
-                                  : 'border-white/20'
-                              }`}
-                              placeholder="e.g., Software Engineer, Marketing Manager"
-                              aria-describedby="jobTitle-error"
-                            />
-                            {getFieldStatus('jobTitle') === 'success' && (
-                              <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                            )}
-                          </div>
-                          {errors.jobTitle && (
-                            <p id="jobTitle-error" className="mt-1 text-sm text-red-400 flex items-center">
-                              <span className="mr-1">⚠</span>
-                              {errors.jobTitle.message}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
-                            Target Company *
-                          </label>
-                          <div className="relative">
-                            <input
-                              {...register('company')}
-                              id="company"
-                              className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                                getFieldStatus('company') === 'error' 
-                                  ? 'border-red-400' 
-                                  : getFieldStatus('company') === 'success'
-                                  ? 'border-green-400'
-                                  : 'border-white/20'
-                              }`}
-                              placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
-                              aria-describedby="company-error"
-                            />
-                            {getFieldStatus('company') === 'success' && (
-                              <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                            )}
-                          </div>
-                          {errors.company && (
-                            <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
-                              <span className="mr-1">⚠</span>
-                              {errors.company.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Privacy Statement */}
-                  <div className="flex items-start space-x-3 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <Shield className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-300">
-                      <p className="font-medium mb-1">Your privacy is protected</p>
-                      <p>We never share your personal data with third parties. Your information is only used to generate your resume and is deleted after processing.</p>
-                    </div>
-                  </div>
-
-                  {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                      <p className="text-red-400 text-sm flex items-center">
-                        <span className="mr-2">⚠</span>
-                        {error}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Enhanced Submit Button */}
-                  <div className="space-y-3">
-                    <button
-                      type="submit"
-                      disabled={isGenerating || !isValid || formProgress < 100}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                          <span>Generating your {coverLetter ? 'resume & cover letter' : 'resume'}...</span>
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="h-6 w-6" />
-                          <span>Generate My {coverLetter ? 'Resume & Cover Letter' : 'Resume'}</span>
-                        </>
-                      )}
-                    </button>
-                    
-                    {!isValid && formProgress > 0 && (
-                      <p className="text-sm text-yellow-400 text-center">
-                        Please complete all required fields to continue
-                      </p>
-                    )}
-                    
-                    {formProgress < 100 && (
-                      <p className="text-sm text-gray-400 text-center">
-                        {formProgress === 0 && "Start filling out the form above"}
-                        {formProgress > 0 && formProgress < 50 && "Keep going! You're making great progress."}
-                        {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details needed."}
-                      </p>
-                    )}
-                  </div>
-                </form>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-6">
-                    <CheckCircle className="h-8 w-8 text-green-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">Resume Generated Successfully! 🎉</h3>
-                  <p className="text-gray-300 mb-8 max-w-md mx-auto">
-                    Your professional resume has been created and sent to your email address.
-                    Check your inbox for the download link.
-                  </p>
-                  <button
-                    onClick={() => setIsSuccess(false)}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
-                  >
-                    Generate Another Resume
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Sample Output Preview */}
-          <div className="max-w-4xl mx-auto mt-12">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                  See What You'll Get
-                </h3>
-                <p className="text-gray-300 text-lg">
-                  Professional, ATS-optimized resumes that get you noticed
-                </p>
-              </div>
+    <ContactModalProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5"></div>
+        
+        <div className="relative z-10">
+          {/* Hero Section */}
+          <div className="container mx-auto px-4 py-8 md:py-12">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
+                Get Hired Faster with
+                <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  AI-Powered Resumes
+                </span>
+              </h2>
+              <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto px-4">
+                Create professional resumes and cover letters in minutes. 
+                Stand out to employers with our AI-driven approach. ✨
+              </p>
               
-              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-                {/* Resume Preview */}
-                <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-bold text-gray-800">Professional Resume</h4>
-                    <FileText className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="border-l-4 border-blue-500 pl-3">
-                      <p className="font-semibold">Clean, Modern Design</p>
-                      <p>ATS-friendly formatting</p>
-                    </div>
-                    <div className="border-l-4 border-green-500 pl-3">
-                      <p className="font-semibold">AI-Optimized Content</p>
-                      <p>Keyword-rich descriptions</p>
-                    </div>
-                    <div className="border-l-4 border-purple-500 pl-3">
-                      <p className="font-semibold">Professional Layout</p>
-                      <p>Industry-standard sections</p>
-                    </div>
-                  </div>
+              {/* Enhanced Social Proof */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 text-gray-400 mb-8">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-400" />
+                  <span className="text-sm md:text-base">1,000+ Resumes Generated</span>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-yellow-400" />
+                  <span className="text-sm md:text-base">95% Success Rate</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-blue-400" />
+                  <span className="text-sm md:text-base">Trusted by Job Seekers</span>
+                </div>
+              </div>
+            </div>
 
-                {/* Cover Letter Preview */}
-                <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-bold text-gray-800">Cover Letter</h4>
-                    <Mail className="h-5 w-5 text-purple-600" />
+            {/* Main Form Card */}
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                {!isSuccess ? (
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    {/* Progress Indicator */}
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-300">Form Progress</span>
+                        <span className="text-sm text-gray-400">{formProgress}% Complete</span>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500 ease-out"
+                          style={{ width: `${formProgress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {formProgress < 50 && "Keep going! You're making great progress."}
+                        {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details."}
+                        {formProgress === 100 && "Perfect! Your form is complete and ready to generate."}
+                      </p>
+                    </div>
+
+                    {/* Personal Information */}
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                      <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                          Full Name *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('name')}
+                            id="name"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('name') === 'error' 
+                                ? 'border-red-400' 
+                                : getFieldStatus('name') === 'success'
+                                ? 'border-green-400'
+                                : 'border-white/20'
+                            }`}
+                            placeholder="Enter your full name"
+                            aria-describedby="name-error"
+                          />
+                          {getFieldStatus('name') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        {errors.name && (
+                          <p id="name-error" className="mt-1 text-sm text-red-400 flex items-center">
+                            <span className="mr-1">⚠</span>
+                            {errors.name.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                          Email Address *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('email')}
+                            id="email"
+                            type="email"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('email') === 'error' 
+                                ? 'border-red-400' 
+                                : getFieldStatus('email') === 'success'
+                                ? 'border-green-400'
+                                : 'border-white/20'
+                            }`}
+                            placeholder="your.email@example.com"
+                            aria-describedby="email-error"
+                          />
+                          {getFieldStatus('email') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        {errors.email && (
+                          <p id="email-error" className="mt-1 text-sm text-red-400 flex items-center">
+                            <span className="mr-1">⚠</span>
+                            {errors.email.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                      <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                          Phone Number
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('phone')}
+                            id="phone"
+                            type="tel"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'
+                            }`}
+                            placeholder="+1 (555) 123-4567 (optional)"
+                          />
+                          {getFieldStatus('phone') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-300 mb-2">
+                          Location
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('location')}
+                            id="location"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'
+                            }`}
+                            placeholder="City, State (optional)"
+                          />
+                          {getFieldStatus('location') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Experience */}
+                    <div>
+                      <label htmlFor="experience" className="block text-sm font-medium text-gray-300 mb-2">
+                        Work Experience *
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          {...register('experience')}
+                          id="experience"
+                          rows={4}
+                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
+                            getFieldStatus('experience') === 'error' 
+                              ? 'border-red-400' 
+                              : getFieldStatus('experience') === 'success'
+                              ? 'border-green-400'
+                              : 'border-white/20'
+                          }`}
+                          placeholder="e.g., Led a 10-person development team to deliver a mobile app that increased user engagement by 40%. Managed project timeline, coordinated with stakeholders, and implemented agile methodologies."
+                          aria-describedby="experience-error"
+                        />
+                        {getFieldStatus('experience') === 'success' && (
+                          <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
+                        )}
+                      </div>
+                      {errors.experience && (
+                        <p id="experience-error" className="mt-1 text-sm text-red-400 flex items-center">
+                          <span className="mr-1">⚠</span>
+                          {errors.experience.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Education */}
+                    <div>
+                      <label htmlFor="education" className="block text-sm font-medium text-gray-300 mb-2">
+                        Education *
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          {...register('education')}
+                          id="education"
+                          rows={3}
+                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
+                            getFieldStatus('education') === 'error' 
+                              ? 'border-red-400' 
+                              : getFieldStatus('education') === 'success'
+                              ? 'border-green-400'
+                              : 'border-white/20'
+                          }`}
+                          placeholder="e.g., Bachelor of Science in Computer Science, University of California (2018-2022). Relevant coursework: Data Structures, Algorithms, Web Development. Dean's List recipient."
+                          aria-describedby="education-error"
+                        />
+                        {getFieldStatus('education') === 'success' && (
+                          <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
+                        )}
+                      </div>
+                      {errors.education && (
+                        <p id="education-error" className="mt-1 text-sm text-red-400 flex items-center">
+                          <span className="mr-1">⚠</span>
+                          {errors.education.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Skills */}
+                    <div>
+                      <label htmlFor="skills" className="block text-sm font-medium text-gray-300 mb-2">
+                        Skills *
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          {...register('skills')}
+                          id="skills"
+                          rows={3}
+                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
+                            getFieldStatus('skills') === 'error' 
+                              ? 'border-red-400' 
+                              : getFieldStatus('skills') === 'success'
+                              ? 'border-green-400'
+                              : 'border-white/20'
+                          }`}
+                          placeholder="e.g., JavaScript, React, Node.js, Python, AWS, Docker, Git, Agile methodologies, Team leadership, Problem-solving, Communication"
+                          aria-describedby="skills-error"
+                        />
+                        {getFieldStatus('skills') === 'success' && (
+                          <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
+                        )}
+                      </div>
+                      {errors.skills && (
+                        <p id="skills-error" className="mt-1 text-sm text-red-400 flex items-center">
+                          <span className="mr-1">⚠</span>
+                          {errors.skills.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Achievements */}
+                    <div>
+                      <label htmlFor="achievements" className="block text-sm font-medium text-gray-300 mb-2">
+                        Key Achievements *
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          {...register('achievements')}
+                          id="achievements"
+                          rows={3}
+                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none ${
+                            getFieldStatus('achievements') === 'error' 
+                              ? 'border-red-400' 
+                              : getFieldStatus('achievements') === 'success'
+                              ? 'border-green-400'
+                              : 'border-white/20'
+                          }`}
+                          placeholder="e.g., Increased website conversion rate by 25% through A/B testing. Won 'Employee of the Year' award. Reduced system downtime by 60%. Launched 3 successful products generating $2M in revenue."
+                          aria-describedby="achievements-error"
+                        />
+                        {getFieldStatus('achievements') === 'success' && (
+                          <CheckCircle className="absolute right-3 top-3 h-5 w-5 text-green-400" />
+                        )}
+                      </div>
+                      {errors.achievements && (
+                        <p id="achievements-error" className="mt-1 text-sm text-red-400 flex items-center">
+                          <span className="mr-1">⚠</span>
+                          {errors.achievements.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Cover Letter Option */}
+                    <div className="flex items-center space-x-3 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <input
+                        {...register('coverLetter')}
+                        type="checkbox"
+                        id="coverLetter"
+                        className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
+                      />
+                      <label htmlFor="coverLetter" className="text-sm text-gray-300">
+                        Also generate a cover letter for this position
+                      </label>
+                    </div>
+
+                    {/* Conditional Job Title and Company Fields */}
+                    {coverLetter && (
+                      <>
+                        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                          <div>
+                            <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-300 mb-2">
+                              Desired Job Title *
+                            </label>
+                            <div className="relative">
+                              <input
+                                {...register('jobTitle')}
+                                id="jobTitle"
+                                className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                                  getFieldStatus('jobTitle') === 'error' 
+                                    ? 'border-red-400' 
+                                    : getFieldStatus('jobTitle') === 'success'
+                                    ? 'border-green-400'
+                                    : 'border-white/20'
+                                }`}
+                                placeholder="e.g., Software Engineer, Marketing Manager"
+                                aria-describedby="jobTitle-error"
+                              />
+                              {getFieldStatus('jobTitle') === 'success' && (
+                                <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                              )}
+                            </div>
+                            {errors.jobTitle && (
+                              <p id="jobTitle-error" className="mt-1 text-sm text-red-400 flex items-center">
+                                <span className="mr-1">⚠</span>
+                                {errors.jobTitle.message}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
+                              Target Company *
+                            </label>
+                            <div className="relative">
+                              <input
+                                {...register('company')}
+                                id="company"
+                                className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                                  getFieldStatus('company') === 'error' 
+                                    ? 'border-red-400' 
+                                    : getFieldStatus('company') === 'success'
+                                    ? 'border-green-400'
+                                    : 'border-white/20'
+                                }`}
+                                placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
+                                aria-describedby="company-error"
+                              />
+                              {getFieldStatus('company') === 'success' && (
+                                <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                              )}
+                            </div>
+                            {errors.company && (
+                              <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
+                                <span className="mr-1">⚠</span>
+                                {errors.company.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Privacy Statement */}
+                    <div className="flex items-start space-x-3 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <Shield className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm text-gray-300">
+                        <p className="font-medium mb-1">Your privacy is protected</p>
+                        <p>We never share your personal data with third parties. Your information is only used to generate your resume and is deleted after processing.</p>
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <p className="text-red-400 text-sm flex items-center">
+                          <span className="mr-2">⚠</span>
+                          {error}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Enhanced Submit Button */}
+                    <div className="space-y-3">
+                      <button
+                        type="submit"
+                        disabled={isGenerating || !isValid || formProgress < 100}
+                        className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span>Generating your {coverLetter ? 'resume & cover letter' : 'resume'}...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="h-6 w-6" />
+                            <span>Generate My {coverLetter ? 'Resume & Cover Letter' : 'Resume'}</span>
+                          </>
+                        )}
+                      </button>
+                      
+                      {!isValid && formProgress > 0 && (
+                        <p className="text-sm text-yellow-400 text-center">
+                          Please complete all required fields to continue
+                        </p>
+                      )}
+                      
+                      {formProgress < 100 && (
+                        <p className="text-sm text-gray-400 text-center">
+                          {formProgress === 0 && "Start filling out the form above"}
+                          {formProgress > 0 && formProgress < 50 && "Keep going! You're making great progress."}
+                          {formProgress >= 50 && formProgress < 100 && "Almost there! Just a few more details needed."}
+                        </p>
+                      )}
+                    </div>
+                  </form>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 rounded-full mb-6">
+                      <CheckCircle className="h-8 w-8 text-green-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">Resume Generated Successfully! 🎉</h3>
+                    <p className="text-gray-300 mb-8 max-w-md mx-auto">
+                      Your professional resume has been created and sent to your email address.
+                      Check your inbox for the download link.
+                    </p>
+                    <button
+                      onClick={() => setIsSuccess(false)}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+                    >
+                      Generate Another Resume
+                    </button>
                   </div>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="border-l-4 border-purple-500 pl-3">
-                      <p className="font-semibold">Personalized Content</p>
-                      <p>Tailored to your target role</p>
+                )}
+              </div>
+            </div>
+
+            {/* Sample Output Preview */}
+            <div className="max-w-4xl mx-auto mt-12">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                    See What You'll Get
+                  </h3>
+                  <p className="text-gray-300 text-lg">
+                    Professional, ATS-optimized resumes that get you noticed
+                  </p>
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                  {/* Resume Preview */}
+                  <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-gray-800">Professional Resume</h4>
+                      <FileText className="h-5 w-5 text-blue-600" />
                     </div>
-                    <div className="border-l-4 border-emerald-500 pl-3">
-                      <p className="font-semibold">Compelling Narrative</p>
-                      <p>Highlights your unique value</p>
+                    <div className="space-y-3 text-sm text-gray-600">
+                      <div className="border-l-4 border-blue-500 pl-3">
+                        <p className="font-semibold">Clean, Modern Design</p>
+                        <p>ATS-friendly formatting</p>
+                      </div>
+                      <div className="border-l-4 border-green-500 pl-3">
+                        <p className="font-semibold">AI-Optimized Content</p>
+                        <p>Keyword-rich descriptions</p>
+                      </div>
+                      <div className="border-l-4 border-purple-500 pl-3">
+                        <p className="font-semibold">Professional Layout</p>
+                        <p>Industry-standard sections</p>
+                      </div>
                     </div>
-                    <div className="border-l-4 border-orange-500 pl-3">
-                      <p className="font-semibold">Professional Tone</p>
-                      <p>Perfect for any industry</p>
+                  </div>
+
+                  {/* Cover Letter Preview */}
+                  <div className="bg-white rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-gray-800">Cover Letter</h4>
+                      <Mail className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className="space-y-3 text-sm text-gray-600">
+                      <div className="border-l-4 border-purple-500 pl-3">
+                        <p className="font-semibold">Personalized Content</p>
+                        <p>Tailored to your target role</p>
+                      </div>
+                      <div className="border-l-4 border-emerald-500 pl-3">
+                        <p className="font-semibold">Compelling Narrative</p>
+                        <p>Highlights your unique value</p>
+                      </div>
+                      <div className="border-l-4 border-orange-500 pl-3">
+                        <p className="font-semibold">Professional Tone</p>
+                        <p>Perfect for any industry</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Pricing Section */}
+            <div className="max-w-4xl mx-auto mt-12">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                    Simple, Transparent Pricing
+                  </h3>
+                  <p className="text-gray-300 text-lg">
+                    No hidden fees, no subscriptions - just great results
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Resume Only */}
+                  <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
+                    <div className="text-center mb-4">
+                      <h4 className="text-xl font-bold text-white mb-2">Resume Only</h4>
+                      <div className="flex items-center justify-center space-x-2 mb-1">
+                        <span className="text-3xl font-bold text-blue-400">$19.99</span>
+                        <span className="text-lg text-gray-400 line-through">$49.99</span>
+                      </div>
+                      <p className="text-gray-400 text-sm">One-time payment</p>
+                      <p className="text-green-400 text-sm font-medium">Save $30!</p>
+                    </div>
+                    <ul className="space-y-2 text-sm text-gray-300 mb-6">
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        Professional resume design
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        ATS-optimized formatting
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        AI-enhanced content
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        PDF download
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Resume + Cover Letter */}
+                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/10 rounded-xl p-6 border border-purple-500/30 relative">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        MOST POPULAR
+                      </span>
+                    </div>
+                    <div className="text-center mb-4">
+                      <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
+                      <div className="flex items-center justify-center space-x-2 mb-1">
+                        <span className="text-3xl font-bold text-purple-400">$29.99</span>
+                        <span className="text-lg text-gray-400 line-through">$79.99</span>
+                      </div>
+                      <p className="text-gray-400 text-sm">One-time payment</p>
+                      <p className="text-green-400 text-sm font-medium">Save $50!</p>
+                    </div>
+                    <ul className="space-y-2 text-sm text-gray-300 mb-6">
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        Everything in Resume Only
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        Personalized cover letter
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        Target company optimization
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                        Both PDF downloads
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="max-w-4xl mx-auto mt-12">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                    Frequently Asked Questions
+                  </h3>
+                  <p className="text-gray-300 text-lg">
+                    Everything you need to know about our AI resume generator
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(0)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        How does the AI resume generator work?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 0 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 0 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 0 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        Our AI analyzes your experience, skills, and achievements to create a professional, 
+                        ATS-optimized resume. It uses industry best practices and keyword optimization to 
+                        ensure your resume gets past applicant tracking systems and into human hands.
+                      </p>
+                    )}
+                  </div>
+
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(1)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        What makes your resumes different from others?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 1 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 1 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 1 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        Our resumes are specifically designed to pass ATS systems while maintaining a 
+                        professional, modern appearance. We use advanced AI to optimize content for your 
+                        target industry and role, ensuring maximum impact with hiring managers.
+                      </p>
+                    )}
+                  </div>
+
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(2)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        How long does it take to generate my resume?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 2 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 2 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 2 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        Your resume is generated instantly! Once you submit your information, our AI 
+                        processes it immediately and sends you a download link via email within seconds. 
+                        No waiting, no delays.
+                      </p>
+                    )}
+                  </div>
+
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(3)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        Is my personal information secure?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 3 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 3 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 3 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        Absolutely. We take your privacy seriously. Your data is encrypted, never shared 
+                        with third parties, and automatically deleted after processing. We only use your 
+                        information to generate your resume and cover letter.
+                      </p>
+                    )}
+                  </div>
+
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(4)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        Can I edit my resume after generation?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 4 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 4 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 4 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        Yes! You'll receive an editable version along with the final PDF. You can make 
+                        any adjustments you want to perfectly match your preferences and requirements.
+                      </p>
+                    )}
+                  </div>
+
+                  <div 
+                    className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
+                    onClick={() => toggleFAQ(5)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold text-white">
+                        What if I'm not satisfied with my resume?
+                      </h4>
+                      <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 5 ? 'rotate-0' : ''}`}>
+                        {openFAQ === 5 ? '−' : '+'}
+                      </span>
+                    </div>
+                    {openFAQ === 5 && (
+                      <p className="text-gray-300 mt-3 leading-relaxed">
+                        We offer a 100% satisfaction guarantee. If you're not completely happy with your 
+                        resume, we'll regenerate it for free or provide a full refund. Your success is 
+                        our priority.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <footer className="text-center mt-12 md:mt-16 pb-8">
+              {/* Trust Section */}
+              <div className="max-w-4xl mx-auto mb-8">
+                <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-400">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Shield className="h-6 w-6 text-blue-400" />
+                    <p className="font-medium">Your data is private</p>
+                    <p>Never stored or shared</p>
+                  </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <Users className="h-6 w-6 text-green-400" />
+                    <p className="font-medium">Trusted by 1,000+ users</p>
+                    <p>Join the community</p>
+                  </div>
+                  <div className="flex flex-col items-center space-y-2">
+                    <TrendingUp className="h-6 w-6 text-purple-400" />
+                    <p className="font-medium">95% success rate</p>
+                    <p>Proven results</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center mb-4">
+                <div className="flex flex-row items-center gap-4 text-xs md:text-sm text-gray-400">
+                  <a href="/terms" className="hover:text-blue-400 transition-colors font-medium">Terms and Conditions</a>
+                  <span className="text-gray-500">|</span>
+                  <a href="/privacy" className="hover:text-purple-400 transition-colors font-medium">Privacy Policy</a>
+                  <span className="text-gray-500">|</span>
+                  <button type="button" onClick={() => setContactOpen(true)} className="hover:text-pink-400 transition-colors font-medium bg-transparent border-none p-0 m-0 focus:outline-none">Contact Us</button>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm">
+                © 2024 EZ Resume. Powered by AI to help you land your dream job. ✨
+              </p>
+            </footer>
           </div>
-
-          {/* Pricing Section */}
-          <div className="max-w-4xl mx-auto mt-12">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                  Simple, Transparent Pricing
-                </h3>
-                <p className="text-gray-300 text-lg">
-                  No hidden fees, no subscriptions - just great results
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Resume Only */}
-                <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
-                  <div className="text-center mb-4">
-                    <h4 className="text-xl font-bold text-white mb-2">Resume Only</h4>
-                    <div className="flex items-center justify-center space-x-2 mb-1">
-                      <span className="text-3xl font-bold text-blue-400">$19.99</span>
-                      <span className="text-lg text-gray-400 line-through">$49.99</span>
-                    </div>
-                    <p className="text-gray-400 text-sm">One-time payment</p>
-                    <p className="text-green-400 text-sm font-medium">Save $30!</p>
-                  </div>
-                  <ul className="space-y-2 text-sm text-gray-300 mb-6">
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      Professional resume design
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      ATS-optimized formatting
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      AI-enhanced content
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      PDF download
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Resume + Cover Letter */}
-                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/10 rounded-xl p-6 border border-purple-500/30 relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      MOST POPULAR
-                    </span>
-                  </div>
-                  <div className="text-center mb-4">
-                    <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
-                    <div className="flex items-center justify-center space-x-2 mb-1">
-                      <span className="text-3xl font-bold text-purple-400">$29.99</span>
-                      <span className="text-lg text-gray-400 line-through">$79.99</span>
-                    </div>
-                    <p className="text-gray-400 text-sm">One-time payment</p>
-                    <p className="text-green-400 text-sm font-medium">Save $50!</p>
-                  </div>
-                  <ul className="space-y-2 text-sm text-gray-300 mb-6">
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      Everything in Resume Only
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      Personalized cover letter
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      Target company optimization
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                      Both PDF downloads
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* FAQ Section */}
-          <div className="max-w-4xl mx-auto mt-12">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                  Frequently Asked Questions
-                </h3>
-                <p className="text-gray-300 text-lg">
-                  Everything you need to know about our AI resume generator
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(0)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      How does the AI resume generator work?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 0 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 0 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 0 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Our AI analyzes your experience, skills, and achievements to create a professional, 
-                      ATS-optimized resume. It uses industry best practices and keyword optimization to 
-                      ensure your resume gets past applicant tracking systems and into human hands.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(1)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      What makes your resumes different from others?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 1 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 1 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 1 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Our resumes are specifically designed to pass ATS systems while maintaining a 
-                      professional, modern appearance. We use advanced AI to optimize content for your 
-                      target industry and role, ensuring maximum impact with hiring managers.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(2)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      How long does it take to generate my resume?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 2 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 2 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 2 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Your resume is generated instantly! Once you submit your information, our AI 
-                      processes it immediately and sends you a download link via email within seconds. 
-                      No waiting, no delays.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(3)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      Is my personal information secure?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 3 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 3 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 3 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Absolutely. We take your privacy seriously. Your data is encrypted, never shared 
-                      with third parties, and automatically deleted after processing. We only use your 
-                      information to generate your resume and cover letter.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(4)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      Can I edit my resume after generation?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 4 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 4 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 4 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      Yes! You'll receive an editable version along with the final PDF. You can make 
-                      any adjustments you want to perfectly match your preferences and requirements.
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="border border-white/10 rounded-lg p-4 cursor-pointer hover:bg-white/5 hover:border-pink-500/50 transition-all duration-200"
-                  onClick={() => toggleFAQ(5)}
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white">
-                      What if I'm not satisfied with my resume?
-                    </h4>
-                    <span className={`text-white transition-transform duration-200 text-2xl font-bold ${openFAQ === 5 ? 'rotate-0' : ''}`}>
-                      {openFAQ === 5 ? '−' : '+'}
-                    </span>
-                  </div>
-                  {openFAQ === 5 && (
-                    <p className="text-gray-300 mt-3 leading-relaxed">
-                      We offer a 100% satisfaction guarantee. If you're not completely happy with your 
-                      resume, we'll regenerate it for free or provide a full refund. Your success is 
-                      our priority.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <footer className="text-center mt-12 md:mt-16 pb-8">
-            {/* Trust Section */}
-            <div className="max-w-4xl mx-auto mb-8">
-              <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-400">
-                <div className="flex flex-col items-center space-y-2">
-                  <Shield className="h-6 w-6 text-blue-400" />
-                  <p className="font-medium">Your data is private</p>
-                  <p>Never stored or shared</p>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                  <Users className="h-6 w-6 text-green-400" />
-                  <p className="font-medium">Trusted by 1,000+ users</p>
-                  <p>Join the community</p>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                  <TrendingUp className="h-6 w-6 text-purple-400" />
-                  <p className="font-medium">95% success rate</p>
-                  <p>Proven results</p>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-gray-400 text-sm">
-              © 2024 EZ Resume. Powered by AI to help you land your dream job. ✨
-            </p>
-          </footer>
         </div>
+        <ContactModal open={open} onClose={closeModal} />
       </div>
-    </div>
+    </ContactModalProvider>
   )
 } 

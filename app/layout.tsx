@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import AppClientWrapper from './AppClientWrapper';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -84,9 +85,11 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-          {children}
-        </div>
+        <AppClientWrapper>
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-950 dark:to-blue-950 flex flex-col">
+            {children}
+          </div>
+        </AppClientWrapper>
       </body>
     </html>
   )
