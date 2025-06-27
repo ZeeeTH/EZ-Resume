@@ -95,9 +95,6 @@ export const searchTemplates = (query: string): ResumeTemplate[] => {
   return templates.filter(template => 
     template.name.toLowerCase().includes(lowercaseQuery) ||
     template.description.toLowerCase().includes(lowercaseQuery) ||
-    template.category.toLowerCase().includes(lowercaseQuery) ||
-    templateMetadata.find(meta => meta.id === template.id)?.tags.some(tag => 
-      tag.toLowerCase().includes(lowercaseQuery)
-    )
+    template.category.toLowerCase().includes(lowercaseQuery)
   );
 }; 
