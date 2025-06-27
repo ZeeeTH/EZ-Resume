@@ -17,10 +17,21 @@ const formSchema = z.object({
   education: z.string().min(20, 'Please provide at least 20 characters of education'),
   skills: z.string().min(20, 'Please provide at least 20 characters of skills'),
   achievements: z.string().min(30, 'Please provide at least 30 characters of achievements'),
-  coverLetter: z.boolean().default(false)
+  coverLetter: z.boolean()
 })
 
-type FormData = z.infer<typeof formSchema>
+interface FormData {
+  name: string
+  email: string
+  phone?: string
+  jobTitle: string
+  company: string
+  experience: string
+  education: string
+  skills: string
+  achievements: string
+  coverLetter: boolean
+}
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
@@ -33,7 +44,10 @@ export default function Home() {
     formState: { errors },
     watch
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      coverLetter: false
+    }
   })
 
   const coverLetter = watch('coverLetter')
