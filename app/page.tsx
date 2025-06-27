@@ -52,7 +52,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [formProgress, setFormProgress] = useState(0)
-  const { open, closeModal } = useContactModal ? useContactModal() : { open: false, closeModal: () => {} };
+  const { open, closeModal, openModal } = useContactModal ? useContactModal() : { open: false, closeModal: () => {} };
 
   const {
     register,
@@ -890,7 +890,7 @@ export default function Home() {
                   <span className="text-gray-500">|</span>
                   <a href="/privacy" className="hover:text-purple-400 transition-colors font-medium">Privacy Policy</a>
                   <span className="text-gray-500">|</span>
-                  <button type="button" onClick={() => setContactOpen(true)} className="hover:text-pink-400 transition-colors font-medium bg-transparent border-none p-0 m-0 focus:outline-none">Contact Us</button>
+                  <button type="button" onClick={openModal} className="hover:text-pink-400 transition-colors font-medium bg-transparent border-none p-0 m-0 focus:outline-none">Contact Us</button>
                 </div>
               </div>
               <p className="text-gray-400 text-sm">
