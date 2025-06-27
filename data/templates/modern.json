@@ -19,7 +19,6 @@
         "company": "TechCorp Inc.",
         "position": "Senior Software Engineer",
         "startDate": "2022-01",
-        "endDate": null,
         "current": true,
         "description": [
           "Lead development of microservices architecture serving 1M+ users",

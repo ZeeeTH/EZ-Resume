@@ -10,8 +10,7 @@
       "email": "sarah.johnson@email.com",
       "phone": "+1 (555) 987-6543",
       "location": "New York, NY",
-      "linkedin": "linkedin.com/in/sarahjohnson",
-      "website": null
+      "linkedin": "linkedin.com/in/sarahjohnson"
     },
     "summary": "Dedicated marketing professional with over 7 years of experience in digital marketing, brand strategy, and campaign management. Proven track record of increasing brand awareness and driving revenue growth through data-driven marketing initiatives.",
     "experience": [
@@ -19,7 +18,6 @@
         "company": "Global Marketing Solutions",
         "position": "Senior Marketing Manager",
         "startDate": "2021-06",
-        "endDate": null,
         "current": true,
         "description": [
           "Manage a team of 5 marketing specialists and coordinate cross-functional campaigns",
