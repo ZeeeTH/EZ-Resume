@@ -252,105 +252,108 @@ export default function Home() {
                     </p>
                   </div>
 
-                  {/* Personal Information */}
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                        Full Name *
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('name')}
-                          id="name"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('name') === 'error' 
-                              ? 'border-red-400' 
-                              : getFieldStatus('name') === 'success'
-                              ? 'border-green-400'
-                              : 'border-white/20'
-                          }`}
-                          placeholder="Enter your full name"
-                          aria-describedby="name-error"
-                        />
-                        {getFieldStatus('name') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                  {/* Personal Details Section */}
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Personal Details</h2>
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                      <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                          Full Name *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('name')}
+                            id="name"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('name') === 'error' 
+                                ? 'border-red-400' 
+                                : getFieldStatus('name') === 'success'
+                                ? 'border-green-400'
+                                : 'border-white/20'
+                            }`}
+                            placeholder="Enter your full name"
+                            aria-describedby="name-error"
+                          />
+                          {getFieldStatus('name') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        {errors.name && (
+                          <p id="name-error" className="mt-1 text-sm text-red-400 flex items-center">
+                            <span className="mr-1">⚠</span>
+                            {errors.name.message}
+                          </p>
                         )}
                       </div>
-                      {errors.name && (
-                        <p id="name-error" className="mt-1 text-sm text-red-400 flex items-center">
-                          <span className="mr-1">⚠</span>
-                          {errors.name.message}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                        Email Address *
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('email')}
-                          id="email"
-                          type="email"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('email') === 'error' 
-                              ? 'border-red-400' 
-                              : getFieldStatus('email') === 'success'
-                              ? 'border-green-400'
-                              : 'border-white/20'
-                          }`}
-                          placeholder="your.email@example.com"
-                          aria-describedby="email-error"
-                        />
-                        {getFieldStatus('email') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                          Email Address *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('email')}
+                            id="email"
+                            type="email"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('email') === 'error' 
+                                ? 'border-red-400' 
+                                : getFieldStatus('email') === 'success'
+                                ? 'border-green-400'
+                                : 'border-white/20'
+                            }`}
+                            placeholder="your.email@example.com"
+                            aria-describedby="email-error"
+                          />
+                          {getFieldStatus('email') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        {errors.email && (
+                          <p id="email-error" className="mt-1 text-sm text-red-400 flex items-center">
+                            <span className="mr-1">⚠</span>
+                            {errors.email.message}
+                          </p>
                         )}
                       </div>
-                      {errors.email && (
-                        <p id="email-error" className="mt-1 text-sm text-red-400 flex items-center">
-                          <span className="mr-1">⚠</span>
-                          {errors.email.message}
-                        </p>
-                      )}
                     </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
-                        Phone Number
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('phone')}
-                          id="phone"
-                          type="tel"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                            getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'
-                          }`}
-                          placeholder="+1 (555) 123-4567 (optional)"
-                        />
-                        {getFieldStatus('phone') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6 mt-6">
+                      <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                          Phone Number
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('phone')}
+                            id="phone"
+                            type="tel"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                              getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'
+                            }`}
+                            placeholder="+1 (555) 123-4567 (optional)"
+                          />
+                          {getFieldStatus('phone') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-300 mb-2">
-                        Location
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...register('location')}
-                          id="location"
-                          className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                          getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'
-                        }`}
-                          placeholder="City, State (optional)"
-                        />
-                        {getFieldStatus('location') === 'success' && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                        )}
+                      <div>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-300 mb-2">
+                          Location
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('location')}
+                            id="location"
+                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                            getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'
+                          }`}
+                            placeholder="City, State (optional)"
+                          />
+                          {getFieldStatus('location') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -363,21 +366,31 @@ export default function Home() {
                         key={idx}
                         className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
                       >
-                        <input
-                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="Job Title"
-                          value={job.title}
-                          onChange={e => handleWorkChange(idx, 'title', e.target.value)}
-                        />
-                        <input
-                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="Company"
-                          value={job.company}
-                          onChange={e => handleWorkChange(idx, 'company', e.target.value)}
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Job Title
+                          </label>
+                          <input
+                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="e.g., Senior Software Engineer"
+                            value={job.title}
+                            onChange={e => handleWorkChange(idx, 'title', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Company
+                          </label>
+                          <input
+                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="e.g., Google, Microsoft"
+                            value={job.company}
+                            onChange={e => handleWorkChange(idx, 'company', e.target.value)}
+                          />
+                        </div>
                         <div className="flex gap-6 w-full">
                           <div className="flex flex-col w-1/2">
-                            <label className="text-xs text-gray-300 mb-1">Start</label>
+                            <label className="text-sm font-medium text-gray-300 mb-2">Start Date</label>
                             <div className="flex gap-2">
                               <select
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -402,7 +415,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="flex flex-col w-1/2">
-                            <label className="text-xs text-gray-300 mb-1">End</label>
+                            <label className="text-sm font-medium text-gray-300 mb-2">End Date</label>
                             <div className="flex gap-2">
                               <select
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -427,12 +440,17 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                        <textarea
-                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                          placeholder="Description"
-                          value={job.description}
-                          onChange={e => handleWorkChange(idx, 'description', e.target.value)}
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Job Description
+                          </label>
+                          <textarea
+                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                            placeholder="Describe your responsibilities, achievements, and key contributions in this role"
+                            value={job.description}
+                            onChange={e => handleWorkChange(idx, 'description', e.target.value)}
+                          />
+                        </div>
                       </div>
                     ))}
                     <button
@@ -452,21 +470,31 @@ export default function Home() {
                         key={idx}
                         className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all duration-200"
                       >
-                        <input
-                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="Degree"
-                          value={edu.degree}
-                          onChange={e => handleEduChange(idx, 'degree', e.target.value)}
-                        />
-                        <input
-                          className="bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="School"
-                          value={edu.school}
-                          onChange={e => handleEduChange(idx, 'school', e.target.value)}
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Degree
+                          </label>
+                          <input
+                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="e.g., Bachelor of Science in Computer Science"
+                            value={edu.degree}
+                            onChange={e => handleEduChange(idx, 'degree', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            School/University
+                          </label>
+                          <input
+                            className="w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="e.g., Stanford University"
+                            value={edu.school}
+                            onChange={e => handleEduChange(idx, 'school', e.target.value)}
+                          />
+                        </div>
                         <div className="flex gap-6 w-full">
                           <div className="flex flex-col w-1/2">
-                            <label className="text-xs text-gray-300 mb-1">Start</label>
+                            <label className="text-sm font-medium text-gray-300 mb-2">Start Date</label>
                             <div className="flex gap-2">
                               <select
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -491,7 +519,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="flex flex-col w-1/2">
-                            <label className="text-xs text-gray-300 mb-1">End</label>
+                            <label className="text-sm font-medium text-gray-300 mb-2">End Date</label>
                             <div className="flex gap-2">
                               <select
                                 className="w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -527,11 +555,9 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* Skills */}
-                  <div>
-                    <label htmlFor="skills" className="block text-sm font-medium text-gray-300 mb-2">
-                      Skills *
-                    </label>
+                  {/* Skills Section */}
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Skills</h2>
                     <div className="relative">
                       <textarea
                         {...register('skills')}
@@ -559,11 +585,9 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Achievements */}
-                  <div>
-                    <label htmlFor="achievements" className="block text-sm font-medium text-gray-300 mb-2">
-                      Key Achievements *
-                    </label>
+                  {/* Key Achievements Section */}
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Key Achievements</h2>
                     <div className="relative">
                       <textarea
                         {...register('achievements')}
@@ -884,6 +908,11 @@ export default function Home() {
                   </ul>
                 </div>
               </div>
+              
+              {/* Pricing Note */}
+              <div className="text-center mt-4 pt-2 border-t border-white/10">
+                <p className="text-sm text-gray-400">All prices in USD</p>
+              </div>
             </div>
           </div>
 
@@ -979,7 +1008,7 @@ export default function Home() {
                     <p className="text-gray-300 mt-3 leading-relaxed">
                       Absolutely. We take your privacy seriously. Your data is encrypted, never shared 
                       with third parties, and automatically deleted after processing. We only use your 
-                      information to generate your resume and cover letter.
+                      information to generate your resume and is deleted after processing.
                     </p>
                   )}
                 </div>
