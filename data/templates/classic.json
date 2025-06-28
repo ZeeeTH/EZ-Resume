@@ -13,70 +13,53 @@
   },
   "colorOptions": {
     "allowUserColorOverride": true,
-    "defaultPrimaryColor": "#1F8072",
-    "defaultSecondaryColor": "#4B5563",
+    "defaultPrimaryColor": "#374151",
+    "defaultSecondaryColor": "#6B7280",
     "palette": [
-      {
-        "label": "Emerald",
-        "primary": "#1F8072",
-        "secondary": "#4B5563"
-      },
-      {
-        "label": "Classic Blue",
-        "primary": "#1E3A8A",
-        "secondary": "#475569"
-      },
-      {
-        "label": "Burgundy",
-        "primary": "#7C2D12",
-        "secondary": "#78350F"
-      },
-      {
-        "label": "Slate Gray",
-        "primary": "#334155",
-        "secondary": "#64748B"
-      }
+      { "label": "Greyscale", "primary": "#374151", "secondary": "#6B7280" },
+      { "label": "Emerald", "primary": "#1F8072", "secondary": "#4B5563" },
+      { "label": "Classic Blue", "primary": "#1E3A8A", "secondary": "#475569" }
     ]
   },
   "sampleData": {
-    "name": "Richard Williams",
-    "title": "Senior Financial Advisor",
+    "name": "Ava Thompson",
+    "title": "Senior Litigation Attorney",
     "contact": {
-      "phone": "(770) 625-9669",
-      "email": "richard.williams@mail.com",
-      "location": "3665 Margaret Street, Houston, TX 47587",
-      "linkedin": "linkedin.com/in/richard.williams",
-      "twitter": "twitter.com/richard.williams",
-      "website": "richard.williams.com"
+      "phone": "(312) 555-0198",
+      "email": "ava.thompson@lawmail.com",
+      "location": "200 S Michigan Ave, Chicago, IL 60604",
+      "linkedin": "linkedin.com/in/ava-thompson-law",
+      "twitter": "twitter.com/ava_thompson_law",
+      "website": "avathompsonlaw.com"
     },
     "sections": [
       {
         "title": "Summary",
-        "content": "Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million dollar portfolios, driving profitability, and increasing ROI through skillful strategic planning, consulting, and financial advisory services."
+        "content": "Accomplished litigation attorney with 10+ years of experience representing clients in civil and commercial disputes. Recognized for persuasive advocacy, strategic case management, and a strong record of favorable verdicts."
       },
       {
         "title": "Professional Experience",
         "jobs": [
           {
-            "title": "Senior Financial Advisor",
-            "company": "Wells Fargo Advisors",
-            "location": "Houston, TX",
-            "dates": "August 20XX – Present",
+            "title": "Senior Litigation Attorney",
+            "company": "Thompson & Rivera LLP",
+            "location": "Chicago, IL",
+            "dates": "March 2017 – Present",
             "bullets": [
-              "Deliver financial advice to clients, proposing strategies to achieve short- and long-term objectives for investments, insurance, business and estate planning with minimal risk",
-              "Develop, review, and optimize investment portfolios for 300+ high value clients with over $190M AUM (Assets Under Management)",
-              "Ensure maximum client satisfaction by providing exceptional and personalized service, enhancing client satisfaction ratings from 88% to 99.9% in less than 6 months"
+              "Lead counsel on over 30 high-stakes civil litigation cases, achieving a 90% success rate in court verdicts and settlements.",
+              "Mentored and supervised a team of 5 junior associates, improving department efficiency by 20%.",
+              "Developed and implemented firm-wide litigation strategies, resulting in a 15% reduction in case duration."
             ]
           },
           {
-            "title": "Financial Advisor",
-            "company": "Suntrust Investment Services, Inc.",
-            "location": "New Orleans, LA",
-            "dates": "January 20XX – January 20XX",
+            "title": "Associate Attorney",
+            "company": "Mason, Lee & Partners",
+            "location": "Chicago, IL",
+            "dates": "July 2012 – February 2017",
             "bullets": [
-              "Served as knowledgeable financial advisor to clients, managing an over $20.75M investment portfolio of 90+ individual and corporate clients",
-              "Devised and applied a new training and accountability program that increased productivity from #10 to #3 in the region",
-              "Partnered with cross-functional teams in consulting with clients to provide asset management risk strategy and mitigation, which increased AUM by 50%"
+              "Drafted legal briefs and motions for complex commercial litigation cases.",
+              "Conducted depositions and managed discovery for multi-million dollar lawsuits.",
+              "Negotiated settlements and represented clients in mediation hearings."
             ]
           }
         ]
@@ -85,29 +68,20 @@
         "title": "Education",
         "education": [
           {
-            "degree": "Bachelor of Science in Business Administration",
-            "institution": "Resume Genius University",
-            "location": "Baton Rouge, LA",
-            "dates": "May 20XX",
-            "gpa": "3.5"
+            "degree": "Juris Doctor (JD)",
+            "institution": "Midwest College of Law",
+            "location": "Chicago, IL",
+            "dates": "May 2012",
+            "gpa": "3.8"
           }
         ]
       },
       {
         "title": "Skills",
         "categories": {
-          "Technical": [
-            "MS Office (Word, Excel, PowerPoint)",
-            "Outlook",
-            "MS Project",
-            "Salesforce",
-            "TFS Project Management",
-            "Webex",
-            "GoToMeeting"
-          ],
-          "Languages": [
-            "Fluent in English, Spanish, and French"
-          ]
+          "Legal Research": ["Westlaw", "LexisNexis", "CaseText"],
+          "Courtroom": ["Trial Preparation", "Oral Advocacy", "Cross-Examination"],
+          "Languages": ["Fluent in English and Spanish"]
         }
       }
     ]

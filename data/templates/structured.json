@@ -22,54 +22,44 @@
     ]
   },
   "sampleData": {
-    "name": "Richard Williams",
-    "title": "Senior Financial Advisor",
+    "name": "Dr. Priya Desai",
+    "title": "Associate Professor of Biology",
     "contact": {
-      "phone": "(123) 456-7890",
-      "email": "richard.williams@mail.com",
-      "location": "47 W 13th St, New York, NY 10011",
-      "website": "richard.williams.com",
-      "linkedin": "linkedin.com/in/richard.williams",
-      "twitter": "twitter.com/richard.williams"
+      "phone": "(617) 555-0412",
+      "email": "priya.desai@universitymail.edu",
+      "location": "12 College Ave, Boston, MA 02115",
+      "website": "priyadesaibiology.com",
+      "linkedin": "linkedin.com/in/priyadesai-bio",
+      "twitter": "twitter.com/priyadesaibio"
     },
     "sections": [
       {
         "title": "Summary",
-        "content": "Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million dollar portfolios, driving profitability, and increasing ROI through strategic planning and consulting."
+        "content": "Dedicated biology professor with 15+ years of experience in higher education, research, and curriculum development. Passionate about mentoring students and advancing scientific knowledge through collaborative research."
       },
       {
         "title": "Professional Experience",
         "jobs": [
           {
-            "title": "Senior Financial Advisor",
-            "company": "Wells Fargo Advisors",
-            "location": "Houston, TX",
-            "dates": "January 20XX – Present",
+            "title": "Associate Professor of Biology",
+            "company": "Boston Metropolitan University",
+            "location": "Boston, MA",
+            "dates": "August 2014 – Present",
             "bullets": [
-              "Deliver financial advice to clients on short- and long-term investment and estate planning strategies",
-              "Optimize portfolios for 300+ clients with $190M+ AUM",
-              "Improve client satisfaction ratings from 88% to 99.9% in 6 months"
+              "Developed and taught 10+ undergraduate and graduate courses in molecular biology and genetics.",
+              "Published 20+ peer-reviewed articles in leading scientific journals.",
+              "Supervised 12 PhD and MS students, many of whom have gone on to successful academic and industry careers."
             ]
           },
           {
-            "title": "Financial Advisor",
-            "company": "Suntrust Investment Services, Inc.",
-            "location": "New Orleans, LA",
-            "dates": "January 20XX – January 20XX",
+            "title": "Assistant Professor of Biology",
+            "company": "Boston Metropolitan University",
+            "location": "Boston, MA",
+            "dates": "September 2008 – July 2014",
             "bullets": [
-              "Managed a $20.75M investment portfolio for 90+ clients",
-              "Increased productivity by restructuring accountability programs (ranked #3 in region)",
-              "Collaborated on asset risk mitigation strategies, boosting AUM by 50%"
-            ]
-          },
-          {
-            "title": "Financial Advisor",
-            "company": "Maverick Capital Management",
-            "location": "New Orleans, LA",
-            "dates": "January 20XX – January 20XX",
-            "bullets": [
-              "Primary point of contact for over 15 clients",
-              "Oversaw portfolios totaling $8.5M in assets"
+              "Secured $1.2M in research grants for laboratory and field studies.",
+              "Organized annual biology symposium attended by 200+ students and faculty.",
+              "Served on university curriculum and diversity committees."
             ]
           }
         ]
@@ -78,25 +68,20 @@
         "title": "Education",
         "education": [
           {
-            "degree": "Bachelor of Science in Business Administration",
-            "institution": "Resume Genius University",
-            "location": "Baton Rouge, LA",
-            "dates": "May 20XX",
-            "gpa": "3.7/4.0"
+            "degree": "Ph.D. in Molecular Biology",
+            "institution": "Northeast Institute of Science",
+            "location": "Cambridge, MA",
+            "dates": "May 2008",
+            "gpa": "4.0"
           }
         ]
       },
       {
         "title": "Skills",
         "categories": {
-          "Professional": [
-            "MS Office (Word, Excel, PowerPoint)",
-            "Outlook",
-            "MS Project",
-            "Salesforce",
-            "TFS Project Management"
-          ],
-          "Languages": ["Fluent in English, Spanish, and French"]
+          "Research": ["Molecular Cloning", "CRISPR", "Fluorescence Microscopy"],
+          "Teaching": ["Curriculum Development", "Academic Advising", "Public Speaking"],
+          "Languages": ["Fluent in English and Hindi"]
         }
       }
     ]

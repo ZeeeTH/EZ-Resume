@@ -1,7 +1,7 @@
 'use client'
 // Vercel rebuild cache buster - local fix successful, forcing clean deploy
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -76,7 +76,11 @@ export default function Home() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const [formProgress, setFormProgress] = useState(0)
   const [selectedTemplate, setSelectedTemplate] = useState('classic')
-  const [selectedColorVariant, setSelectedColorVariant] = useState(0)
+  const [selectedColorVariants, setSelectedColorVariants] = useState<Record<string, number>>({
+    classic: 0,
+    modern: 0,
+    structured: 0,
+  });
   const [coverLetterChecked, setCoverLetterChecked] = useState(false)
   const { open, closeModal, openModal } = useContactModal();
 
@@ -187,8 +191,8 @@ export default function Home() {
         educationData: data.education,
         // Include color variant if template has color options
         ...(selectedTemplateData?.colorOptions && {
-          colorVariant: selectedColorVariant,
-          selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariant]
+          colorVariant: selectedColorVariants[selectedTemplate] ?? 0,
+          selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants[selectedTemplate] ?? 0]
         })
       }
 
@@ -248,6 +252,19 @@ export default function Home() {
     setPreviewTemplate(template);
     setShowTemplatePreview(true);
   };
+
+  // Lock scroll when sample preview modal is open
+  useEffect(() => {
+    if (showTemplatePreview) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    // Clean up in case modal is unmounted
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [showTemplatePreview]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
@@ -761,7 +778,7 @@ export default function Home() {
                           onClick={() => {
                             setSelectedTemplate(template.id);
                             setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
-                            setSelectedColorVariant(0);
+                            setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
                           }}
                           className={`
                             relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 flex flex-col
@@ -772,13 +789,13 @@ export default function Home() {
                           `}
                         >
                           <div>
-                            <div className="flex items-center justify-between mb-3">
-                              <h3 className="font-semibold text-white text-sm">{template.name}</h3>
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-semibold text-white text-sm mb-2">{template.name}</h3>
                               {selectedTemplate === template.id && (
                                 <CheckCircle className="h-5 w-5 text-green-400" />
                               )}
                             </div>
-                            <p className="text-gray-400 text-xs whitespace-pre-line">{template.description}</p>
+                            <p className="text-gray-400 text-xs mb-4">{template.description}</p>
                             {/* Color Dots and Label */}
                             {template.colorOptions && (
                               <div className="pt-3 border-t border-white/10 mt-3">
@@ -786,12 +803,13 @@ export default function Home() {
                                   {template.colorOptions.palette.map((color, index) => (
                                     <button
                                       key={index}
-                                      onClick={(e) => {
+                                      type="button"
+                                      onClick={e => {
                                         e.stopPropagation();
-                                        setSelectedColorVariant(index);
+                                        setSelectedColorVariants(prev => ({ ...prev, [template.id]: index }));
                                       }}
                                       className={`w-6 h-6 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                                        selectedTemplate === template.id && selectedColorVariant === index
+                                        selectedTemplate === template.id && selectedColorVariants[template.id] === index
                                           ? 'border-white shadow-lg'
                                           : 'border-white/30'
                                       }`}
@@ -801,7 +819,7 @@ export default function Home() {
                                   ))}
                                 </div>
                                 <p className="text-xs text-gray-400 text-center mt-1 min-h-[20px]">
-                                  {template.colorOptions.palette[selectedColorVariant]?.label || template.colorOptions.palette[0]?.label}
+                                  {template.colorOptions.palette[selectedColorVariants[template.id] ?? 0]?.label || template.colorOptions.palette[0]?.label}
                                 </p>
                               </div>
                             )}
@@ -1237,362 +1255,380 @@ export default function Home() {
               </button>
             </div>
             <div className="p-6 overflow-auto max-h-[calc(90vh-80px)]">
-              <div className="bg-white rounded-lg shadow-lg p-8 mb-4" style={{ fontFamily: previewTemplate.styling.fontFamily }}>
-                {/* Template-specific styling based on layout */}
-                {previewTemplate.id === 'classic' && (
-                  <div className="space-y-10 px-2 md:px-8 py-6" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
-                    {/* Header */}
-                    <div className="border-b border-gray-300 pb-4 mb-2">
-                      <h1
-                        className="text-4xl md:text-5xl font-extrabold mb-1 tracking-tight"
-                        style={{ color: previewTemplate.styling.primaryColor, fontFamily: previewTemplate.fonts?.header }}
-                      >
-                        {previewTemplate.sampleData.name}
-                      </h1>
-                      <div className="w-full border-t-2 border-gray-300 my-2" />
-                      {previewTemplate.sampleData.title && (
-                        <div className="uppercase text-gray-700 font-bold tracking-widest text-lg md:text-xl mb-2" style={{ fontFamily: previewTemplate.fonts?.section }}>
-                          {previewTemplate.sampleData.title}
+              {/* Use selected color variant for preview */}
+              {(() => {
+                const colorPalette = previewTemplate.colorOptions?.palette || [];
+                const color = colorPalette[selectedColorVariants[previewTemplate.id] ?? 0] || {
+                  primary: previewTemplate.styling.primaryColor,
+                  secondary: previewTemplate.styling.secondaryColor,
+                };
+                const primaryColor = color.primary;
+                const secondaryColor = color.secondary;
+
+                // All preview blocks below should use primaryColor/secondaryColor instead of previewTemplate.styling.primaryColor/secondaryColor
+                return (
+                  <div className="bg-white rounded-lg shadow-lg p-8 mb-4" style={{ fontFamily: previewTemplate.styling.fontFamily }}>
+                    {/* Template-specific styling based on layout */}
+                    {previewTemplate.id === 'classic' && (
+                      <div className="space-y-10 px-2 md:px-8 py-6" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
+                        {/* Header */}
+                        <div>
+                          <h1
+                            className="text-4xl md:text-5xl font-extrabold mb-1 tracking-tight"
+                            style={{ color: primaryColor, fontFamily: previewTemplate.fonts?.header }}
+                          >
+                            {previewTemplate.sampleData.name}
+                          </h1>
+                          <div className="w-full border-t-2" style={{ borderColor: primaryColor, margin: '0.5rem 0' }} />
+                          {previewTemplate.sampleData.title && (
+                            <div className="uppercase text-gray-700 font-bold tracking-widest text-lg md:text-xl mb-2" style={{ fontFamily: previewTemplate.fonts?.section }}>
+                              {previewTemplate.sampleData.title}
+                            </div>
+                          )}
+                          {/* Contact Row */}
+                          {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email || previewTemplate.sampleData.contact.location) && (
+                            <div className="flex flex-wrap items-center text-base text-gray-700 gap-x-3 gap-y-1 mb-1">
+                              {previewTemplate.sampleData.contact.phone && <span>{previewTemplate.sampleData.contact.phone}</span>}
+                              {previewTemplate.sampleData.contact.phone && previewTemplate.sampleData.contact.email && <span className="mx-1" style={{ color: primaryColor }}>•</span>}
+                              {previewTemplate.sampleData.contact.email && <span>{previewTemplate.sampleData.contact.email}</span>}
+                              {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email) && previewTemplate.sampleData.contact.location && <span className="mx-1" style={{ color: primaryColor }}>•</span>}
+                              {previewTemplate.sampleData.contact.location && <span>{previewTemplate.sampleData.contact.location}</span>}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {/* Contact Row */}
-                      {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email || previewTemplate.sampleData.contact.location) && (
-                        <div className="flex flex-wrap items-center text-base text-gray-700 gap-x-3 gap-y-1 mb-1">
-                          {previewTemplate.sampleData.contact.phone && <span>{previewTemplate.sampleData.contact.phone}</span>}
-                          {previewTemplate.sampleData.contact.phone && previewTemplate.sampleData.contact.email && <span className="mx-1 text-green-600">•</span>}
-                          {previewTemplate.sampleData.contact.email && <span>{previewTemplate.sampleData.contact.email}</span>}
-                          {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email) && previewTemplate.sampleData.contact.location && <span className="mx-1 text-green-600">•</span>}
-                          {previewTemplate.sampleData.contact.location && <span>{previewTemplate.sampleData.contact.location}</span>}
-                        </div>
-                      )}
-                      {/* REMOVE: Social Row (website/linkedin/twitter) */}
-                    </div>
-                    {/* Sections */}
-                    {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
-                      <div key={idx}>
-                        <h2
-                          className="text-xl md:text-2xl font-extrabold uppercase mb-2 tracking-wide border-b-2 pb-1"
-                          style={{ color: previewTemplate.styling.primaryColor, fontFamily: previewTemplate.fonts?.section, letterSpacing: '0.04em' }}
-                        >
-                          {section.title}
-                        </h2>
-                        {/* Summary */}
-                        {section.content && (
-                          <p className="text-gray-800 text-lg leading-relaxed mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>{section.content}</p>
-                        )}
-                        {/* Experience */}
-                        {section.jobs && section.jobs.length > 0 && (
-                          <div className="space-y-6">
-                            {section.jobs.map((job: any, j: number) => (
-                              <div key={j}>
-                                {/* Company always on its own line */}
-                                <div className="font-bold text-gray-900 text-lg md:text-xl" style={{ fontFamily: previewTemplate.fonts?.section }}>
-                                  {job.company}
-                                </div>
-                                {/* Location and Dates on next line, right-aligned on desktop, stacked on mobile */}
-                                {(job.location || job.dates) && (
-                                  <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                    <div>{job.location}</div>
-                                    <div className="italic">{job.dates}</div>
-                                  </div>
-                                )}
-                                {/* Job Title below company */}
-                                {job.title && <div className="text-gray-800 font-semibold text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
-                                {job.bullets && job.bullets.length > 0 && (
-                                  <div className={`grid ${job.bullets.length > 2 ? 'md:grid-cols-2' : ''} gap-x-8 gap-y-1 mt-2`}>
-                                    {job.bullets.map((b: string, k: number) => (
-                                      <div key={k} className="flex items-start gap-2">
-                                        <span className="text-green-600 mt-1">■</span>
-                                        <span className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{b}</span>
+                        {/* Sections */}
+                        {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
+                          <div key={idx}>
+                            <h2
+                              className="text-xl md:text-2xl font-extrabold uppercase mb-2 tracking-wide border-b-2 pb-1"
+                              style={{ color: primaryColor, fontFamily: previewTemplate.fonts?.section, letterSpacing: '0.04em', borderColor: primaryColor }}
+                            >
+                              {section.title}
+                            </h2>
+                            {/* Summary */}
+                            {section.content && (
+                              <p className="text-gray-800 text-lg leading-relaxed mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>{section.content}</p>
+                            )}
+                            {/* Experience */}
+                            {section.jobs && section.jobs.length > 0 && (
+                              <div className="space-y-6">
+                                {section.jobs.map((job: any, j: number) => (
+                                  <div key={j}>
+                                    {/* Company always on its own line */}
+                                    <div className="font-bold text-gray-900 text-lg md:text-xl" style={{ fontFamily: previewTemplate.fonts?.section }}>
+                                      {job.company}
+                                    </div>
+                                    {/* Location and Dates on next line, right-aligned on desktop, stacked on mobile */}
+                                    {(job.location || job.dates) && (
+                                      <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                        <div>{job.location}</div>
+                                        <div className="italic">{job.dates}</div>
                                       </div>
-                                    ))}
+                                    )}
+                                    {/* Job Title below company */}
+                                    {job.title && <div className="text-gray-800 font-semibold text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
+                                    {job.bullets && job.bullets.length > 0 && (
+                                      <div className={`grid ${job.bullets.length > 2 ? 'md:grid-cols-2' : ''} gap-x-8 gap-y-1 mt-2`}>
+                                        {job.bullets.map((b: string, k: number) => (
+                                          <div key={k} className="flex items-start gap-2">
+                                            <span className="text-green-600 mt-1">■</span>
+                                            <span className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{b}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
-                        {/* Education */}
-                        {section.education && section.education.length > 0 && (
-                          <div className="space-y-2">
-                            {section.education.map((edu: any, e: number) => (
-                              <div key={e}>
-                                {/* Degree always on its own line */}
-                                <div className="font-bold text-gray-900 text-lg md:text-xl" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
-                                {/* School/University and Dates on same line */}
-                                {(edu.institution || edu.dates) && (
-                                  <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                    <div>{edu.institution}</div>
-                                    <div className="italic">{edu.dates}</div>
+                            )}
+                            {/* Education */}
+                            {section.education && section.education.length > 0 && (
+                              <div className="space-y-2">
+                                {section.education.map((edu: any, e: number) => (
+                                  <div key={e}>
+                                    {/* Degree always on its own line */}
+                                    <div className="font-bold text-gray-900 text-lg md:text-xl" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
+                                    {/* School/University and Dates on same line */}
+                                    {(edu.institution || edu.dates) && (
+                                      <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                        <div>{edu.institution}</div>
+                                        <div className="italic">{edu.dates}</div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
-                        {/* Skills */}
-                        {section.categories && Object.keys(section.categories).length > 0 && (
-                          <div className="grid md:grid-cols-2 gap-x-8 gap-y-2 mt-2">
-                            {Object.entries(section.categories).map(([cat, skills]: [string, any]) => (
-                              Array.isArray(skills) && skills.length > 0 && (
-                                <div key={cat}>
-                                  <div className="font-bold text-gray-900 mb-1 text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{cat}</div>
-                                  <ul className="list-none pl-0 space-y-1">
-                                    {skills.map((s: string, si: number) => (
-                                      <li key={si} className="flex items-start gap-2">
-                                        <span className="text-green-600 mt-1">■</span>
-                                        <span className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{s}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {previewTemplate.id === 'structured' && (
-                  <div className="bg-white rounded-lg shadow-lg px-2 md:px-12 py-8 space-y-10" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
-                    {/* Header */}
-                    <div className="flex flex-col items-center text-center space-y-2">
-                      <h1
-                        className="text-4xl md:text-5xl font-extrabold tracking-tight mb-1"
-                        style={{ color: previewTemplate.styling.primaryColor, fontFamily: previewTemplate.fonts?.header }}
-                      >
-                        {previewTemplate.sampleData.name}
-                      </h1>
-                      {previewTemplate.sampleData.title && (
-                        <div className="uppercase text-gray-700 font-bold tracking-widest text-lg md:text-xl mb-1" style={{ fontFamily: previewTemplate.fonts?.section }}>{previewTemplate.sampleData.title}</div>
-                      )}
-                      <div className="w-full border-t-2 border-gray-300 my-2" />
-                      {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email || previewTemplate.sampleData.contact.location) && (
-                        <div className="flex flex-wrap justify-center items-center text-base text-gray-700 gap-x-3 gap-y-1">
-                          {previewTemplate.sampleData.contact.phone && <span>{previewTemplate.sampleData.contact.phone}</span>}
-                          {previewTemplate.sampleData.contact.phone && previewTemplate.sampleData.contact.email && <span className="mx-1 text-blue-900">•</span>}
-                          {previewTemplate.sampleData.contact.email && <span>{previewTemplate.sampleData.contact.email}</span>}
-                          {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email) && previewTemplate.sampleData.contact.location && <span className="mx-1 text-blue-900">•</span>}
-                          {previewTemplate.sampleData.contact.location && <span>{previewTemplate.sampleData.contact.location}</span>}
-                        </div>
-                      )}
-                      {/* REMOVE: Social Row (website/linkedin/twitter) */}
-                      <div className="w-full border-t-2 border-gray-300 my-2" />
-                      {/* Italic summary */}
-                      {previewTemplate.sampleData.sections.find((s: any) => s.title === 'Summary' && s.content) && (
-                        <div className="italic text-gray-700 text-lg max-w-3xl mx-auto mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                          {previewTemplate.sampleData.sections.find((s: any) => s.title === 'Summary')?.content}
-                        </div>
-                      )}
-                    </div>
-                    {/* Sections */}
-                    {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
-                      section.title !== 'Summary' && (
-                        <div key={idx} className="mb-2">
-                          <h2
-                            className="text-2xl md:text-3xl font-extrabold uppercase mb-1 tracking-wide"
-                            style={{ color: previewTemplate.styling.primaryColor, fontFamily: previewTemplate.fonts?.section, letterSpacing: '0.04em' }}
-                          >
-                            {section.title}
-                          </h2>
-                          <div className="w-16 border-b-2 mb-3" style={{ borderColor: previewTemplate.styling.primaryColor }} />
-                          {/* Professional Experience */}
-                          {
-                            <div className="space-y-6">
-                              {section.jobs && section.jobs.map((job: any, j: number) => (
-                                <div key={j}>
-                                  {/* Company always on its own line */}
-                                  <div className="font-bold text-gray-900 text-lg md:text-xl uppercase tracking-wide" style={{ fontFamily: previewTemplate.fonts?.section }}>
-                                    {job.company}
-                                  </div>
-                                  {/* Location and Dates on next line, right-aligned on desktop, stacked on mobile */}
-                                  {(job.location || job.dates) && (
-                                    <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                      <div>{job.location}</div>
-                                      <div className="italic">{job.dates}</div>
+                            )}
+                            {/* Skills */}
+                            {section.categories && Object.keys(section.categories).length > 0 && (
+                              <div className="grid md:grid-cols-2 gap-x-8 gap-y-2 mt-2">
+                                {Object.entries(section.categories).map(([cat, skills]: [string, any]) => (
+                                  Array.isArray(skills) && skills.length > 0 && (
+                                    <div key={cat}>
+                                      <div className="font-bold text-gray-900 mb-1 text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{cat}</div>
+                                      <ul className="list-none pl-0 space-y-1">
+                                        {skills.map((s: string, si: number) => (
+                                          <li key={si} className="flex items-start gap-2">
+                                            <span className="mt-1" style={{ color: primaryColor }}>■</span>
+                                            <span className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{s}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
                                     </div>
-                                  )}
-                                  {/* Job Title below company */}
-                                  {job.title && <div className="text-gray-800 font-semibold text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
-                                  {job.bullets && job.bullets.length > 0 && (
-                                    <ul className="list-disc pl-6 text-gray-800 text-base space-y-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                      {job.bullets.map((b: string, k: number) => (
-                                        <li key={k}>{b}</li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          }
-                          {/* Education */}
-                          {section.title === 'Education' && section.education && section.education.length > 0 && (
-                            <div className="space-y-6">
-                              {section.education.map((edu: any, e: number) => (
-                                <div key={e}>
-                                  {/* Degree always on its own line */}
-                                  <div className="font-bold text-gray-900 text-lg md:text-xl uppercase tracking-wide" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
-                                  {/* School/University and Dates on same line */}
-                                  {(edu.institution || edu.dates) && (
-                                    <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                      <div>{edu.institution}</div>
-                                      <div className="italic">{edu.dates}</div>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          {/* Skills */}
-                          {section.categories && Object.keys(section.categories).length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-2 border-t border-gray-300 pt-2">
-                              {Object.entries(section.categories).map(([cat, skills]: [string, any], i, arr) => (
-                                Array.isArray(skills) && skills.length > 0 && (
-                                  <div key={cat} className={i === 0 && arr.length > 1 ? 'md:border-r md:pr-8 border-gray-300' : ''}>
-                                    <ul className="list-disc pl-6 space-y-1">
-                                      {skills.map((s: string, si: number) => (
-                                        <li key={si} className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{s}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    ))}
-                  </div>
-                )}
-
-                {previewTemplate.id === 'modern' && (
-                  <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-lg overflow-hidden" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
-                    {/* Sidebar */}
-                    <div
-                      className="md:w-1/3 w-full bg-gradient-to-b from-blue-900 to-blue-600 text-white p-8 flex flex-col items-center md:items-start"
-                      style={{ background: `linear-gradient(180deg, ${previewTemplate.styling.primaryColor} 0%, ${previewTemplate.styling.secondaryColor} 100%)` }}
-                    >
-                      <h1
-                        className="text-3xl md:text-4xl font-extrabold mb-1 tracking-tight text-center md:text-left"
-                        style={{ fontFamily: previewTemplate.fonts?.header }}
-                      >
-                        {previewTemplate.sampleData.name}
-                      </h1>
-                      {previewTemplate.sampleData.title && (
-                        <div className="uppercase opacity-80 font-bold tracking-widest text-base md:text-lg mb-4 text-center md:text-left" style={{ fontFamily: previewTemplate.fonts?.section }}>
-                          {previewTemplate.sampleData.title}
-                        </div>
-                      )}
-                      <div className="w-12 border-b-2 border-white mb-4" />
-                      {/* Contact Info */}
-                      <div className="flex flex-col gap-2 w-full text-sm md:text-base">
-                        {previewTemplate.sampleData.contact.phone && (
-                          <div className="flex items-center gap-2">
-                            <span>📞</span>
-                            <span>{previewTemplate.sampleData.contact.phone}</span>
+                                  )
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {previewTemplate.sampleData.contact.email && (
-                          <div className="flex items-center gap-2">
-                            <span>✉️</span>
-                            <span>{previewTemplate.sampleData.contact.email}</span>
-                          </div>
-                        )}
-                        {previewTemplate.sampleData.contact.location && (
-                          <div className="flex items-center gap-2">
-                            <span>📍</span>
-                            <span>{previewTemplate.sampleData.contact.location}</span>
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    </div>
-                    {/* Main Content */}
-                    <div className="md:w-2/3 w-full bg-white p-8 flex flex-col gap-8">
-                      {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
-                        <div key={idx}>
-                          <h2
-                            className="text-xl font-extrabold uppercase mb-2 tracking-wide"
-                            style={{
-                              color: previewTemplate.styling.primaryColor,
-                              fontFamily: previewTemplate.fonts?.section,
-                              letterSpacing: '0.04em',
-                              borderBottom: `3px solid ${previewTemplate.styling.primaryColor}`,
-                              display: 'inline-block',
-                              paddingBottom: '2px',
-                              marginBottom: '12px'
-                            }}
+                    )}
+                    {previewTemplate.id === 'modern' && (
+                      <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-lg overflow-hidden" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
+                        {/* Sidebar */}
+                        <div
+                          className="md:w-1/3 w-full bg-gradient-to-b from-blue-900 to-blue-600 text-white p-8 flex flex-col items-center md:items-start"
+                          style={{ background: `linear-gradient(180deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
+                        >
+                          <h1
+                            className="text-3xl md:text-4xl font-extrabold mb-1 tracking-tight text-center md:text-left"
+                            style={{ fontFamily: previewTemplate.fonts?.header }}
                           >
-                            {section.title}
-                          </h2>
-                          {/* Summary */}
-                          {section.content && (
-                            <p className="text-gray-800 text-base md:text-lg leading-relaxed mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>{section.content}</p>
-                          )}
-                          {/* Experience */}
-                          {section.jobs && section.jobs.length > 0 && (
-                            <div className="space-y-6">
-                              {section.jobs.map((job: any, j: number) => (
-                                <div key={j}>
-                                  <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                                    <div className="font-bold text-gray-900 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{job.company}</div>
-                                    <div className="italic text-gray-600 text-sm md:text-base">{job.dates}</div>
-                                  </div>
-                                  <div className="text-gray-700 text-sm md:text-base">{job.location}</div>
-                                  {job.title && <div className="text-gray-800 font-semibold text-base md:text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
-                                  {job.bullets && job.bullets.length > 0 && (
-                                    <ul className="list-disc pl-6 text-gray-800 text-sm md:text-base space-y-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
-                                      {job.bullets.map((b: string, k: number) => (
-                                        <li key={k}>{b}</li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                              ))}
+                            {previewTemplate.sampleData.name}
+                          </h1>
+                          {previewTemplate.sampleData.title && (
+                            <div className="uppercase opacity-80 font-bold tracking-widest text-base md:text-lg mb-4 text-center md:text-left" style={{ fontFamily: previewTemplate.fonts?.section }}>
+                              {previewTemplate.sampleData.title}
                             </div>
                           )}
-                          {/* Education */}
-                          {section.education && section.education.length > 0 && (
-                            <div className="space-y-4">
-                              {section.education.map((edu: any, e: number) => (
-                                <div key={e}>
-                                  <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                                    <div className="font-bold text-gray-900 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
-                                    <div className="italic text-gray-600 text-sm md:text-base">{edu.dates}</div>
-                                  </div>
-                                  <div className="text-gray-700 text-sm md:text-base">{edu.institution}</div>
+                          <div className="w-12 border-b-2 mb-4" style={{ borderColor: 'white' }} />
+                          {/* Contact Info */}
+                          <div className="flex flex-col gap-2 w-full text-sm md:text-base">
+                            {previewTemplate.sampleData.contact.phone && (
+                              <div className="flex items-center gap-2">
+                                <span>📞</span>
+                                <span>{previewTemplate.sampleData.contact.phone}</span>
+                              </div>
+                            )}
+                            {previewTemplate.sampleData.contact.email && (
+                              <div className="flex items-center gap-2">
+                                <span>✉️</span>
+                                <span>{previewTemplate.sampleData.contact.email}</span>
+                              </div>
+                            )}
+                            {previewTemplate.sampleData.contact.location && (
+                              <div className="flex items-center gap-2">
+                                <span>📍</span>
+                                <span>{previewTemplate.sampleData.contact.location}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {/* Main Content */}
+                        <div className="md:w-2/3 w-full bg-white p-8 flex flex-col gap-8">
+                          {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
+                            <div key={idx}>
+                              <h2
+                                className="text-xl font-extrabold uppercase mb-2 tracking-wide"
+                                style={{
+                                  color: primaryColor,
+                                  fontFamily: previewTemplate.fonts?.section,
+                                  letterSpacing: '0.04em',
+                                  borderBottom: `3px solid ${primaryColor}`,
+                                  display: 'inline-block',
+                                  paddingBottom: '2px',
+                                  marginBottom: '12px'
+                                }}
+                              >
+                                {section.title}
+                              </h2>
+                              {/* Summary */}
+                              {section.content && (
+                                <p className="text-gray-800 text-base md:text-lg leading-relaxed mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>{section.content}</p>
+                              )}
+                              {/* Experience */}
+                              {section.jobs && section.jobs.length > 0 && (
+                                <div className="space-y-6">
+                                  {section.jobs.map((job: any, j: number) => (
+                                    <div key={j}>
+                                      {/* Company always on its own line */}
+                                      <div className="font-bold text-gray-900 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{job.company}</div>
+                                      {/* Location and Dates on next line, right-aligned on desktop, stacked on mobile */}
+                                      {(job.location || job.dates) && (
+                                        <div className="flex flex-col md:flex-row md:justify-between md:items-center text-sm md:text-base text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          <div>{job.location}</div>
+                                          <div className="italic">{job.dates}</div>
+                                        </div>
+                                      )}
+                                      {/* Job Title below company */}
+                                      {job.title && <div className="text-gray-800 font-semibold text-base md:text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
+                                      {job.bullets && job.bullets.length > 0 && (
+                                        <ul className="list-disc pl-6 text-gray-800 text-sm md:text-base space-y-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          {job.bullets.map((b: string, k: number) => (
+                                            <li key={k}>{b}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
+                              )}
+                              {/* Education */}
+                              {section.education && section.education.length > 0 && (
+                                <div className="space-y-4">
+                                  {section.education.map((edu: any, e: number) => (
+                                    <div key={e}>
+                                      {/* Degree always on its own line */}
+                                      <div className="font-bold text-gray-900 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
+                                      {/* School/University and Dates on next line, right-aligned on desktop, stacked on mobile */}
+                                      {(edu.institution || edu.dates) && (
+                                        <div className="flex flex-col md:flex-row md:justify-between md:items-center text-sm md:text-base text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          <div>{edu.institution}</div>
+                                          <div className="italic">{edu.dates}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {/* Skills */}
+                              {section.categories && Object.keys(section.categories).length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-2">
+                                  {Object.entries(section.categories).map(([cat, skills]: [string, any]) => (
+                                    Array.isArray(skills) && skills.length > 0 && (
+                                      <div key={cat}>
+                                        <div className="font-bold text-gray-900 mb-1 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{cat}</div>
+                                        <ul className="list-none pl-0 space-y-1">
+                                          {skills.map((s: string, si: number) => (
+                                            <li key={si} className="flex items-start gap-2">
+                                              <span className="mt-1" style={{ color: primaryColor }}>■</span>
+                                              <span className="text-gray-800 text-sm md:text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{s}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {previewTemplate.id === 'structured' && (
+                      <div className="bg-white rounded-lg shadow-lg px-2 md:px-12 py-8 space-y-10" style={{ fontFamily: previewTemplate.fonts?.body || previewTemplate.styling.fontFamily }}>
+                        {/* Header */}
+                        <div className="flex flex-col items-center text-center space-y-2">
+                          <h1
+                            className="text-4xl md:text-5xl font-extrabold tracking-tight mb-1"
+                            style={{ color: primaryColor, fontFamily: previewTemplate.fonts?.header }}
+                          >
+                            {previewTemplate.sampleData.name}
+                          </h1>
+                          {previewTemplate.sampleData.title && (
+                            <div className="uppercase text-gray-700 font-bold tracking-widest text-lg md:text-xl mb-1" style={{ fontFamily: previewTemplate.fonts?.section }}>{previewTemplate.sampleData.title}</div>
+                          )}
+                          <div className="w-full border-t-2" style={{ borderColor: primaryColor, margin: '0.5rem 0' }} />
+                          {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email || previewTemplate.sampleData.contact.location) && (
+                            <div className="flex flex-wrap justify-center items-center text-base text-gray-700 gap-x-3 gap-y-1">
+                              {previewTemplate.sampleData.contact.phone && <span>{previewTemplate.sampleData.contact.phone}</span>}
+                              {previewTemplate.sampleData.contact.phone && previewTemplate.sampleData.contact.email && <span className="mx-1" style={{ color: primaryColor }}>•</span>}
+                              {previewTemplate.sampleData.contact.email && <span>{previewTemplate.sampleData.contact.email}</span>}
+                              {(previewTemplate.sampleData.contact.phone || previewTemplate.sampleData.contact.email) && previewTemplate.sampleData.contact.location && <span className="mx-1" style={{ color: primaryColor }}>•</span>}
+                              {previewTemplate.sampleData.contact.location && <span>{previewTemplate.sampleData.contact.location}</span>}
                             </div>
                           )}
-                          {/* Skills */}
-                          {section.categories && Object.keys(section.categories).length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-2">
-                              {Object.entries(section.categories).map(([cat, skills]: [string, any]) => (
-                                Array.isArray(skills) && skills.length > 0 && (
-                                  <div key={cat}>
-                                    <div className="font-bold text-gray-900 mb-1 text-base md:text-lg" style={{ fontFamily: previewTemplate.fonts?.section }}>{cat}</div>
-                                    <ul className="list-none pl-0 space-y-1">
-                                      {skills.map((s: string, si: number) => (
-                                        <li key={si} className="flex items-start gap-2">
-                                          <span className="text-green-600 mt-1">■</span>
-                                          <span className="text-gray-800 text-sm md:text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}>{s}</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )
-                              ))}
+                          <div className="w-full border-t-2" style={{ borderColor: primaryColor, margin: '0.5rem 0' }} />
+                          {/* Italic summary */}
+                          {previewTemplate.sampleData.sections.find((s: any) => s.title === 'Summary' && s.content) && (
+                            <div className="italic text-gray-700 text-lg max-w-3xl mx-auto mb-2" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                              {previewTemplate.sampleData.sections.find((s: any) => s.title === 'Summary')?.content}
                             </div>
                           )}
                         </div>
-                      ))}
-                    </div>
+                        {/* Sections */}
+                        {previewTemplate.sampleData.sections.map((section: any, idx: number) => (
+                          section.title !== 'Summary' && (
+                            <div key={idx} className="mb-2">
+                              <h2
+                                className="text-2xl md:text-3xl font-extrabold uppercase mb-1 tracking-wide"
+                                style={{ color: primaryColor, fontFamily: previewTemplate.fonts?.section, letterSpacing: '0.04em' }}
+                              >
+                                {section.title}
+                              </h2>
+                              <div className="w-16 border-b-2 mb-3" style={{ borderColor: primaryColor }} />
+                              {/* Professional Experience */}
+                              {
+                                <div className="space-y-6">
+                                  {section.jobs && section.jobs.map((job: any, j: number) => (
+                                    <div key={j}>
+                                      {/* Company always on its own line */}
+                                      <div className="font-bold text-gray-900 text-lg md:text-xl uppercase tracking-wide" style={{ fontFamily: previewTemplate.fonts?.section }}>
+                                        {job.company}
+                                      </div>
+                                      {/* Location and Dates on next line, right-aligned on desktop, stacked on mobile */}
+                                      {(job.location || job.dates) && (
+                                        <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          <div>{job.location}</div>
+                                          <div className="italic">{job.dates}</div>
+                                        </div>
+                                      )}
+                                      {/* Job Title below company */}
+                                      {job.title && <div className="text-gray-800 font-semibold text-lg mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>{job.title}</div>}
+                                      {job.bullets && job.bullets.length > 0 && (
+                                        <ul className="list-disc pl-6 text-gray-800 text-base space-y-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          {job.bullets.map((b: string, k: number) => (
+                                            <li key={k}>{b}</li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              }
+                              {/* Education */}
+                              {section.title === 'Education' && section.education && section.education.length > 0 && (
+                                <div className="space-y-6">
+                                  {section.education.map((edu: any, e: number) => (
+                                    <div key={e}>
+                                      {/* Degree always on its own line */}
+                                      <div className="font-bold text-gray-900 text-lg md:text-xl uppercase tracking-wide" style={{ fontFamily: previewTemplate.fonts?.section }}>{edu.degree}</div>
+                                      {/* School/University and Dates on same line */}
+                                      {(edu.institution || edu.dates) && (
+                                        <div className="flex flex-col md:flex-row md:justify-between md:items-center text-base md:text-lg text-gray-700 mt-0 mb-1" style={{ fontFamily: previewTemplate.fonts?.body }}>
+                                          <div>{edu.institution}</div>
+                                          <div className="italic">{edu.dates}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {/* Skills */}
+                              {section.categories && Object.keys(section.categories).length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-2 border-t border-gray-300 pt-2">
+                                  {Object.entries(section.categories).map(([cat, skills]: [string, any], i, arr) => (
+                                    Array.isArray(skills) && skills.length > 0 && (
+                                      <div key={cat} className={i === 0 && arr.length > 1 ? 'md:border-r md:pr-8 border-gray-300' : ''}>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                          {skills.map((s: string, si: number) => (
+                                            <li key={si} className="text-gray-800 text-base leading-snug" style={{ fontFamily: previewTemplate.fonts?.body }}><span style={{ color: primaryColor }}>■</span> {s}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              
+                );
+              })()}
               <div className="text-center">
                 <button
                   onClick={() => {

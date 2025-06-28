@@ -65,19 +65,19 @@ export interface ResumeTemplate {
 
 export const templates: ResumeTemplate[] = [
   {
-    ...modernTemplate,
-    fonts: {
-      header: 'Montserrat, Arial, sans-serif',
-      section: 'Montserrat, Arial, sans-serif',
-      body: 'Inter, Arial, sans-serif',
-    },
-  },
-  {
     ...classicTemplate,
     fonts: {
       header: 'Merriweather, Georgia, serif',
       section: 'Lato, Arial, sans-serif',
       body: 'Lato, Arial, sans-serif',
+    },
+  },
+  {
+    ...modernTemplate,
+    fonts: {
+      header: 'Montserrat, Arial, sans-serif',
+      section: 'Montserrat, Arial, sans-serif',
+      body: 'Inter, Arial, sans-serif',
     },
   },
   {
@@ -94,40 +94,26 @@ export const templateMetadata = [
   {
     id: 'classic',
     name: 'Classic',
-    description: `Traditional single-column format with formal typography.
-Clean section breaks and subtle icons for a timeless look.
-Ideal for finance, law, and professional roles.`,
+    description: `Traditional single-column resume with clean section breaks, subtle icons, and serif headings. Ideal for finance and professional roles.`,
     popularity: 4,
     category: 'Traditional',
     colorOptions: {
       allowUserColorOverride: true,
-      defaultPrimaryColor: "#000000",
-      defaultSecondaryColor: "#374151",
+      defaultPrimaryColor: "#374151",
+      defaultSecondaryColor: "#6B7280",
       palette: [
-        {
-          label: "Black",
-          primary: "#000000",
-          secondary: "#374151"
-        },
-        {
-          label: "Emerald",
-          primary: "#1F8072",
-          secondary: "#4B5563"
-        },
-        {
-          label: "Classic Blue",
-          primary: "#1E3A8A",
-          secondary: "#475569"
-        }
+        { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
+        { label: "Emerald", primary: "#1F8072", secondary: "#4B5563" },
+        { label: "Classic Blue", primary: "#1E3A8A", secondary: "#475569" },
+        { label: "Burgundy", primary: "#7C2D12", secondary: "#78350F" },
+        { label: "Slate Gray", primary: "#334155", secondary: "#64748B" }
       ]
     }
   },
   {
     id: 'modern',
     name: 'Modern',
-    description: `Contemporary two-column layout with bold color accents.
-Clean lines, modern iconography, and structured typography.
-Perfect for tech, marketing, and creative professionals.`,
+    description: `Two-column layout with bold color accents and modern style. Ideal for tech, marketing, and creative roles.`,
     popularity: 5,
     category: 'Professional',
     colorOptions: {
@@ -135,30 +121,16 @@ Perfect for tech, marketing, and creative professionals.`,
       defaultPrimaryColor: "#374151",
       defaultSecondaryColor: "#6B7280",
       palette: [
-        {
-          label: "Greyscale",
-          primary: "#374151",
-          secondary: "#6B7280"
-        },
-        {
-          label: "Pale Orange",
-          primary: "#F59E0B",
-          secondary: "#92400E"
-        },
-        {
-          label: "Teal",
-          primary: "#0D9488",
-          secondary: "#134E4A"
-        }
+        { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
+        { label: "Pale Orange", primary: "#F59E0B", secondary: "#92400E" },
+        { label: "Teal", primary: "#0D9488", secondary: "#134E4A" }
       ]
     }
   },
   {
     id: 'structured',
     name: 'Structured',
-    description: `Polished single-column layout with centered headings.
-Subtle lines and formal structure for clarity and order.
-Great for academic, administrative, and business roles.`,
+    description: `A polished, single-column layout with centered headings, subtle lines, and formal structure. Ideal for academic, administrative, and professional roles.`,
     popularity: 3,
     category: 'Clean',
     colorOptions: {
@@ -166,21 +138,9 @@ Great for academic, administrative, and business roles.`,
       defaultPrimaryColor: "#374151",
       defaultSecondaryColor: "#6B7280",
       palette: [
-        {
-          label: "Greyscale",
-          primary: "#374151",
-          secondary: "#6B7280"
-        },
-        {
-          label: "Soft Deep Blue",
-          primary: "#1E40AF",
-          secondary: "#475569"
-        },
-        {
-          label: "Sage Green",
-          primary: "#6B7280",
-          secondary: "#4B5563"
-        }
+        { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
+        { label: "Soft Deep Blue", primary: "#1E40AF", secondary: "#475569" },
+        { label: "Sage Green", primary: "#6B7280", secondary: "#4B5563" }
       ]
     }
   },

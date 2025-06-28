@@ -1,7 +1,7 @@
 {
   "id": "modern",
   "name": "Modern",
-  "description": "Two-column modern layout with bold color accents, iconography, and structured typography. Ideal for marketing, tech, and creative professionals.",
+  "description": "Two-column modern resume with bold color accents, clean section breaks, and clear headings. Ideal for tech, marketing, and creative professionals.",
   "popularity": 5,
   "category": "Professional",
   "styling": {
@@ -22,55 +22,44 @@
     ]
   },
   "sampleData": {
-    "name": "Lauren Chen",
-    "title": "Digital Marketing Specialist",
+    "name": "Jordan Kim",
+    "title": "Lead UX Designer",
     "contact": {
-      "phone": "(123) 456-7890",
-      "email": "lauren.chen@mail.com",
-      "location": "47 W 13th St, New York, NY 10011",
-      "website": "lauren.chen.com",
-      "linkedin": "linkedin.com/in/lauren.chen",
-      "twitter": "twitter.com/lauren-chen"
+      "phone": "(415) 555-0234",
+      "email": "jordan.kim@uxmail.com",
+      "location": "88 Market St, San Francisco, CA 94103",
+      "website": "jordankimux.com",
+      "linkedin": "linkedin.com/in/jordan-kim-ux",
+      "twitter": "twitter.com/jordankimux"
     },
     "sections": [
       {
         "title": "Summary",
-        "content": "Digital Marketing Specialist with 6+ years of experience in online marketing, branding, and business strategy across music, media, and entertainment industries. Skilled in evaluating financial needs and implementing multi-pronged digital strategies that increase revenue and drive brand growth."
+        "content": "Innovative UX Designer with 8+ years of experience creating user-centered digital products for SaaS and e-commerce. Expert in design systems, prototyping, and cross-functional collaboration."
       },
       {
         "title": "Professional Experience",
         "jobs": [
           {
-            "title": "Digital Marketing Specialist",
-            "company": "Triangle Music Group",
-            "location": "New York, NY",
-            "dates": "January 20XX – Present",
+            "title": "Lead UX Designer",
+            "company": "PixelForge Studios",
+            "location": "San Francisco, CA",
+            "dates": "June 2019 – Present",
             "bullets": [
-              "Manage digital sales and streaming accounts to improve brand positioning and growth",
-              "Source and develop new strategic partnerships, social engagements, and advertising opportunities that generate new revenue streams",
-              "Collaborate with internal departments to execute national advertising campaigns, plan global digital distribution, and re-deploy a 1M+ consumer sales and marketing database"
+              "Directed UX strategy for a B2B SaaS platform used by 50,000+ users, increasing user retention by 22%.",
+              "Led a team of 4 designers in launching a mobile e-commerce app that won a 2023 Webby Award.",
+              "Established a company-wide design system, reducing design debt and dev handoff time by 30%."
             ]
           },
           {
-            "title": "Digital Marketing Associate",
-            "company": "Momo Software",
-            "location": "New York, NY",
-            "dates": "January 20XX – January 20XX",
+            "title": "UX Designer",
+            "company": "BrightPath Interactive",
+            "location": "San Jose, CA",
+            "dates": "March 2016 – May 2019",
             "bullets": [
-              "Developed and applied digital marketing plans with focus on driving acquisition and conversion",
-              "Implemented robust digital acquisition plans to ensure forecast accuracy and performance tracking",
-              "Increased conversions by 15% from paid sources (PPC, Grant, Display, and VOD)"
-            ]
-          },
-          {
-            "title": "Marketing Intern",
-            "company": "Kingston Digital",
-            "location": "New York, NY",
-            "dates": "January 20XX – January 20XX",
-            "bullets": [
-              "Helped research, write, and edit blog posts for Kingston's website",
-              "Used tools like Semrush, Ahrefs, and Page Optimizer Pro to improve SEO relevance",
-              "Gathered and analyzed data from social media PPE campaigns"
+              "Designed and prototyped new features for a cloud-based productivity suite.",
+              "Conducted 100+ user interviews and usability tests to inform product decisions.",
+              "Collaborated with engineers and PMs to deliver 10+ successful product launches."
             ]
           }
         ]
@@ -79,18 +68,19 @@
         "title": "Education",
         "education": [
           {
-            "degree": "Bachelor of Arts, Communications",
-            "institution": "Resume Genius University",
-            "location": "New York, NY",
-            "dates": "May 20XX"
+            "degree": "Bachelor of Fine Arts in Interaction Design",
+            "institution": "California School of Design",
+            "location": "San Francisco, CA",
+            "dates": "May 2015"
           }
         ]
       },
       {
         "title": "Skills",
         "categories": {
-          "Digital Marketing": ["Digital Data Analytics", "Digital Marketing"],
-          "Creative Tools": ["Adobe Photoshop", "Adobe Illustrator"]
+          "Design Tools": ["Figma", "Sketch", "Adobe XD", "InVision"],
+          "Front-End": ["HTML5", "CSS3", "JavaScript", "React"],
+          "Research": ["User Interviews", "Usability Testing", "A/B Testing"]
         }
       }
     ]
