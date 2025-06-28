@@ -66,6 +66,11 @@ export interface ResumeTemplate {
 export const templates: ResumeTemplate[] = [
   {
     ...classicTemplate,
+    styling: {
+      ...classicTemplate.styling,
+      spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: classicTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
     fonts: {
       header: 'Merriweather, Georgia, serif',
       section: 'Lato, Arial, sans-serif',
@@ -74,6 +79,11 @@ export const templates: ResumeTemplate[] = [
   },
   {
     ...modernTemplate,
+    styling: {
+      ...modernTemplate.styling,
+      spacing: modernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: modernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
     fonts: {
       header: 'Montserrat, Arial, sans-serif',
       section: 'Montserrat, Arial, sans-serif',
@@ -82,6 +92,11 @@ export const templates: ResumeTemplate[] = [
   },
   {
     ...structuredTemplate,
+    styling: {
+      ...structuredTemplate.styling,
+      spacing: structuredTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: structuredTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
     fonts: {
       header: 'Lora, Georgia, serif',
       section: 'Lato, Arial, sans-serif',
@@ -104,9 +119,7 @@ export const templateMetadata = [
       palette: [
         { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
         { label: "Emerald", primary: "#1F8072", secondary: "#4B5563" },
-        { label: "Classic Blue", primary: "#1E3A8A", secondary: "#475569" },
-        { label: "Burgundy", primary: "#7C2D12", secondary: "#78350F" },
-        { label: "Slate Gray", primary: "#334155", secondary: "#64748B" }
+        { label: "Classic Blue", primary: "#1E3A8A", secondary: "#475569" }
       ]
     }
   },

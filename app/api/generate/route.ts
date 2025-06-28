@@ -79,6 +79,7 @@ interface FormData {
   coverLetter: boolean
   template: string
   location?: string
+  personalSummary?: string
   workExperience: WorkExperience[]
   education: Education[]
   colorVariant?: number
@@ -166,6 +167,7 @@ function validateAndSanitizeInput(data: unknown): FormData | null {
       coverLetter: Boolean(d.coverLetter),
       template: sanitizeString(d.template, 50) || 'modern',
       location: sanitizeString(d.location, 100),
+      personalSummary: sanitizeString(d.personalSummary, 1000),
       workExperience,
       education,
       colorVariant: typeof d.colorVariant === 'number' ? d.colorVariant : undefined,
@@ -388,7 +390,7 @@ Target Job Title: ${formData.jobTitle || 'Not specified'}
 Target Company: ${formData.company || 'Not specified'}
 
 Professional Summary:
-${formData.achievements}
+${formData.personalSummary || formData.achievements}
 
 Work Experience:
 ${formData.workExperience.map((job, idx) => `
@@ -403,7 +405,7 @@ Skills:
 ${formData.skills}
 
 Additional Experience:
-${formatWorkExperienceForPrompt(formData.workExperience)}
+${formData.achievements}
 
 Education Details:
 ${formatEducationForPrompt(formData.education)}
@@ -486,7 +488,7 @@ Location: ${formData.location || 'Not provided'}
 Target Position: ${formData.jobTitle || 'Not specified'}
 Target Company: ${formData.company || 'Not specified'}
 
-Professional Summary: ${formData.achievements}
+Professional Summary: ${formData.personalSummary || formData.achievements}
 
 Work Experience:
 ${formData.workExperience.map((job, index) => `

@@ -20,18 +20,18 @@ const resumeEmailTemplate = handlebars.compile(`
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 8px; }
         .document { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #3b82f6; }
         .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .gradient-line { height: 3px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 2px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Your Professional Resume is Ready!</h1>
-        </div>
         <div class="content">
+            <div class="gradient-line"></div>
+            <h1 style="margin-top: 0; color: #1f2937; font-size: 28px; font-weight: 700;">Your Professional Resume is Ready!</h1>
+            
             <p>Hi {{name}},</p>
             <p>Your professional resume has been generated successfully! Here it is:</p>
             
@@ -68,18 +68,18 @@ const coverLetterEmailTemplate = handlebars.compile(`
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 8px; }
         .document { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #3b82f6; }
         .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .gradient-line { height: 3px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 2px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Your Professional Cover Letter is Ready!</h1>
-        </div>
         <div class="content">
+            <div class="gradient-line"></div>
+            <h1 style="margin-top: 0; color: #1f2937; font-size: 28px; font-weight: 700;">Your Professional Cover Letter is Ready!</h1>
+            
             <p>Hi {{name}},</p>
             <p>Your professional cover letter has been generated successfully! Here it is:</p>
             
@@ -116,19 +116,19 @@ const bothDocumentsEmailTemplate = handlebars.compile(`
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 8px; }
         .document { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #3b82f6; }
         .document h3 { margin-top: 0; color: #3b82f6; }
         .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .gradient-line { height: 3px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 2px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Your Professional Documents are Ready!</h1>
-        </div>
         <div class="content">
+            <div class="gradient-line"></div>
+            <h1 style="margin-top: 0; color: #1f2937; font-size: 28px; font-weight: 700;">Your Professional Documents are Ready!</h1>
+            
             <p>Hi {{name}},</p>
             <p>Your professional resume and cover letter have been generated successfully! Here they are:</p>
             

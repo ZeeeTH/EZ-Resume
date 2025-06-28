@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center py-12 px-4">
-      <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 md:p-12 max-w-2xl w-full shadow-2xl relative">
+      <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 md:p-12 max-w-2xl w-full shadow-2xl relative select-none">
         <Link href="/" className="absolute left-6 top-6 text-blue-400 hover:text-white font-semibold text-sm flex items-center transition-colors">
           <span className="mr-2">←</span> Back to Home
         </Link>
