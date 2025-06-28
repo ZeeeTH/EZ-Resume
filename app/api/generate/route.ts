@@ -81,6 +81,12 @@ interface FormData {
   location?: string
   workExperience: WorkExperience[]
   education: Education[]
+  colorVariant?: number
+  selectedColors?: {
+    label: string
+    primary: string
+    secondary: string
+  }
 }
 
 // Input validation and sanitization
@@ -161,7 +167,12 @@ function validateAndSanitizeInput(data: unknown): FormData | null {
       template: sanitizeString(d.template, 50) || 'modern',
       location: sanitizeString(d.location, 100),
       workExperience,
-      education
+      education,
+      colorVariant: typeof d.colorVariant === 'number' ? d.colorVariant : undefined,
+      selectedColors: d.selectedColors && typeof d.selectedColors === 'object' && 
+        'label' in d.selectedColors && 'primary' in d.selectedColors && 'secondary' in d.selectedColors
+        ? d.selectedColors as { label: string; primary: string; secondary: string }
+        : undefined
     }
   } catch (error) {
     console.error('Input validation error:', error)
@@ -286,7 +297,7 @@ export async function POST(request: NextRequest) {
 
     // Create PDFs using AI-generated content
     console.log('Creating PDF with template:', formData.template)
-    const resumePdf = await createResumePDF(resumeJson, formData.template)
+    const resumePdf = await createResumePDF(resumeJson, formData.template, formData.selectedColors)
     console.log('Resume PDF created, size:', resumePdf.length)
     
     let coverLetterPdf: Uint8Array | null = null
@@ -555,7 +566,7 @@ function formatMonthYear(dateStr: string): string {
   return dateStr;
 }
 
-async function createResumePDF(resumeJson: any, template: string = 'modern'): Promise<Uint8Array> {
+async function createResumePDF(resumeJson: any, template: string = 'modern', selectedColors?: { label: string; primary: string; secondary: string }): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([612, 792]); // US Letter size
   
@@ -563,9 +574,13 @@ async function createResumePDF(resumeJson: any, template: string = 'modern'): Pr
   const templateData = getTemplateById(template) || getTemplateById('modern')!
   const { primaryColor, secondaryColor, fontFamily, spacing, layout } = templateData.styling
   
+  // Use selected colors if available (for classic template), otherwise use template defaults
+  const finalPrimaryColor = selectedColors?.primary || primaryColor
+  const finalSecondaryColor = selectedColors?.secondary || secondaryColor
+  
   // Parse colors
-  const primaryRGB = hexToRgb(primaryColor) || { r: 37, g: 99, b: 235 }
-  const secondaryRGB = hexToRgb(secondaryColor) || { r: 100, g: 116, b: 139 }
+  const primaryRGB = hexToRgb(finalPrimaryColor) || { r: 37, g: 99, b: 235 }
+  const secondaryRGB = hexToRgb(finalSecondaryColor) || { r: 100, g: 116, b: 139 }
   
   // Choose fonts based on template
   let font: any, boldFont: any;
@@ -614,9 +629,9 @@ async function createResumePDF(resumeJson: any, template: string = 'modern'): Pr
   if (template === 'classic') {
     // CLASSIC TEMPLATE: Traditional, formal layout
     await renderClassicTemplate();
-  } else if (template === 'minimalist') {
-    // MINIMALIST TEMPLATE: Clean, lots of white space
-    await renderMinimalistTemplate();
+  } else if (template === 'structured') {
+    // STRUCTURED TEMPLATE: Clean, lots of white space
+    await renderStructuredTemplate();
   } else {
     // MODERN TEMPLATE: Contemporary, bold design
     await renderModernTemplate();
@@ -795,7 +810,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern'): Pr
     }
   }
 
-  async function renderMinimalistTemplate() {
+  async function renderStructuredTemplate() {
     // Header with name - small and subtle
     ensureSpace(30);
     page.drawText(resumeJson.name || 'Your Name', {

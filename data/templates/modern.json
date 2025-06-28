@@ -1,53 +1,76 @@
 {
   "id": "modern",
   "name": "Modern",
-  "description": "Contemporary design with bold typography and clean lines",
+  "description": "Two-column modern layout with bold color accents, iconography, and structured typography. Ideal for marketing, tech, and creative professionals.",
   "popularity": 5,
   "category": "Professional",
   "styling": {
-    "primaryColor": "#3B82F6",
-    "secondaryColor": "#64748B",
-    "fontFamily": "Helvetica",
-    "spacing": "standard",
-    "layout": "modern"
+    "primaryColor": "#374151",
+    "secondaryColor": "#6B7280",
+    "fontFamily": "Arial",
+    "spacing": "compact",
+    "layout": "two-column-sidebar"
+  },
+  "colorOptions": {
+    "allowUserColorOverride": true,
+    "defaultPrimaryColor": "#374151",
+    "defaultSecondaryColor": "#6B7280",
+    "palette": [
+      { "label": "Greyscale", "primary": "#374151", "secondary": "#6B7280" },
+      { "label": "Pale Orange", "primary": "#F59E0B", "secondary": "#92400E" },
+      { "label": "Teal", "primary": "#0D9488", "secondary": "#134E4A" }
+    ]
   },
   "sampleData": {
-    "name": "Sarah Johnson",
+    "name": "Lauren Chen",
+    "title": "Digital Marketing Specialist",
     "contact": {
-      "email": "sarah.johnson@email.com",
-      "phone": "(555) 123-4567",
-      "location": "San Francisco, CA"
+      "phone": "(123) 456-7890",
+      "email": "lauren.chen@mail.com",
+      "location": "47 W 13th St, New York, NY 10011",
+      "website": "lauren.chen.com",
+      "linkedin": "linkedin.com/in/lauren.chen",
+      "twitter": "twitter.com/lauren-chen"
     },
     "sections": [
       {
-        "title": "Professional Summary",
-        "content": "Results-driven marketing professional with 5+ years of experience in digital marketing and brand strategy. Proven track record of increasing brand awareness by 40% and driving 25% growth in customer engagement through innovative campaigns and data-driven approaches."
+        "title": "Summary",
+        "content": "Digital Marketing Specialist with 6+ years of experience in online marketing, branding, and business strategy across music, media, and entertainment industries. Skilled in evaluating financial needs and implementing multi-pronged digital strategies that increase revenue and drive brand growth."
       },
       {
         "title": "Professional Experience",
         "jobs": [
           {
-            "title": "Senior Marketing Manager",
-            "company": "TechCorp Solutions",
-            "location": "San Francisco, CA",
-            "dates": "2021 - Present",
+            "title": "Digital Marketing Specialist",
+            "company": "Triangle Music Group",
+            "location": "New York, NY",
+            "dates": "January 20XX – Present",
             "bullets": [
-              "Led digital marketing campaigns resulting in 40% increase in brand awareness",
-              "Managed team of 5 marketing specialists and coordinated with cross-functional teams",
-              "Implemented data-driven strategies that improved conversion rates by 25%",
-              "Developed and executed social media campaigns across multiple platforms"
+              "Manage digital sales and streaming accounts to improve brand positioning and growth",
+              "Source and develop new strategic partnerships, social engagements, and advertising opportunities that generate new revenue streams",
+              "Collaborate with internal departments to execute national advertising campaigns, plan global digital distribution, and re-deploy a 1M+ consumer sales and marketing database"
             ]
           },
           {
-            "title": "Marketing Specialist",
-            "company": "Innovate Marketing Agency",
-            "location": "Los Angeles, CA",
-            "dates": "2019 - 2021",
+            "title": "Digital Marketing Associate",
+            "company": "Momo Software",
+            "location": "New York, NY",
+            "dates": "January 20XX – January 20XX",
             "bullets": [
-              "Created and managed content marketing strategies for 15+ clients",
-              "Increased client social media engagement by 35% through targeted campaigns",
-              "Conducted market research and competitor analysis to inform strategy",
-              "Collaborated with design team to create compelling visual content"
+              "Developed and applied digital marketing plans with focus on driving acquisition and conversion",
+              "Implemented robust digital acquisition plans to ensure forecast accuracy and performance tracking",
+              "Increased conversions by 15% from paid sources (PPC, Grant, Display, and VOD)"
+            ]
+          },
+          {
+            "title": "Marketing Intern",
+            "company": "Kingston Digital",
+            "location": "New York, NY",
+            "dates": "January 20XX – January 20XX",
+            "bullets": [
+              "Helped research, write, and edit blog posts for Kingston's website",
+              "Used tools like Semrush, Ahrefs, and Page Optimizer Pro to improve SEO relevance",
+              "Gathered and analyzed data from social media PPE campaigns"
             ]
           }
         ]
@@ -56,20 +79,20 @@
         "title": "Education",
         "education": [
           {
-            "degree": "Bachelor of Business Administration, Marketing",
-            "institution": "University of California, Berkeley",
-            "dates": "2015 - 2019"
+            "degree": "Bachelor of Arts, Communications",
+            "institution": "Resume Genius University",
+            "location": "New York, NY",
+            "dates": "May 20XX"
           }
         ]
       },
       {
         "title": "Skills",
         "categories": {
-          "Digital Marketing": ["Google Ads", "Facebook Ads", "SEO", "Email Marketing", "Content Marketing"],
-          "Analytics": ["Google Analytics", "HubSpot", "Tableau", "A/B Testing", "Data Analysis"],
-          "Tools": ["Adobe Creative Suite", "Hootsuite", "Mailchimp", "WordPress", "Salesforce"]
+          "Digital Marketing": ["Digital Data Analytics", "Digital Marketing"],
+          "Creative Tools": ["Adobe Photoshop", "Adobe Illustrator"]
         }
       }
     ]
   }
-} 
+}

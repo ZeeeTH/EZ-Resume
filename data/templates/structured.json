@@ -1,0 +1,104 @@
+{
+  "id": "structured",
+  "name": "Structured",
+  "description": "A polished, single-column layout with centered headings, subtle lines, and formal structure. Ideal for academic, administrative, and professional roles.",
+  "popularity": 3,
+  "category": "Clean",
+  "styling": {
+    "primaryColor": "#374151",
+    "secondaryColor": "#6B7280",
+    "fontFamily": "Helvetica",
+    "spacing": "standard",
+    "layout": "single-column-centered-header"
+  },
+  "colorOptions": {
+    "allowUserColorOverride": true,
+    "defaultPrimaryColor": "#374151",
+    "defaultSecondaryColor": "#6B7280",
+    "palette": [
+      { "label": "Greyscale", "primary": "#374151", "secondary": "#6B7280" },
+      { "label": "Soft Deep Blue", "primary": "#1E40AF", "secondary": "#475569" },
+      { "label": "Sage Green", "primary": "#6B7280", "secondary": "#4B5563" }
+    ]
+  },
+  "sampleData": {
+    "name": "Richard Williams",
+    "title": "Senior Financial Advisor",
+    "contact": {
+      "phone": "(123) 456-7890",
+      "email": "richard.williams@mail.com",
+      "location": "47 W 13th St, New York, NY 10011",
+      "website": "richard.williams.com",
+      "linkedin": "linkedin.com/in/richard.williams",
+      "twitter": "twitter.com/richard.williams"
+    },
+    "sections": [
+      {
+        "title": "Summary",
+        "content": "Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million dollar portfolios, driving profitability, and increasing ROI through strategic planning and consulting."
+      },
+      {
+        "title": "Professional Experience",
+        "jobs": [
+          {
+            "title": "Senior Financial Advisor",
+            "company": "Wells Fargo Advisors",
+            "location": "Houston, TX",
+            "dates": "January 20XX – Present",
+            "bullets": [
+              "Deliver financial advice to clients on short- and long-term investment and estate planning strategies",
+              "Optimize portfolios for 300+ clients with $190M+ AUM",
+              "Improve client satisfaction ratings from 88% to 99.9% in 6 months"
+            ]
+          },
+          {
+            "title": "Financial Advisor",
+            "company": "Suntrust Investment Services, Inc.",
+            "location": "New Orleans, LA",
+            "dates": "January 20XX – January 20XX",
+            "bullets": [
+              "Managed a $20.75M investment portfolio for 90+ clients",
+              "Increased productivity by restructuring accountability programs (ranked #3 in region)",
+              "Collaborated on asset risk mitigation strategies, boosting AUM by 50%"
+            ]
+          },
+          {
+            "title": "Financial Advisor",
+            "company": "Maverick Capital Management",
+            "location": "New Orleans, LA",
+            "dates": "January 20XX – January 20XX",
+            "bullets": [
+              "Primary point of contact for over 15 clients",
+              "Oversaw portfolios totaling $8.5M in assets"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "education": [
+          {
+            "degree": "Bachelor of Science in Business Administration",
+            "institution": "Resume Genius University",
+            "location": "Baton Rouge, LA",
+            "dates": "May 20XX",
+            "gpa": "3.7/4.0"
+          }
+        ]
+      },
+      {
+        "title": "Skills",
+        "categories": {
+          "Professional": [
+            "MS Office (Word, Excel, PowerPoint)",
+            "Outlook",
+            "MS Project",
+            "Salesforce",
+            "TFS Project Management"
+          ],
+          "Languages": ["Fluent in English, Spanish, and French"]
+        }
+      }
+    ]
+  }
+}

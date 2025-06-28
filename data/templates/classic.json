@@ -1,53 +1,82 @@
 {
   "id": "classic",
   "name": "Classic",
-  "description": "Traditional format with formal typography and professional layout",
+  "description": "Traditional single-column resume with clean section breaks, subtle icons, and serif headings. Ideal for finance and professional roles.",
   "popularity": 4,
   "category": "Traditional",
   "styling": {
-    "primaryColor": "#1F2937",
-    "secondaryColor": "#6B7280",
-    "fontFamily": "Times New Roman",
+    "primaryColor": "#1F8072",
+    "secondaryColor": "#4B5563",
+    "fontFamily": "Georgia",
     "spacing": "spacious",
-    "layout": "classic"
+    "layout": "single-column-header-summary-left-aligned"
+  },
+  "colorOptions": {
+    "allowUserColorOverride": true,
+    "defaultPrimaryColor": "#1F8072",
+    "defaultSecondaryColor": "#4B5563",
+    "palette": [
+      {
+        "label": "Emerald",
+        "primary": "#1F8072",
+        "secondary": "#4B5563"
+      },
+      {
+        "label": "Classic Blue",
+        "primary": "#1E3A8A",
+        "secondary": "#475569"
+      },
+      {
+        "label": "Burgundy",
+        "primary": "#7C2D12",
+        "secondary": "#78350F"
+      },
+      {
+        "label": "Slate Gray",
+        "primary": "#334155",
+        "secondary": "#64748B"
+      }
+    ]
   },
   "sampleData": {
-    "name": "Michael Rodriguez",
+    "name": "Richard Williams",
+    "title": "Senior Financial Advisor",
     "contact": {
-      "email": "michael.rodriguez@email.com",
-      "phone": "(555) 987-6543",
-      "location": "New York, NY"
+      "phone": "(770) 625-9669",
+      "email": "richard.williams@mail.com",
+      "location": "3665 Margaret Street, Houston, TX 47587",
+      "linkedin": "linkedin.com/in/richard.williams",
+      "twitter": "twitter.com/richard.williams",
+      "website": "richard.williams.com"
     },
     "sections": [
       {
-        "title": "Professional Summary",
-        "content": "Dedicated financial analyst with 7+ years of experience in investment banking and portfolio management. Demonstrated expertise in financial modeling, risk assessment, and strategic planning. Proven ability to analyze complex financial data and provide actionable insights to senior management."
+        "title": "Summary",
+        "content": "Financial Advisor with 7+ years of experience delivering financial/investment advisory services to high value clients. Proven success in managing multi-million dollar portfolios, driving profitability, and increasing ROI through skillful strategic planning, consulting, and financial advisory services."
       },
       {
         "title": "Professional Experience",
         "jobs": [
           {
-            "title": "Senior Financial Analyst",
-            "company": "Global Investment Bank",
-            "location": "New York, NY",
-            "dates": "2020 - Present",
+            "title": "Senior Financial Advisor",
+            "company": "Wells Fargo Advisors",
+            "location": "Houston, TX",
+            "dates": "August 20XX – Present",
             "bullets": [
-              "Conducted comprehensive financial analysis for $500M+ investment portfolios",
-              "Developed complex financial models for mergers and acquisitions",
-              "Presented investment recommendations to senior management and clients",
-              "Led team of 3 junior analysts in financial research and reporting"
+              "Deliver financial advice to clients, proposing strategies to achieve short- and long-term objectives for investments, insurance, business and estate planning with minimal risk",
+              "Develop, review, and optimize investment portfolios for 300+ high value clients with over $190M AUM (Assets Under Management)",
+              "Ensure maximum client satisfaction by providing exceptional and personalized service, enhancing client satisfaction ratings from 88% to 99.9% in less than 6 months"
             ]
           },
           {
-            "title": "Investment Analyst",
-            "company": "Capital Management Group",
-            "location": "Boston, MA",
-            "dates": "2017 - 2020",
+            "title": "Financial Advisor",
+            "company": "Suntrust Investment Services, Inc.",
+            "location": "New Orleans, LA",
+            "dates": "January 20XX – January 20XX",
             "bullets": [
-              "Performed due diligence on potential investment opportunities",
-              "Created detailed financial reports and presentations for stakeholders",
-              "Monitored portfolio performance and recommended rebalancing strategies",
-              "Collaborated with research team to identify market trends and opportunities"
+              "Served as knowledgeable financial advisor to clients, managing an over $20.75M investment portfolio of 90+ individual and corporate clients",
+              "Devised and applied a new training and accountability program that increased productivity from #10 to #3 in the region",
+              "Partnered with cross-functional teams in consulting with clients to provide asset management risk strategy and mitigation, which increased AUM by 50%"
             ]
           }
         ]
@@ -56,25 +85,31 @@
         "title": "Education",
         "education": [
           {
-            "degree": "Master of Business Administration, Finance",
-            "institution": "Harvard Business School",
-            "dates": "2015 - 2017"
-          },
-          {
-            "degree": "Bachelor of Science, Economics",
-            "institution": "Yale University",
-            "dates": "2011 - 2015"
+            "degree": "Bachelor of Science in Business Administration",
+            "institution": "Resume Genius University",
+            "location": "Baton Rouge, LA",
+            "dates": "May 20XX",
+            "gpa": "3.5"
           }
         ]
       },
       {
         "title": "Skills",
         "categories": {
-          "Financial Analysis": ["Financial Modeling", "Valuation", "Risk Assessment", "Portfolio Management", "Excel"],
-          "Technical Skills": ["Bloomberg Terminal", "FactSet", "Python", "SQL", "Tableau"],
-          "Certifications": ["CFA Level II", "Series 7", "Series 63"]
+          "Technical": [
+            "MS Office (Word, Excel, PowerPoint)",
+            "Outlook",
+            "MS Project",
+            "Salesforce",
+            "TFS Project Management",
+            "Webex",
+            "GoToMeeting"
+          ],
+          "Languages": [
+            "Fluent in English, Spanish, and French"
+          ]
         }
       }
     ]
   }
-} 
+}

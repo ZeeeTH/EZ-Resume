@@ -9,14 +9,33 @@ export interface ResumeTemplate {
     secondaryColor: string;
     fontFamily: string;
     spacing: 'compact' | 'standard' | 'spacious';
-    layout: 'modern' | 'classic' | 'minimalist';
+    layout: 'modern' | 'classic' | 'structured';
+  };
+  colorOptions?: {
+    allowUserColorOverride: boolean;
+    defaultPrimaryColor: string;
+    defaultSecondaryColor: string;
+    palette: Array<{
+      label: string;
+      primary: string;
+      secondary: string;
+    }>;
+  };
+  fonts?: {
+    header?: string;
+    section?: string;
+    body?: string;
   };
   sampleData: {
     name: string;
+    title?: string;
     contact: {
       email: string;
       phone: string;
       location: string;
+      website?: string;
+      linkedin?: string;
+      twitter?: string;
     };
     sections: Array<{
       title: string;
@@ -31,7 +50,9 @@ export interface ResumeTemplate {
       education?: Array<{
         degree: string;
         institution: string;
+        location?: string;
         dates: string;
+        gpa?: string;
       }>;
       categories?: Record<string, string[]>;
     }>;
@@ -44,4 +65,14 @@ export interface TemplateMetadata {
   description: string;
   popularity: number;
   category: string;
+  colorOptions?: {
+    allowUserColorOverride: boolean;
+    defaultPrimaryColor: string;
+    defaultSecondaryColor: string;
+    palette: Array<{
+      label: string;
+      primary: string;
+      secondary: string;
+    }>;
+  };
 } 

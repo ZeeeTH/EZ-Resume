@@ -1,17 +1,12 @@
-"use client";
-import { ContactModalProvider, useContactModal } from './ContactModalContext';
-import ContactModal from './ContactModal';
+'use client'
 
-function ContactModalRoot() {
-  const { open, closeModal } = useContactModal();
-  return <ContactModal open={open} onClose={closeModal} />;
-}
+import React from 'react'
+import { ContactModalProvider } from './ContactModalContext'
 
 export default function AppClientWrapper({ children }: { children: React.ReactNode }) {
   return (
     <ContactModalProvider>
       {children}
-      <ContactModalRoot />
     </ContactModalProvider>
-  );
+  )
 } 
