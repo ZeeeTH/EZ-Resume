@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
       const metadata = session.metadata || {}
-      const customerName = metadata.customerName
       const sessionId = session.id
       // Retrieve order data from Supabase
       const { data, error } = await supabase
