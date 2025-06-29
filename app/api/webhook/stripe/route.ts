@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
 import { sendEmailWithPdfAttachments } from '@/lib/email'
+import { getFormData, deleteFormData } from '@/lib/formDataStore'
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,53 +35,22 @@ export async function POST(request: NextRequest) {
       const documentType = metadata.documentType
       const customerEmail = metadata.customerEmail
       const customerName = metadata.customerName
+      const sessionId = session.id
+      const formData = getFormData(sessionId)
 
-      if (!documentType || !customerEmail || !customerName) {
-        console.error('Missing required metadata in Stripe session')
-        return NextResponse.json({ error: 'Missing required metadata' }, { status: 400 })
+      if (!documentType || !customerEmail || !customerName || !formData) {
+        console.error('Missing required metadata or form data in Stripe session')
+        return NextResponse.json({ error: 'Missing required metadata or form data' }, { status: 400 })
       }
 
       console.log('Checkout completed for:', {
         customerEmail,
         customerName,
         documentType,
-        sessionId: session.id,
+        sessionId,
       })
 
       try {
-        // For now, we'll use sample data since we can't store full form data in metadata
-        // In production, you might want to use a database or temporary storage
-        const sampleFormData = {
-          name: customerName,
-          email: customerEmail,
-          phone: '+1 (555) 123-4567',
-          location: 'City, State',
-          personalSummary: 'Professional summary for AI-generated resume',
-          jobTitle: 'Software Engineer',
-          company: 'Tech Company',
-          skills: 'JavaScript, React, Node.js, TypeScript',
-          achievements: 'Led development of key features, improved performance by 30%',
-          coverLetter: documentType === 'both' || documentType === 'cover-letter',
-          template: 'classic',
-          workExperience: [{
-            title: 'Software Engineer',
-            company: 'Tech Company',
-            startMonth: 'January',
-            startYear: '2023',
-            endMonth: 'December',
-            endYear: '2024',
-            description: 'Developed and maintained web applications using modern technologies'
-          }],
-          education: [{
-            degree: 'Bachelor of Science in Computer Science',
-            school: 'University',
-            startMonth: 'September',
-            startYear: '2019',
-            endMonth: 'May',
-            endYear: '2023'
-          }]
-        }
-
         // Generate documents based on the payment type
         let resumePdf: Uint8Array | null = null
         let coverLetterPdf: Uint8Array | null = null
@@ -93,7 +63,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...sampleFormData,
+              ...formData,
               coverLetter: false, // Only generate resume for this call
             }),
           })
@@ -115,7 +85,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...sampleFormData,
+              ...formData,
               coverLetter: true,
             }),
           })
@@ -147,6 +117,9 @@ export async function POST(request: NextRequest) {
         } else {
           console.error('No documents generated to send')
         }
+
+        // Clean up form data after use
+        deleteFormData(sessionId)
 
         return NextResponse.json({ received: true })
       } catch (error) {

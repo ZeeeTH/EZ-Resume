@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createCheckoutSession, getPriceForDocumentType } from '@/lib/stripe'
+import { saveFormData } from '@/lib/formDataStore'
 
 const paymentSchema = z.object({
   documentType: z.enum(['resume', 'cover-letter', 'both']),
@@ -48,6 +49,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       successUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/success?email=${encodeURIComponent(validatedData.customerEmail)}&documentType=${validatedData.documentType}&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}`,
     })
+
+    // Save form data by session ID for webhook use
+    if (checkoutResult.success && checkoutResult.sessionId) {
+      saveFormData(checkoutResult.sessionId, validatedData.formData);
+    }
 
     console.log('Checkout result:', checkoutResult)
 
