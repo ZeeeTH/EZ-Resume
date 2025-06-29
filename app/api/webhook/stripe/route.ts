@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
 import { sendEmailWithPdfAttachments } from '@/lib/email'
-import { getFormData, deleteFormData } from '@/lib/formDataStore'
 import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
