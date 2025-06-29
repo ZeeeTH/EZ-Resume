@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { supabase } from '@/lib/supabase'
 
 // Email transporter configuration
 const createTransporter = () => {
@@ -19,20 +20,45 @@ const createTransporter = () => {
   return nodemailer.createTransport(primaryConfig)
 }
 
-export async function GET() {
-  const envCheck = {
-    openai: !!process.env.OPENAI_API_KEY,
-    gmail_user: !!process.env.GMAIL_USER,
-    gmail_pass: !!process.env.GMAIL_PASS,
-    node_env: process.env.NODE_ENV,
-    timestamp: new Date().toISOString()
+export async function GET(request: NextRequest) {
+  try {
+    console.log('Test API called - checking Supabase connection...')
+    
+    // Test environment variables
+    console.log('SUPABASE_URL exists:', !!process.env.SUPABASE_URL)
+    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+    
+    // Test database connection
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .limit(1);
+    
+    if (error) {
+      console.error('Supabase test failed:', error)
+      return NextResponse.json({
+        success: false,
+        error: 'Supabase connection failed',
+        details: error
+      }, { status: 500 })
+    }
+    
+    console.log('Supabase test successful, data:', data)
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Supabase connection working',
+      data: data
+    })
+    
+  } catch (error) {
+    console.error('Test API error:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Test failed',
+      details: error
+    }, { status: 500 })
   }
-
-  return NextResponse.json({
-    success: true,
-    environment: envCheck,
-    message: 'Environment check completed'
-  })
 }
 
 export async function POST(request: Request) {
