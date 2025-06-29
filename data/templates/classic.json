@@ -85,5 +85,8 @@
         }
       }
     ]
+  },
+  "layout": {
+    "main": ["name", "title", "contact", "summary", "experience", "education", "skills"]
   }
 }

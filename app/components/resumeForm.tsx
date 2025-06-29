@@ -721,28 +721,28 @@ export default function ResumeForm() {
                 </div>
                 {coverLetterChecked && (
                   <div className="mt-6">
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
-                      Target Company *
-                    </label>
-                    <div className="relative">
-                      <input
-                        {...register('company')}
-                        id="company"
+                        <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
+                          Target Company *
+                        </label>
+                        <div className="relative">
+                          <input
+                            {...register('company')}
+                            id="company"
                         className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('company') === 'success' ? 'border-green-400' : 'border-white/20'}`}
-                        placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
-                        aria-describedby="company-error"
-                      />
-                      {getFieldStatus('company') === 'success' && (
-                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                      )}
-                    </div>
-                    {errors.company && (
-                      <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
-                        <span className="mr-1">⚠</span>
-                        {errors.company.message}
-                      </p>
-                    )}
-                  </div>
+                            placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
+                            aria-describedby="company-error"
+                          />
+                          {getFieldStatus('company') === 'success' && (
+                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        {errors.company && (
+                          <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
+                            <span className="mr-1">⚠</span>
+                            {errors.company.message}
+                          </p>
+                        )}
+                      </div>
                 )}
               </div>
 

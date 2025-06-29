@@ -61,6 +61,7 @@ export interface ResumeTemplate {
     section: string;
     body: string;
   };
+  layout?: any;
 }
 
 export const templates: ResumeTemplate[] = [

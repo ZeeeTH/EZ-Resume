@@ -44,9 +44,9 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('Supabase test successful, data:', data)
-    
-    return NextResponse.json({
-      success: true,
+
+  return NextResponse.json({
+    success: true,
       message: 'Supabase connection working',
       data: data
     })

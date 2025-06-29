@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
       };
 
       console.log('Checkout completed for:', {
-        customerEmail,
-        customerName,
-        documentType,
+          customerEmail,
+          customerName,
+          documentType,
         sessionId,
       })
       
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       try {
         // Generate documents based on the payment type
         console.log('Generating documents with form data:', JSON.stringify(processedFormData, null, 2))
-        
+
         // Call generate API only once - it will handle both resume and cover letter if needed
         const generateResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
           method: 'POST',
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         } else {
           console.log('Form data successfully deleted')
         }
-
+        
         return NextResponse.json({ received: true })
       } catch (error) {
         console.error('Error processing checkout completion:', error)

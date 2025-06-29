@@ -84,5 +84,9 @@
         }
       }
     ]
+  },
+  "layout": {
+    "sidebar": ["name", "title", "contact", "summary", "skills"],
+    "main": ["experience", "education"]
   }
 }
