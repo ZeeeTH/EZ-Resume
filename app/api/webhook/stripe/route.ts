@@ -129,9 +129,6 @@ export async function POST(request: NextRequest) {
           console.error('No documents generated to send')
         }
 
-        // Clean up form data after use
-        deleteFormData(sessionId)
-
         // After successful email, mark as fulfilled
         await supabase
           .from('orders')

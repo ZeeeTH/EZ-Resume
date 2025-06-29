@@ -153,9 +153,33 @@ export default function ResumeForm() {
     setFormProgress(progress);
   }, [watchedFields, coverLetterChecked]);
 
-  const getFieldStatus = (fieldName: keyof FormData) => {
-    const value = watchedFields[fieldName];
-    const hasError = errors[fieldName];
+  const getFieldStatus = (fieldName: string) => {
+    // Handle nested field paths like 'workExperience.0.company'
+    if (fieldName.includes('.')) {
+      const parts = fieldName.split('.');
+      const mainField = parts[0] as keyof FormData;
+      const index = parseInt(parts[1]);
+      const subField = parts[2];
+      
+      const value = watchedFields[mainField];
+      if (Array.isArray(value) && value[index]) {
+        const fieldValue = value[index][subField as keyof typeof value[0]];
+        const isFilled = fieldValue && fieldValue.toString().trim().length > 0;
+        
+        // Check for errors in the specific field
+        const fieldError = errors[mainField] as any;
+        const hasError = fieldError && fieldError[index] && fieldError[index][subField];
+        
+        if (hasError) return 'error';
+        if (isFilled) return 'success';
+        return 'default';
+      }
+      return 'default';
+    }
+    
+    // Handle top-level fields
+    const value = watchedFields[fieldName as keyof FormData];
+    const hasError = errors[fieldName as keyof FormData];
     
     if (Array.isArray(value)) {
       const isFilled = value.length > 0 && value.some(item => 
