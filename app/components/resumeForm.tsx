@@ -304,7 +304,7 @@ export default function ResumeForm() {
                       <input
                         {...register('name')}
                         id="name"
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.name && isFieldMissing(watchedFields.name) ? 'border-red-400' : 'border-white/20'}`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('name') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="Enter your full name"
                         aria-describedby="name-error"
                       />
@@ -328,7 +328,7 @@ export default function ResumeForm() {
                         {...register('email')}
                         id="email"
                         type="email"
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.email && isFieldMissing(watchedFields.email) ? 'border-red-400' : 'border-white/20'}`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('email') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="your.email@example.com"
                         aria-describedby="email-error"
                       />
@@ -355,9 +355,7 @@ export default function ResumeForm() {
                         {...register('phone')}
                         id="phone"
                         type="tel"
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                          getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'
-                        }`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('phone') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="+1 (555) 123-4567 (optional)"
                       />
                       {getFieldStatus('phone') === 'success' && (
@@ -373,9 +371,7 @@ export default function ResumeForm() {
                       <input
                         {...register('location')}
                         id="location"
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                        getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'
-                      }`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('location') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="City, State (optional)"
                       />
                       {getFieldStatus('location') === 'success' && (
@@ -393,7 +389,7 @@ export default function ResumeForm() {
                   <input
                     {...register('jobTitle')}
                     id="jobTitle"
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.jobTitle && isFieldMissing(watchedFields.jobTitle) ? 'border-red-400' : 'border-white/20'}`}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('jobTitle') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                     placeholder="e.g., Software Engineer, Marketing Manager"
                     aria-describedby="jobTitle-error"
                   />
@@ -417,9 +413,7 @@ export default function ResumeForm() {
                     {...register('personalSummary')}
                     id="personalSummary"
                     rows={4}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                      getFieldStatus('personalSummary') === 'success' ? 'border-green-400' : 'border-white/20'
-                    }`}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('personalSummary') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                     placeholder="Write a compelling professional summary that highlights your key strengths, experience, and career objectives. This should be 2-4 sentences that capture your professional identity and value proposition."
                   />
                   <p className="text-xs text-gray-400 mt-2">
@@ -434,7 +428,7 @@ export default function ResumeForm() {
                 {workExpFieldArray.fields.map((job, idx) => (
                   <div
                     key={idx}
-                    className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border shadow-2xl flex flex-col gap-4 transition-all duration-200 ${isWorkValid(job) ? 'border-green-400' : 'border-white/10'}`}
+                    className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 mb-6 border shadow-2xl flex flex-col gap-4 transition-all duration-200 ${isWorkValid(watchedFields.workExperience?.[idx]) ? 'border-green-400' : 'border-white/10'}`}
                     style={{ position: 'relative' }}
                   >
                     {workExpFieldArray.fields.length > 1 && (
@@ -453,9 +447,7 @@ export default function ResumeForm() {
                       </label>
                       <input
                         {...register(`workExperience.${idx}.title` as const)}
-                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          !!touchedFields.workExperience?.[idx]?.title && isFieldMissing(watchedFields.workExperience?.[idx]?.title) ? 'border-red-400' : 'border-white/20'
-                        }`}
+                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.title`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="e.g., Senior Software Engineer"
                       />
                     </div>
@@ -465,9 +457,7 @@ export default function ResumeForm() {
                       </label>
                       <input
                         {...register(`workExperience.${idx}.company` as const)}
-                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          !!touchedFields.workExperience?.[idx]?.company && isFieldMissing(watchedFields.workExperience?.[idx]?.company) ? 'border-red-400' : 'border-white/20'
-                        }`}
+                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.company`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="e.g., Google, Microsoft"
                       />
                     </div>
@@ -477,9 +467,7 @@ export default function ResumeForm() {
                         <div className="flex gap-2">
                           <select
                             {...register(`workExperience.${idx}.startMonth` as const)}
-                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              !!touchedFields.workExperience?.[idx]?.startMonth && isFieldMissing(watchedFields.workExperience?.[idx]?.startMonth) ? 'border-red-400' : 'border-white/20'
-                            }`}
+                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.startMonth`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                           >
                             <option value="">Month</option>
                             {months.map((month, index) => (
@@ -488,9 +476,7 @@ export default function ResumeForm() {
                           </select>
                           <select
                             {...register(`workExperience.${idx}.startYear` as const)}
-                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              !!touchedFields.workExperience?.[idx]?.startYear && isFieldMissing(watchedFields.workExperience?.[idx]?.startYear) ? 'border-red-400' : 'border-white/20'
-                            }`}
+                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.startYear`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                           >
                             <option value="">Year</option>
                             {years.map((year) => (
@@ -530,9 +516,7 @@ export default function ResumeForm() {
                       <textarea
                         {...register(`workExperience.${idx}.description` as const)}
                         rows={4}
-                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          !!touchedFields.workExperience?.[idx]?.description && isFieldMissing(watchedFields.workExperience?.[idx]?.description) ? 'border-red-400' : 'border-white/20'
-                        }`}
+                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.description`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="Describe your responsibilities and achievements..."
                       />
                     </div>
@@ -572,9 +556,7 @@ export default function ResumeForm() {
                       </label>
                       <input
                         {...register(`education.${idx}.degree` as const)}
-                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          !!touchedFields.education?.[idx]?.degree && isFieldMissing(watchedFields.education?.[idx]?.degree) ? 'border-red-400' : 'border-white/20'
-                        }`}
+                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`education.${idx}.degree`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="e.g., Bachelor of Science in Computer Science"
                       />
                     </div>
@@ -584,9 +566,7 @@ export default function ResumeForm() {
                       </label>
                       <input
                         {...register(`education.${idx}.school` as const)}
-                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          !!touchedFields.education?.[idx]?.school && isFieldMissing(watchedFields.education?.[idx]?.school) ? 'border-red-400' : 'border-white/20'
-                        }`}
+                        className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`education.${idx}.school`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="e.g., Stanford University"
                       />
                     </div>
@@ -596,9 +576,7 @@ export default function ResumeForm() {
                         <div className="flex gap-2">
                           <select
                             {...register(`education.${idx}.startMonth` as const)}
-                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              !!touchedFields.education?.[idx]?.startMonth && isFieldMissing(watchedFields.education?.[idx]?.startMonth) ? 'border-red-400' : 'border-white/20'
-                            }`}
+                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`education.${idx}.startMonth`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                           >
                             <option value="">Month</option>
                             {months.map((month, index) => (
@@ -607,9 +585,7 @@ export default function ResumeForm() {
                           </select>
                           <select
                             {...register(`education.${idx}.startYear` as const)}
-                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              !!touchedFields.education?.[idx]?.startYear && isFieldMissing(watchedFields.education?.[idx]?.startYear) ? 'border-red-400' : 'border-white/20'
-                            }`}
+                            className={`w-1/2 bg-[#6a4a90] text-white rounded-lg px-4 py-3 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`education.${idx}.startYear`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                           >
                             <option value="">Year</option>
                             {years.map((year) => (
@@ -661,7 +637,7 @@ export default function ResumeForm() {
                     {...register('skills')}
                     id="skills"
                     rows={3}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.skills && isFieldMissing(watchedFields.skills) ? 'border-red-400' : 'border-white/20'}`}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('skills') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                     placeholder="e.g., JavaScript, React, Node.js, Python, SQL, AWS, Docker, Git, Agile methodologies, Team leadership"
                     aria-describedby="skills-error"
                   />
@@ -685,7 +661,7 @@ export default function ResumeForm() {
                     {...register('achievements')}
                     id="achievements"
                     rows={4}
-                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.achievements && isFieldMissing(watchedFields.achievements) ? 'border-red-400' : 'border-white/20'}`}
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('achievements') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                     placeholder="Describe your key achievements, projects, and accomplishments that demonstrate your value..."
                     aria-describedby="achievements-error"
                   />
@@ -728,7 +704,7 @@ export default function ResumeForm() {
                       <input
                         {...register('company')}
                         id="company"
-                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.company && isFieldMissing(watchedFields.company) ? 'border-red-400' : 'border-white/20'}`}
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('company') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
                         aria-describedby="company-error"
                       />
@@ -852,7 +828,7 @@ export default function ResumeForm() {
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '0.50' : '14.99'}</span>
+                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '0.50 AUD' : '14.99 AUD'}</span>
                     </>
                   )}
                 </button>

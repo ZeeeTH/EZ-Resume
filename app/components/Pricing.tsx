@@ -20,7 +20,7 @@ export default function Pricing() {
             <div className="text-center mb-4">
               <h4 className="text-xl font-bold text-white mb-2">Resume Only</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-blue-400">$14.99</span>
+                <span className="text-3xl font-bold text-blue-400">$14.99 AUD</span>
                 <span className="text-lg text-gray-400 line-through">$29.99</span>
               </div>
               <p className="text-gray-400 text-sm">One-time payment</p>
@@ -56,7 +56,7 @@ export default function Pricing() {
             <div className="text-center mb-4">
               <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-purple-400">$0.50</span>
+                <span className="text-3xl font-bold text-purple-400">$0.50 AUD</span>
                 <span className="text-lg text-gray-400 line-through">$49.99</span>
               </div>
               <p className="text-gray-400 text-sm">One-time payment</p>
@@ -85,7 +85,7 @@ export default function Pricing() {
         
         {/* Pricing Note */}
         <div className="text-center mt-4 pt-2 border-t border-white/10">
-          <p className="text-sm text-gray-400">All prices in USD</p>
+          <p className="text-sm text-gray-400">ALL PRICES ARE IN AUD</p>
         </div>
       </div>
     </div>

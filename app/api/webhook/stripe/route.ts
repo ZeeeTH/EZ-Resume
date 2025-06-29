@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
 import { sendEmailWithPdfAttachments } from '@/lib/email'
 import { getFormData, deleteFormData } from '@/lib/formDataStore'
+import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,15 +33,28 @@ export async function POST(request: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
       const metadata = session.metadata || {}
-      const documentType = metadata.documentType
       const customerEmail = metadata.customerEmail
       const customerName = metadata.customerName
       const sessionId = session.id
-      const formData = getFormData(sessionId)
+      // Retrieve order data from Supabase
+      const { data, error } = await supabase
+        .from('orders')
+        .select('document_type, template, email, name')
+        .eq('session_id', sessionId)
+        .single()
 
-      if (!documentType || !customerEmail || !customerName || !formData) {
-        console.error('Missing required metadata or form data in Stripe session')
-        return NextResponse.json({ error: 'Missing required metadata or form data' }, { status: 400 })
+      if (error || !data) {
+        console.error('No order data found for session:', sessionId, error)
+        return NextResponse.json({ error: 'No order data found' }, { status: 400 })
+      }
+      const documentType = data.document_type
+      const template = data.template
+      const customerEmail = data.email
+      const customerName = data.name
+
+      if (!documentType || !customerEmail || !customerName) {
+        console.error('Missing required metadata in Stripe session')
+        return NextResponse.json({ error: 'Missing required metadata' }, { status: 400 })
       }
 
       console.log('Checkout completed for:', {
@@ -63,7 +77,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...formData,
+              ...template,
               coverLetter: false, // Only generate resume for this call
             }),
           })
@@ -85,7 +99,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...formData,
+              ...template,
               coverLetter: true,
             }),
           })
@@ -120,6 +134,12 @@ export async function POST(request: NextRequest) {
 
         // Clean up form data after use
         deleteFormData(sessionId)
+
+        // After successful email, mark as fulfilled
+        await supabase
+          .from('orders')
+          .update({ fulfilled: true, fulfilled_at: new Date().toISOString() })
+          .eq('session_id', sessionId)
 
         return NextResponse.json({ received: true })
       } catch (error) {

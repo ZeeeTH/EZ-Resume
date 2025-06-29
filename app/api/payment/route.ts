@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createCheckoutSession, getPriceForDocumentType } from '@/lib/stripe'
-import { saveFormData } from '@/lib/formDataStore'
+import { supabase } from '@/lib/supabase'
 
 const paymentSchema = z.object({
   documentType: z.enum(['resume', 'cover-letter', 'both']),
@@ -31,14 +31,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // Get price for document type
-    const amount = getPriceForDocumentType(validatedData.documentType)
-    console.log('Calculated amount:', amount)
-
+    // Set price and currency
+    const currency = 'aud';
+    const amount = 1499; // $14.99 AUD in cents
     // Create checkout session with minimal metadata
     const checkoutResult = await createCheckoutSession({
       amount,
-      currency: 'usd',
+      currency,
       customerEmail: validatedData.customerEmail,
       customerName: validatedData.customerName,
       metadata: {
@@ -50,9 +49,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}`,
     })
 
-    // Save form data by session ID for webhook use
+    // Save form data by session ID for webhook use (Supabase)
     if (checkoutResult.success && checkoutResult.sessionId) {
-      saveFormData(checkoutResult.sessionId, validatedData.formData);
+      await supabase.from('orders').insert([
+        {
+          session_id: checkoutResult.sessionId,
+          document_type: validatedData.documentType,
+          template: validatedData.formData.template,
+          email: validatedData.customerEmail,
+          name: validatedData.customerName,
+          price: amount,
+          currency: currency,
+        }
+      ]);
     }
 
     console.log('Checkout result:', checkoutResult)
