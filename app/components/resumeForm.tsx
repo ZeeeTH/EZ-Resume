@@ -856,6 +856,44 @@ export default function ResumeForm() {
                     </>
                   )}
                 </button>
+                {/* Bypass Payment Button (Test Only) */}
+                <button
+                  type="button"
+                  disabled={isGenerating || !isValid || formProgress < 100}
+                  className="w-full mt-3 bg-yellow-500/90 hover:bg-yellow-600 text-black font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg border-2 border-yellow-700"
+                  onClick={async () => {
+                    setIsGenerating(true);
+                    setError('');
+                    try {
+                      const selectedTemplateData = templateMetadata.find(t => t.id === selectedTemplate);
+                      const apiData = {
+                        ...watchedFields,
+                        template: selectedTemplate,
+                        workExperience: watchedFields.workExperience,
+                        educationData: watchedFields.education,
+                        ...(selectedTemplateData?.colorOptions && {
+                          colorVariant: selectedColorVariants[selectedTemplate] ?? 0,
+                          selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants[selectedTemplate] ?? 0]
+                        })
+                      };
+                      const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(apiData)
+                      });
+                      if (!response.ok) throw new Error('Failed to generate resume');
+                      // Simulate success (show preview modal, etc.)
+                      setIsSuccess(true);
+                    } catch (err) {
+                      setError('Failed to generate resume. Please try again.');
+                    } finally {
+                      setIsGenerating(false);
+                    }
+                  }}
+                >
+                  <Sparkles className="h-6 w-6 mr-2" />
+                  Bypass Payment (Test Only)
+                </button>
               </div>
             </form>
           ) : (
