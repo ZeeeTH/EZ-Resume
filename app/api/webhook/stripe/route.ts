@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        if (documentType === 'cover-letter' || documentType === 'both') {
-          // Generate cover letter
+        if (documentType === 'both') {
+          // Generate cover letter for bundle
           const coverLetterResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
             method: 'POST',
             headers: {
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           const emailSent = await sendEmailWithPdfAttachments({
             to: customerEmail,
             name: customerName,
-            documentType: documentType as 'resume' | 'cover-letter' | 'both',
+            documentType: documentType as 'resume' | 'both',
             resumePdf: resumePdf || undefined,
             coverLetterPdf: coverLetterPdf || undefined,
           })

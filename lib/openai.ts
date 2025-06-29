@@ -13,7 +13,11 @@ export interface GenerateDocumentParams {
   experience: string
   education: string
   skills: string
-  documentType: 'resume' | 'cover-letter' | 'both'
+  documentType: 'resume' | 'both'
+  formData: any
+  template: string
+  colorVariant?: number
+  selectedColors?: any
 }
 
 export async function generateResume(params: GenerateDocumentParams): Promise<string> {

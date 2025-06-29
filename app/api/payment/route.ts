@@ -4,7 +4,7 @@ import { createCheckoutSession, getPriceForDocumentType } from '@/lib/stripe'
 import { supabase } from '@/lib/supabase'
 
 const paymentSchema = z.object({
-  documentType: z.enum(['resume', 'cover-letter', 'both']),
+  documentType: z.enum(['resume', 'both']),
   customerEmail: z.string().email('Please enter a valid email address'),
   customerName: z.string().min(2, 'Name must be at least 2 characters'),
   formData: z.any(), // Form data to be stored in metadata
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Set price and currency
     const currency = 'aud';
-    const amount = 1499; // $14.99 AUD in cents
+    const amount = getPriceForDocumentType(validatedData.documentType);
     // Create checkout session with minimal metadata
     const checkoutResult = await createCheckoutSession({
       amount,

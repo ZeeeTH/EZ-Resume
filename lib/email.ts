@@ -162,18 +162,31 @@ const bothDocumentsEmailTemplate = handlebars.compile(`
 </html>
 `)
 
-export interface SendEmailParams {
+export interface EmailParams {
   to: string
-  name: string
-  documentType: 'resume' | 'cover-letter' | 'both'
-  resume?: string
-  coverLetter?: string
+  subject: string
+  html: string
+  attachments?: Array<{
+    filename: string
+    content: Buffer
+    contentType: string
+  }>
+}
+
+export interface SendResumeEmailParams {
+  customerEmail: string
+  customerName: string
+  documentType: 'resume' | 'both'
+  resumeBuffer?: Buffer
+  coverLetterBuffer?: Buffer
+  template: string
+  colorVariant?: number
 }
 
 export interface SendEmailWithPdfAttachmentsParams {
   to: string
   name: string
-  documentType: 'resume' | 'cover-letter' | 'both'
+  documentType: 'resume' | 'both'
   resumePdf?: Uint8Array
   coverLetterPdf?: Uint8Array
 }
@@ -190,13 +203,6 @@ export async function sendDocumentEmail(params: SendEmailParams): Promise<boolea
           resume: params.resume,
         })
         subject = 'Your Professional Resume - EZ Resume'
-        break
-      case 'cover-letter':
-        html = coverLetterEmailTemplate({
-          name: params.name,
-          coverLetter: params.coverLetter,
-        })
-        subject = 'Your Professional Cover Letter - EZ Resume'
         break
       case 'both':
         html = bothDocumentsEmailTemplate({
@@ -243,20 +249,6 @@ export async function sendEmailWithPdfAttachments(params: SendEmailWithPdfAttach
           attachments.push({
             filename: `${params.name.replace(/\s+/g, '_')}_Resume.pdf`,
             content: Buffer.from(params.resumePdf),
-            contentType: 'application/pdf'
-          })
-        }
-        break
-      case 'cover-letter':
-        html = coverLetterEmailTemplate({
-          name: params.name,
-          coverLetter: 'Your professional cover letter is attached as a PDF file.',
-        })
-        subject = 'Your Professional Cover Letter - EZ Resume'
-        if (params.coverLetterPdf) {
-          attachments.push({
-            filename: `${params.name.replace(/\s+/g, '_')}_CoverLetter.pdf`,
-            content: Buffer.from(params.coverLetterPdf),
             contentType: 'application/pdf'
           })
         }

@@ -20,14 +20,16 @@ export interface GenerateDocumentResponse {
 }
 
 export interface PaymentRequest {
-  documentType: 'resume' | 'cover-letter' | 'both'
+  documentType: 'resume' | 'both'
   customerEmail: string
   customerName: string
+  formData: any
 }
 
 export interface PaymentResponse {
   success: boolean
-  clientSecret?: string
+  sessionId?: string
+  url?: string
   error?: string
 }
 
@@ -44,4 +46,23 @@ export interface EmailData {
   documentType: 'resume' | 'cover-letter' | 'both'
   resume?: string
   coverLetter?: string
+}
+
+export interface WebhookData {
+  sessionId: string
+  documentType: 'resume' | 'both'
+  customerEmail: string
+  customerName: string
+  formData: any
+}
+
+export interface OrderData {
+  session_id: string
+  document_type: 'resume' | 'both'
+  template: string
+  email: string
+  name: string
+  price: number
+  currency: string
+  timestamp?: string
 } 

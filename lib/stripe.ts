@@ -124,16 +124,13 @@ export function constructWebhookEvent(payload: string, signature: string) {
 // Pricing configuration
 export const PRICING = {
   RESUME_ONLY: 1499, // $14.99 AUD in cents
-  COVER_LETTER_ONLY: 1499, // $14.99 AUD in cents (if needed)
-  BOTH: 80, // $0.80 AUD in cents for testing
+  BOTH: 80, // $0.80 AUD in cents for bundle
 }
 
-export function getPriceForDocumentType(documentType: 'resume' | 'cover-letter' | 'both'): number {
+export function getPriceForDocumentType(documentType: 'resume' | 'both'): number {
   switch (documentType) {
     case 'resume':
       return PRICING.RESUME_ONLY
-    case 'cover-letter':
-      return PRICING.COVER_LETTER_ONLY
     case 'both':
       return PRICING.BOTH
     default:
