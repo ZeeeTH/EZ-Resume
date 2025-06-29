@@ -852,7 +852,7 @@ export default function ResumeForm() {
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '24.99' : '14.99'}</span>
+                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '0.20' : '14.99'}</span>
                     </>
                   )}
                 </button>

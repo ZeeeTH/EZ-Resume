@@ -56,7 +56,7 @@ export default function Pricing() {
             <div className="text-center mb-4">
               <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-purple-400">$24.99</span>
+                <span className="text-3xl font-bold text-purple-400">$0.20</span>
                 <span className="text-lg text-gray-400 line-through">$49.99</span>
               </div>
               <p className="text-gray-400 text-sm">One-time payment</p>
