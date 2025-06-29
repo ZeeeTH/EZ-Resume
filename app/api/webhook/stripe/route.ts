@@ -30,7 +30,15 @@ export async function POST(request: NextRequest) {
     // Handle checkout session completion
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object
-      const { documentType, customerEmail, customerName } = session.metadata
+      const metadata = session.metadata || {}
+      const documentType = metadata.documentType
+      const customerEmail = metadata.customerEmail
+      const customerName = metadata.customerName
+
+      if (!documentType || !customerEmail || !customerName) {
+        console.error('Missing required metadata in Stripe session')
+        return NextResponse.json({ error: 'Missing required metadata' }, { status: 400 })
+      }
 
       console.log('Checkout completed for:', {
         customerEmail,
