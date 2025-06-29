@@ -191,27 +191,34 @@ export default function ResumeForm() {
         })
       };
 
-      const response = await fetch('/api/generate', {
+      // Create Stripe checkout session
+      const response = await fetch('/api/payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(apiData),
+        body: JSON.stringify({
+          documentType: data.coverLetter ? 'both' : 'resume',
+          customerEmail: data.email,
+          customerName: data.name,
+          formData: apiData
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate resume');
+        throw new Error('Failed to create payment session');
       }
 
-      const result = await response.json();
+      const { url } = await response.json();
       
-      if (result.success) {
-        setIsSuccess(true);
-      } else {
-        setError(result.error || 'Something went wrong');
+      if (!url) {
+        throw new Error('No checkout URL received');
       }
+
+      // Redirect to Stripe Checkout
+      window.location.href = url;
     } catch (err) {
-      setError('Failed to generate resume. Please try again.');
+      setError('Failed to create payment session. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -840,15 +847,163 @@ export default function ResumeForm() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>Generating your {coverLetterChecked ? 'resume & cover letter' : 'resume'}...</span>
+                      <span>Redirecting to secure checkout...</span>
                     </>
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'}</span>
+                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '29.99' : '19.99'}</span>
                     </>
                   )}
                 </button>
+              </div>
+
+              {/* Test Payment Buttons */}
+              <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <h3 className="text-yellow-400 font-semibold mb-3 text-center">🧪 Test Payment Flow</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={async () => {
+                      setIsGenerating(true);
+                      try {
+                        const response = await fetch('/api/payment', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            documentType: 'resume',
+                            customerEmail: 'test@example.com',
+                            customerName: 'Test User',
+                            formData: {
+                              name: 'Test User',
+                              email: 'test@example.com',
+                              phone: '+1234567890',
+                              jobTitle: 'Software Engineer',
+                              company: 'Test Company',
+                              skills: 'JavaScript, React, Node.js, TypeScript',
+                              achievements: 'Led development of 3 major features, Improved performance by 40%',
+                              coverLetter: false,
+                              template: 'classic',
+                              location: 'San Francisco, CA',
+                              personalSummary: 'Experienced software engineer with 5+ years in web development',
+                              workExperience: [{
+                                title: 'Senior Developer',
+                                company: 'Tech Corp',
+                                startMonth: 'January',
+                                startYear: '2022',
+                                endMonth: '',
+                                endYear: '',
+                                description: 'Led development team of 5 developers, implemented CI/CD pipeline'
+                              }],
+                              educationData: [{
+                                degree: 'Bachelor of Science in Computer Science',
+                                school: 'University of Technology',
+                                startMonth: 'September',
+                                startYear: '2018',
+                                endMonth: 'May',
+                                endYear: '2022'
+                              }],
+                              colorVariant: 0,
+                              selectedColors: {
+                                primary: '#3B82F6',
+                                secondary: '#1E40AF',
+                                accent: '#60A5FA',
+                                background: '#FFFFFF',
+                                text: '#1F2937'
+                              }
+                            }
+                          })
+                        });
+                        
+                        if (response.ok) {
+                          const { url } = await response.json();
+                          window.location.href = url;
+                        } else {
+                          throw new Error('Failed to create checkout session');
+                        }
+                      } catch (error) {
+                        setError('Test payment failed: ' + (error as Error).message);
+                      } finally {
+                        setIsGenerating(false);
+                      }
+                    }}
+                    disabled={isGenerating}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    Test Resume Only ($19.99)
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setIsGenerating(true);
+                      try {
+                        const response = await fetch('/api/payment', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            documentType: 'both',
+                            customerEmail: 'test@example.com',
+                            customerName: 'Test User',
+                            formData: {
+                              name: 'Test User',
+                              email: 'test@example.com',
+                              phone: '+1234567890',
+                              jobTitle: 'Software Engineer',
+                              company: 'Test Company',
+                              skills: 'JavaScript, React, Node.js, TypeScript',
+                              achievements: 'Led development of 3 major features, Improved performance by 40%',
+                              coverLetter: true,
+                              template: 'classic',
+                              location: 'San Francisco, CA',
+                              personalSummary: 'Experienced software engineer with 5+ years in web development',
+                              workExperience: [{
+                                title: 'Senior Developer',
+                                company: 'Tech Corp',
+                                startMonth: 'January',
+                                startYear: '2022',
+                                endMonth: '',
+                                endYear: '',
+                                description: 'Led development team of 5 developers, implemented CI/CD pipeline'
+                              }],
+                              educationData: [{
+                                degree: 'Bachelor of Science in Computer Science',
+                                school: 'University of Technology',
+                                startMonth: 'September',
+                                startYear: '2018',
+                                endMonth: 'May',
+                                endYear: '2022'
+                              }],
+                              colorVariant: 0,
+                              selectedColors: {
+                                primary: '#3B82F6',
+                                secondary: '#1E40AF',
+                                accent: '#60A5FA',
+                                background: '#FFFFFF',
+                                text: '#1F2937'
+                              }
+                            }
+                          })
+                        });
+                        
+                        if (response.ok) {
+                          const { url } = await response.json();
+                          window.location.href = url;
+                        } else {
+                          throw new Error('Failed to create checkout session');
+                        }
+                      } catch (error) {
+                        setError('Test payment failed: ' + (error as Error).message);
+                      } finally {
+                        setIsGenerating(false);
+                      }
+                    }}
+                    disabled={isGenerating}
+                    className="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  >
+                    Test Resume + Cover Letter ($29.99)
+                  </button>
+                </div>
+                <p className="text-yellow-300 text-xs text-center mt-2">
+                  Use these buttons to test the payment flow without filling out the form
+                </p>
               </div>
             </form>
           ) : (

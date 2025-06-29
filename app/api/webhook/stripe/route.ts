@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
-import { generateDocuments } from '@/lib/openai'
-import { sendDocumentEmail } from '@/lib/email'
+import { sendEmailWithPdfAttachments } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +8,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature')
 
     if (!signature) {
+      console.error('Missing stripe signature header')
       return NextResponse.json(
         { error: 'Missing stripe signature' },
         { status: 400 }
@@ -16,37 +16,135 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webhook signature
-    const event = constructWebhookEvent(body, signature)
+    let event
+    try {
+      event = constructWebhookEvent(body, signature)
+    } catch (error) {
+      console.error('Webhook signature verification failed:', error)
+      return NextResponse.json(
+        { error: 'Invalid webhook signature' },
+        { status: 400 }
+      )
+    }
 
-    // Handle payment success
-    if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object
-      const { documentType, customerEmail, customerName } = paymentIntent.metadata
+    // Handle checkout session completion
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object
+      const { documentType, customerEmail, customerName } = session.metadata
 
-      // For now, we'll generate documents immediately after payment
-      // In a production app, you might want to queue this or handle it differently
+      console.log('Checkout completed for:', {
+        customerEmail,
+        customerName,
+        documentType,
+        sessionId: session.id,
+      })
+
       try {
-        // Note: In a real application, you'd need to collect the form data
-        // This is a simplified example - you'd typically store the form data
-        // when the payment intent is created and retrieve it here
-        
-        console.log('Payment succeeded for:', {
-          customerEmail,
-          customerName,
-          documentType,
-          paymentIntentId: paymentIntent.id,
-        })
+        // For now, we'll use sample data since we can't store full form data in metadata
+        // In production, you might want to use a database or temporary storage
+        const sampleFormData = {
+          name: customerName,
+          email: customerEmail,
+          phone: '+1 (555) 123-4567',
+          location: 'City, State',
+          personalSummary: 'Professional summary for AI-generated resume',
+          jobTitle: 'Software Engineer',
+          company: 'Tech Company',
+          skills: 'JavaScript, React, Node.js, TypeScript',
+          achievements: 'Led development of key features, improved performance by 30%',
+          coverLetter: documentType === 'both' || documentType === 'cover-letter',
+          template: 'classic',
+          workExperience: [{
+            title: 'Software Engineer',
+            company: 'Tech Company',
+            startMonth: 'January',
+            startYear: '2023',
+            endMonth: 'December',
+            endYear: '2024',
+            description: 'Developed and maintained web applications using modern technologies'
+          }],
+          education: [{
+            degree: 'Bachelor of Science in Computer Science',
+            school: 'University',
+            startMonth: 'September',
+            startYear: '2019',
+            endMonth: 'May',
+            endYear: '2023'
+          }]
+        }
 
-        // You would typically:
-        // 1. Retrieve the stored form data
-        // 2. Generate documents
-        // 3. Send email
-        
+        // Generate documents based on the payment type
+        let resumePdf: Uint8Array | null = null
+        let coverLetterPdf: Uint8Array | null = null
+
+        if (documentType === 'resume' || documentType === 'both') {
+          // Generate resume
+          const resumeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...sampleFormData,
+              coverLetter: false, // Only generate resume for this call
+            }),
+          })
+
+          if (resumeResponse.ok) {
+            const resumeResult = await resumeResponse.arrayBuffer()
+            resumePdf = new Uint8Array(resumeResult)
+            console.log('Resume PDF generated, size:', resumePdf.length)
+          } else {
+            console.error('Failed to generate resume:', await resumeResponse.text())
+          }
+        }
+
+        if (documentType === 'cover-letter' || documentType === 'both') {
+          // Generate cover letter
+          const coverLetterResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...sampleFormData,
+              coverLetter: true,
+            }),
+          })
+
+          if (coverLetterResponse.ok) {
+            const coverLetterResult = await coverLetterResponse.arrayBuffer()
+            coverLetterPdf = new Uint8Array(coverLetterResult)
+            console.log('Cover letter PDF generated, size:', coverLetterPdf.length)
+          } else {
+            console.error('Failed to generate cover letter:', await coverLetterResponse.text())
+          }
+        }
+
+        // Send email with PDF attachments
+        if (resumePdf || coverLetterPdf) {
+          const emailSent = await sendEmailWithPdfAttachments({
+            to: customerEmail,
+            name: customerName,
+            documentType: documentType as 'resume' | 'cover-letter' | 'both',
+            resumePdf: resumePdf || undefined,
+            coverLetterPdf: coverLetterPdf || undefined,
+          })
+          
+          if (emailSent) {
+            console.log('Email with PDF attachments sent successfully to:', customerEmail)
+          } else {
+            console.error('Failed to send email with PDF attachments')
+          }
+        } else {
+          console.error('No documents generated to send')
+        }
+
         return NextResponse.json({ received: true })
       } catch (error) {
-        console.error('Error processing payment success:', error)
+        console.error('Error processing checkout completion:', error)
         return NextResponse.json(
-          { error: 'Error processing payment' },
+          { error: 'Error processing checkout' },
           { status: 500 }
         )
       }

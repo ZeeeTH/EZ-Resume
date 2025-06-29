@@ -1,13 +1,10 @@
 import React from 'react';
 import { Shield, Users, TrendingUp } from 'lucide-react';
+import { useContactModal } from '../ContactModalContext';
 
-interface FooterProps {
-  openModal: () => void;
-  open: boolean;
-  closeModal: () => void;
-}
+export default function Footer() {
+  const { openModal } = useContactModal();
 
-export default function Footer({ openModal, open, closeModal }: FooterProps) {
   return (
     <>
       {/* Footer */}

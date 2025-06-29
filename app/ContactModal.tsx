@@ -1,13 +1,10 @@
 "use client"
 
 import React, { useState } from 'react';
+import { useContactModal } from './ContactModalContext';
 
-interface ContactModalProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-const ContactModal: React.FC<ContactModalProps> = ({ open, onClose }) => {
+const ContactModal: React.FC = () => {
+  const { open, closeModal } = useContactModal();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
   if (!open) return null;
@@ -16,7 +13,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ open, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-gradient-to-br from-gray-900/90 to-blue-950/90 rounded-2xl shadow-2xl p-8 w-full max-w-md relative border border-white/10">
         <button
-          onClick={onClose}
+          onClick={closeModal}
           className="absolute top-4 right-4 text-gray-400 hover:text-pink-400 text-2xl font-bold focus:outline-none"
           aria-label="Close"
         >
@@ -26,7 +23,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ open, onClose }) => {
         <form
           onSubmit={e => {
             e.preventDefault();
-            onClose();
+            closeModal();
           }}
           className="space-y-4"
         >

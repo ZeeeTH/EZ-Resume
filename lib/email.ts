@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
+    pass: process.env.GMAIL_PASS,
   },
 })
 
@@ -170,6 +170,14 @@ export interface SendEmailParams {
   coverLetter?: string
 }
 
+export interface SendEmailWithPdfAttachmentsParams {
+  to: string
+  name: string
+  documentType: 'resume' | 'cover-letter' | 'both'
+  resumePdf?: Uint8Array
+  coverLetterPdf?: Uint8Array
+}
+
 export async function sendDocumentEmail(params: SendEmailParams): Promise<boolean> {
   try {
     let html: string
@@ -210,6 +218,85 @@ export async function sendDocumentEmail(params: SendEmailParams): Promise<boolea
     }
 
     await transporter.sendMail(mailOptions)
+    return true
+  } catch (error) {
+    console.error('Email sending failed:', error)
+    return false
+  }
+}
+
+export async function sendEmailWithPdfAttachments(params: SendEmailWithPdfAttachmentsParams): Promise<boolean> {
+  try {
+    let html: string
+    let subject: string
+    const attachments: any[] = []
+
+    // Create email content based on document type
+    switch (params.documentType) {
+      case 'resume':
+        html = resumeEmailTemplate({
+          name: params.name,
+          resume: 'Your professional resume is attached as a PDF file.',
+        })
+        subject = 'Your Professional Resume - EZ Resume'
+        if (params.resumePdf) {
+          attachments.push({
+            filename: `${params.name.replace(/\s+/g, '_')}_Resume.pdf`,
+            content: Buffer.from(params.resumePdf),
+            contentType: 'application/pdf'
+          })
+        }
+        break
+      case 'cover-letter':
+        html = coverLetterEmailTemplate({
+          name: params.name,
+          coverLetter: 'Your professional cover letter is attached as a PDF file.',
+        })
+        subject = 'Your Professional Cover Letter - EZ Resume'
+        if (params.coverLetterPdf) {
+          attachments.push({
+            filename: `${params.name.replace(/\s+/g, '_')}_CoverLetter.pdf`,
+            content: Buffer.from(params.coverLetterPdf),
+            contentType: 'application/pdf'
+          })
+        }
+        break
+      case 'both':
+        html = bothDocumentsEmailTemplate({
+          name: params.name,
+          resume: 'Your professional resume is attached as a PDF file.',
+          coverLetter: 'Your professional cover letter is attached as a PDF file.',
+        })
+        subject = 'Your Professional Documents - EZ Resume'
+        if (params.resumePdf) {
+          attachments.push({
+            filename: `${params.name.replace(/\s+/g, '_')}_Resume.pdf`,
+            content: Buffer.from(params.resumePdf),
+            contentType: 'application/pdf'
+          })
+        }
+        if (params.coverLetterPdf) {
+          attachments.push({
+            filename: `${params.name.replace(/\s+/g, '_')}_CoverLetter.pdf`,
+            content: Buffer.from(params.coverLetterPdf),
+            contentType: 'application/pdf'
+          })
+        }
+        break
+      default:
+        throw new Error('Invalid document type')
+    }
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: params.to,
+      subject,
+      html,
+      attachments
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`Email sent successfully to ${params.to} with ${attachments.length} PDF attachment(s)`)
     return true
   } catch (error) {
     console.error('Email sending failed:', error)

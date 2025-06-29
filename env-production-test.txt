@@ -1,0 +1,46 @@
+# ========================================
+# EZ Resume - Production Test Environment
+# ========================================
+# Use this for testing on the live website with test payments
+# Copy this to .env.local for production testing
+
+# ========================================
+# STRIPE CONFIGURATION (Test Mode for Safe Testing)
+# ========================================
+
+# Test Mode - Safe for testing on live website
+STRIPE_SECRET_KEY=sk_test_51RcxrnEAgKmkN6JZpMMOPygpdVOmR2jiiWTZcCvH3sO1WJVIlz7cuZufH3ona6o9AlUTPHZqpGMQa7IsfiSwjd0j003gx3v6Df
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51RcxrnEAgKmkN6JZdCStARo4n6UylDq31YgbZeDMOFUx7nR6XPGJohfUOmSJ8CmaKdd8dk4TJASApkg4sXV9qFFx00a1MWDpbX
+STRIPE_WEBHOOK_SECRET=whsec_1dc41e96f4301a4776f4f2a60870d3c92fccaa090454f4493b1084131cbf5663
+
+# ========================================
+# EMAIL CONFIGURATION
+# ========================================
+
+GMAIL_USER=admin@ez-resume.xyz
+GMAIL_PASS=nvpzugrtkytpnlqq
+
+# ========================================
+# OPENAI CONFIGURATION
+# ========================================
+
+OPENAI_API_KEY=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
+
+# ========================================
+# APPLICATION CONFIGURATION
+# ========================================
+
+# Production domain for live testing
+NEXT_PUBLIC_BASE_URL=https://ez-resume.xyz
+
+# ========================================
+# DEPLOYMENT INSTRUCTIONS
+# ========================================
+#
+# 1. Copy this file to .env.local
+# 2. Restart your development server: npm run dev
+# 3. Test the payment flow using the test buttons
+# 4. The webhook will work locally with Stripe CLI
+# 5. Once confirmed working, deploy to Vercel with these same variables
+#
+# ======================================== 
