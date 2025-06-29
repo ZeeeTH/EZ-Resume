@@ -20,11 +20,11 @@ export default function Pricing() {
             <div className="text-center mb-4">
               <h4 className="text-xl font-bold text-white mb-2">Resume Only</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-blue-400">$19.99</span>
+                <span className="text-3xl font-bold text-blue-400">$14.99</span>
                 <span className="text-lg text-gray-400 line-through">$29.99</span>
               </div>
               <p className="text-gray-400 text-sm">One-time payment</p>
-              <p className="text-green-400 text-sm font-medium">Save $10!</p>
+              <p className="text-green-400 text-sm font-medium">Save $14.00!</p>
             </div>
             <ul className="space-y-2 text-sm text-gray-300 mb-6">
               <li className="flex items-center">
@@ -56,11 +56,11 @@ export default function Pricing() {
             <div className="text-center mb-4">
               <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-purple-400">$29.99</span>
+                <span className="text-3xl font-bold text-purple-400">$24.99</span>
                 <span className="text-lg text-gray-400 line-through">$49.99</span>
               </div>
               <p className="text-gray-400 text-sm">One-time payment</p>
-              <p className="text-green-400 text-sm font-medium">Save $20!</p>
+              <p className="text-green-400 text-sm font-medium">Save $25.00!</p>
             </div>
             <ul className="space-y-2 text-sm text-gray-300 mb-6">
               <li className="flex items-center">

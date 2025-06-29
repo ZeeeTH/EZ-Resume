@@ -69,8 +69,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Test Email Button - Remove in production */}
-      <TestEmailButton />
+
 
       {/* Contact Modal */}
       <ContactModal open={open} onClose={closeModal} />

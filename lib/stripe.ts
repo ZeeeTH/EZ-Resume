@@ -123,9 +123,9 @@ export function constructWebhookEvent(payload: string, signature: string) {
 
 // Pricing configuration
 export const PRICING = {
-  RESUME_ONLY: 1999, // $19.99 in cents
+  RESUME_ONLY: 1499, // $14.99 in cents
   COVER_LETTER_ONLY: 1499, // $14.99 in cents (if needed)
-  BOTH: 2999, // $29.99 in cents
+  BOTH: 2499, // $24.99 in cents
 }
 
 export function getPriceForDocumentType(documentType: 'resume' | 'cover-letter' | 'both'): number {
