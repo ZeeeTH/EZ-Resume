@@ -1423,4 +1423,3 @@ function buildEmailHtml({ name, coverLetter }: { name: string; coverLetter: bool
   </body>
 </html>`;
 } 
-} 
