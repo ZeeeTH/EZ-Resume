@@ -2,8 +2,17 @@ import React from 'react';
 import { Shield, Users, TrendingUp } from 'lucide-react';
 import { useContactModal } from '../ContactModalContext';
 
-export default function Footer() {
-  const { openModal } = useContactModal();
+// Add prop types
+export type FooterProps = {
+  openModal?: () => void;
+  open?: boolean;
+  closeModal?: () => void;
+};
+
+export default function Footer({ openModal, open, closeModal }: FooterProps) {
+  // Fallback to context if prop not provided
+  const context = useContactModal();
+  const handleOpenModal = openModal || context.openModal;
 
   return (
     <>
@@ -35,7 +44,7 @@ export default function Footer() {
             <span className="text-gray-500">|</span>
             <a href="/privacy" className="hover:text-purple-400 transition-colors font-medium">Privacy Policy</a>
             <span className="text-gray-500">|</span>
-            <button type="button" onClick={openModal} className="hover:text-pink-400 transition-colors font-medium bg-transparent border-none p-0 m-0 focus:outline-none">Contact Us</button>
+            <button type="button" onClick={handleOpenModal} className="hover:text-pink-400 transition-colors font-medium bg-transparent border-none p-0 m-0 focus:outline-none">Contact Us</button>
           </div>
         </div>
         <p className="text-gray-400 text-sm">
