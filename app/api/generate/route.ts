@@ -1034,23 +1034,39 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   async function renderStructuredTemplate() {
     const pageWidth = 612;
     ensureSpace(40);
+    // Font selection: use templateData.fonts.body or templateData.styling.fontFamily
+    // Map to PDF-lib fonts
+    let structuredFont = font;
+    let structuredBoldFont = boldFont;
+    const family = (templateData.styling.fontFamily || '').toLowerCase();
+    if (family.includes('helvetica')) {
+      structuredFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      structuredBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    } else if (family.includes('times')) {
+      structuredFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+      structuredBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    } else if (family.includes('courier')) {
+      structuredFont = await pdfDoc.embedFont(StandardFonts.Courier);
+      structuredBoldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+    }
+    // Header with name - centered, larger font
     const nameText = resumeJson.name || 'Your Name';
-    const nameWidth = boldFont.widthOfTextAtSize(nameText, 24);
+    const nameWidth = structuredBoldFont.widthOfTextAtSize(nameText, 24);
     page.drawText(nameText, {
       x: (pageWidth / 2) - (nameWidth / 2),
       y: y,
       size: 24,
-      font: boldFont,
+      font: structuredBoldFont,
       color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
     });
     y -= 32;
     if (resumeJson.title) {
-      const titleWidth = font.widthOfTextAtSize(resumeJson.title, 13);
+      const titleWidth = structuredFont.widthOfTextAtSize(resumeJson.title, 13);
       page.drawText(resumeJson.title, {
         x: (pageWidth / 2) - (titleWidth / 2),
         y: y,
         size: 13,
-        font: font,
+        font: structuredFont,
         color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
       });
       y -= 20;
@@ -1061,32 +1077,56 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
         resumeJson.contact.phone,
         resumeJson.contact.location
       ].filter(Boolean).join(' • ');
-      const contactWidth = font.widthOfTextAtSize(contactInfo, 10);
+      const contactWidth = structuredFont.widthOfTextAtSize(contactInfo, 10);
       page.drawText(contactInfo, {
         x: (pageWidth / 2) - (contactWidth / 2),
         y: y,
         size: 10,
-        font: font,
+        font: structuredFont,
         color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
       });
       y -= 24;
     }
+    // Section key normalization and alias mapping
+    const sectionAliases: Record<string, string[]> = {
+      summary: ['summary', 'professional summary'],
+      experience: ['experience', 'professional experience', 'work experience'],
+      education: ['education'],
+      skills: ['skills']
+    };
+    function findSectionByKey(key: string) {
+      const norm = key.toLowerCase().replace(/\s+/g, '');
+      for (const [main, aliases] of Object.entries(sectionAliases)) {
+        if (aliases.some(a => norm === a.replace(/\s+/g, ''))) {
+          for (const k of aliases) {
+            if (sectionsByTitle[k]) return sectionsByTitle[k];
+            if (sectionsByTitle[capitalizeFirst(k)]) return sectionsByTitle[capitalizeFirst(k)];
+          }
+        }
+      }
+      // fallback: try direct
+      if (sectionsByTitle[key]) return sectionsByTitle[key];
+      if (sectionsByTitle[capitalizeFirst(key)]) return sectionsByTitle[capitalizeFirst(key)];
+      return null;
+    }
     // Render sections in layout order
     for (const sectionKey of layoutConfig.main) {
       if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
-      const section = sectionsByTitle[sectionKey] || sectionsByTitle[capitalizeFirst(sectionKey)];
+      const section = findSectionByKey(sectionKey);
       if (!section) continue;
       ensureSpace(40);
       const sectionTitle = section.title.toUpperCase();
-      const sectionTitleWidth = boldFont.widthOfTextAtSize(sectionTitle, 15);
+      const sectionTitleWidth = structuredBoldFont.widthOfTextAtSize(sectionTitle, 15);
+      // Centered section title
       page.drawText(sectionTitle, {
         x: (pageWidth / 2) - (sectionTitleWidth / 2),
         y: y,
         size: 15,
-        font: boldFont,
+        font: structuredBoldFont,
         color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
       });
       y -= 22;
+      // Subtle line under section title
       page.drawLine({
         start: { x: (pageWidth / 2) - (sectionTitleWidth / 2), y: y - 2 },
         end: { x: (pageWidth / 2) + (sectionTitleWidth / 2), y: y - 2 },
@@ -1096,13 +1136,13 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       y -= 10;
       // Section content
       if (section.content) {
-        const lines = wrapText(section.content, pageWidth - 2 * margin, font, 12);
+        const lines = wrapText(section.content, pageWidth - 2 * margin, structuredFont, 12);
         for (const line of lines) {
           page.drawText(line, {
             x: margin,
             y: y,
             size: 12,
-            font: font,
+            font: structuredFont,
             color: rgb(0, 0, 0)
           });
           y -= 16;
@@ -1115,7 +1155,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             x: margin,
             y: y,
             size: 12,
-            font: boldFont,
+            font: structuredBoldFont,
             color: rgb(0, 0, 0)
           });
           y -= 15;
@@ -1123,19 +1163,19 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             x: margin,
             y: y,
             size: 10,
-            font: font,
+            font: structuredFont,
             color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
           });
           y -= 15;
           if (job.bullets) {
             for (const bullet of job.bullets) {
-              const lines = wrapText(`• ${bullet}`, pageWidth - 2 * margin - 10, font, 10);
+              const lines = wrapText(`• ${bullet}`, pageWidth - 2 * margin - 10, structuredFont, 10);
               for (const line of lines) {
                 page.drawText(line, {
                   x: margin + 10,
                   y: y,
                   size: 10,
-                  font: font,
+                  font: structuredFont,
                   color: rgb(0, 0, 0)
                 });
                 y -= 13;
@@ -1151,7 +1191,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             x: margin,
             y: y,
             size: 10,
-            font: boldFont,
+            font: structuredBoldFont,
             color: rgb(0, 0, 0)
           });
           y -= 12;
@@ -1159,7 +1199,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             x: margin,
             y: y,
             size: 9,
-            font: font,
+            font: structuredFont,
             color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
           });
           y -= 10;
@@ -1168,7 +1208,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
               x: margin,
               y: y,
               size: 9,
-              font: font,
+              font: structuredFont,
               color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
             });
             y -= 10;
@@ -1182,19 +1222,19 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             x: margin,
             y: y,
             size: 11,
-            font: boldFont,
+            font: structuredBoldFont,
             color: rgb(0, 0, 0)
           });
           y -= 15;
           if (Array.isArray(skills)) {
             const skillsText = skills.join(', ');
-            const lines = wrapText(skillsText, pageWidth - 2 * margin - 10, font, 9);
+            const lines = wrapText(skillsText, pageWidth - 2 * margin - 10, structuredFont, 9);
             for (const line of lines) {
               page.drawText(line, {
                 x: margin + 10,
                 y: y,
                 size: 9,
-                font: font,
+                font: structuredFont,
                 color: rgb(0, 0, 0)
               });
               y -= 12;
