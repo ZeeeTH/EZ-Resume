@@ -45,12 +45,12 @@ const formSchema = z.object({
   education: z.array(educationSchema).min(1, 'At least one education entry is required'),
 }).refine((data) => {
   if (data.coverLetter) {
-    return data.jobTitle && data.jobTitle.length >= 3 && data.company && data.company.length >= 2;
+    return data.company && data.company.length >= 2;
   }
   return true;
 }, {
-  message: "Job title and company are required when generating a cover letter",
-  path: ["jobTitle"]
+  message: "Target company is required when generating a cover letter",
+  path: ["company"]
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -95,6 +95,8 @@ export default function ResumeForm() {
       coverLetter: false,
       template: 'classic',
       personalSummary: '',
+      jobTitle: '',
+      company: '',
       workExperience: [
         { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
       ],
@@ -114,7 +116,7 @@ export default function ResumeForm() {
   // Calculate form progress
   React.useEffect(() => {
     const requiredFields = ['name', 'email', 'skills', 'achievements', 'personalSummary'];
-    const coverLetterFields = coverLetterChecked ? ['jobTitle', 'company'] : [];
+    const coverLetterFields = coverLetterChecked ? ['company'] : [];
     let totalFields = requiredFields.length + coverLetterFields.length;
     let filledFields = 0;
     
@@ -374,6 +376,29 @@ export default function ResumeForm() {
                       )}
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Target Job Title */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Target Job Title (Optional)</h2>
+                <div>
+                  <input
+                    {...register('jobTitle')}
+                    id="jobTitle"
+                    className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.jobTitle && isFieldMissing(watchedFields.jobTitle) ? 'border-red-400' : 'border-white/20'}`}
+                    placeholder="e.g., Software Engineer, Marketing Manager"
+                    aria-describedby="jobTitle-error"
+                  />
+                  {touchedFields.jobTitle && errors.jobTitle && (
+                    <p id="jobTitle-error" className="mt-1 text-sm text-red-400 flex items-center">
+                      <span className="mr-1">⚠</span>
+                      {errors.jobTitle.message}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-2">
+                    Optional: This will appear under your name at the top of your resume. Leave blank if you prefer not to include it.
+                  </p>
                 </div>
               </div>
 
@@ -687,59 +712,30 @@ export default function ResumeForm() {
                     Also generate a cover letter for this position
                   </label>
                 </div>
-
-                {/* Conditional Job Title and Company Fields */}
                 {coverLetterChecked && (
-                  <>
-                    <div className="grid md:grid-cols-2 gap-4 md:gap-6 mt-6">
-                      <div>
-                        <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-300 mb-2">
-                          Desired Job Title *
-                        </label>
-                        <div className="relative">
-                          <input
-                            {...register('jobTitle')}
-                            id="jobTitle"
-                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.jobTitle && isFieldMissing(watchedFields.jobTitle) ? 'border-red-400' : 'border-white/20'}`}
-                            placeholder="e.g., Software Engineer, Marketing Manager"
-                            aria-describedby="jobTitle-error"
-                          />
-                          {getFieldStatus('jobTitle') === 'success' && (
-                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                          )}
-                        </div>
-                        {errors.jobTitle && (
-                          <p id="jobTitle-error" className="mt-1 text-sm text-red-400 flex items-center">
-                            <span className="mr-1">⚠</span>
-                            {errors.jobTitle.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
-                          Target Company *
-                        </label>
-                        <div className="relative">
-                          <input
-                            {...register('company')}
-                            id="company"
-                            className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.company && isFieldMissing(watchedFields.company) ? 'border-red-400' : 'border-white/20'}`}
-                            placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
-                            aria-describedby="company-error"
-                          />
-                          {getFieldStatus('company') === 'success' && (
-                            <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
-                          )}
-                        </div>
-                        {errors.company && (
-                          <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
-                            <span className="mr-1">⚠</span>
-                            {errors.company.message}
-                          </p>
-                        )}
-                      </div>
+                  <div className="mt-6">
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
+                      Target Company *
+                    </label>
+                    <div className="relative">
+                      <input
+                        {...register('company')}
+                        id="company"
+                        className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${!!touchedFields.company && isFieldMissing(watchedFields.company) ? 'border-red-400' : 'border-white/20'}`}
+                        placeholder="e.g., Google, Microsoft, or 'Any Tech Company'"
+                        aria-describedby="company-error"
+                      />
+                      {getFieldStatus('company') === 'success' && (
+                        <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400" />
+                      )}
                     </div>
-                  </>
+                    {errors.company && (
+                      <p id="company-error" className="mt-1 text-sm text-red-400 flex items-center">
+                        <span className="mr-1">⚠</span>
+                        {errors.company.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 

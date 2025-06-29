@@ -297,6 +297,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Ensure job title is included in the resume JSON if provided by user
+    if (!resumeJson.title && formData.jobTitle && formData.jobTitle.trim()) {
+      resumeJson.title = formData.jobTitle.trim()
+    }
+
     // Create PDFs using AI-generated content
     console.log('Creating PDF with template:', formData.template)
     const resumePdf = await createResumePDF(resumeJson, formData.template, formData.selectedColors)
@@ -304,7 +309,7 @@ export async function POST(request: NextRequest) {
     
     let coverLetterPdf: Uint8Array | null = null
 
-    if (formData.coverLetter && formData.jobTitle && formData.company) {
+    if (formData.coverLetter && formData.company) {
       console.log('Generating cover letter...')
       const coverLetterPrompt = createCoverLetterPrompt(formData)
       const coverLetterResponse = await openai.chat.completions.create({
@@ -416,6 +421,7 @@ Return the resume as a single JSON object with the following structure. Do not i
 
 {
   "name": "[FULL_NAME]",
+  "title": "[TARGET_JOB_TITLE]",
   "contact": {
     "email": "[EMAIL]",
     "phone": "[PHONE]",
@@ -464,7 +470,7 @@ Return the resume as a single JSON object with the following structure. Do not i
   ]
 }
 
-IMPORTANT: Return ONLY the JSON object above, with all fields filled in and rewritten for maximum impact. Do not include any extra text, markdown, or explanation.
+IMPORTANT: Return ONLY the JSON object above, with all fields filled in and rewritten for maximum impact. Do not include any extra text, markdown, or explanation. Only include the "title" field if a job title is provided.
 
 **Professional Summary Requirements:**
 - The summary must be concise, 3-5 sentences, no more than 400 characters, and elegantly worded for maximum professional impact.
@@ -651,6 +657,19 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
     });
     y -= 35;
 
+    // Job title - centered and styled
+    if (resumeJson.title) {
+      const titleWidth = font.widthOfTextAtSize(resumeJson.title.toUpperCase(), 14);
+      page.drawText(resumeJson.title.toUpperCase(), {
+        x: 306 - (titleWidth / 2),
+        y: y,
+        size: 14,
+        font: font,
+        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+      });
+      y -= 25;
+    }
+
     // Contact information - centered
     if (resumeJson.contact) {
       const contactInfo = [
@@ -824,6 +843,18 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
     });
     y -= 25;
 
+    // Job title - subtle
+    if (resumeJson.title) {
+      page.drawText(resumeJson.title, {
+        x: margin,
+        y: y,
+        size: 12,
+        font: font,
+        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+      });
+      y -= 20;
+    }
+
     // Contact information - minimal
     if (resumeJson.contact) {
       const contactInfo = [
@@ -984,6 +1015,18 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
     });
     y -= 30;
+
+    // Job title - modern styling
+    if (resumeJson.title) {
+      page.drawText(resumeJson.title, {
+        x: margin,
+        y: y,
+        size: 14,
+        font: font,
+        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+      });
+      y -= 20;
+    }
 
     // Contact information - modern layout
     if (resumeJson.contact) {
