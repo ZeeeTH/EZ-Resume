@@ -9,7 +9,6 @@ import ResumeForm from './components/resumeForm'
 import Pricing from './components/Pricing'
 import FAQ from './components/FAQ'
 import Footer from './components/footer'
-import TestEmailButton from './components/TestEmailButton'
 
 export default function Home() {
   const { open, closeModal, openModal } = useContactModal();
@@ -68,8 +67,6 @@ export default function Home() {
           closeModal={closeModal}
         />
       </div>
-
-
 
       {/* Contact Modal */}
       <ContactModal open={open} onClose={closeModal} />
