@@ -65,4 +65,5 @@ export interface OrderData {
   price: number
   currency: string
   timestamp?: string
+  form_data?: any
 } 

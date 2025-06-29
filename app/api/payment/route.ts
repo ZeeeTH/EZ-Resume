@@ -15,6 +15,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log('Payment API called - checking environment variables...')
     console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY)
     console.log('NEXT_PUBLIC_BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
+    console.log('SUPABASE_URL exists:', !!process.env.SUPABASE_URL)
+    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
     
     // Parse and validate request body
     const body = await request.json()
@@ -51,7 +53,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Save form data by session ID for webhook use (Supabase)
     if (checkoutResult.success && checkoutResult.sessionId) {
-      await supabase.from('orders').insert([
+      console.log('Attempting to save order data to Supabase...')
+      console.log('Session ID:', checkoutResult.sessionId)
+      console.log('Document type:', validatedData.documentType)
+      console.log('Template:', validatedData.formData.template)
+      
+      // Test database connection and table structure
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from('orders')
+          .select('*')
+          .limit(1);
+        
+        if (testError) {
+          console.error('Database connection test failed:', testError)
+        } else {
+          console.log('Database connection successful, table structure:', testData)
+        }
+      } catch (testErr) {
+        console.error('Database connection test error:', testErr)
+      }
+      
+      const { data: insertData, error: insertError } = await supabase.from('orders').insert([
         {
           session_id: checkoutResult.sessionId,
           document_type: validatedData.documentType,
@@ -60,8 +83,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           name: validatedData.customerName,
           price: amount,
           currency: currency,
+          form_data: validatedData.formData, // Store complete form data
         }
       ]);
+
+      if (insertError) {
+        console.error('Failed to insert order data into Supabase:', insertError)
+        console.error('Error details:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint
+        })
+      } else {
+        console.log('Order data successfully saved to Supabase:', insertData)
+      }
     }
 
     console.log('Checkout result:', checkoutResult)

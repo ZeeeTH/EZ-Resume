@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       // Retrieve order data from Supabase
       const { data, error } = await supabase
         .from('orders')
-        .select('document_type, template, email, name')
+        .select('document_type, template, email, name, form_data')
         .eq('session_id', sessionId)
         .single()
 
@@ -48,10 +48,11 @@ export async function POST(request: NextRequest) {
       const template = data.template
       const customerEmail = data.email
       const customerName = data.name
+      const formData = data.form_data
 
-      if (!documentType || !customerEmail || !customerName) {
-        console.error('Missing required metadata in Stripe session')
-        return NextResponse.json({ error: 'Missing required metadata' }, { status: 400 })
+      if (!documentType || !customerEmail || !customerName || !formData) {
+        console.error('Missing required data in order')
+        return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
       }
 
       console.log('Checkout completed for:', {
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...template,
+              ...formData,
               coverLetter: false, // Only generate resume for this call
             }),
           })
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              ...template,
+              ...formData,
               coverLetter: true,
             }),
           })
