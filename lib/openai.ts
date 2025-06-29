@@ -121,7 +121,7 @@ export async function generateDocuments(params: GenerateDocumentParams): Promise
     results.resume = await generateResume(params)
   }
 
-  if (params.documentType === 'cover-letter' || params.documentType === 'both') {
+  if (params.documentType === 'both') {
     results.coverLetter = await generateCoverLetter(params)
   }
 

@@ -191,6 +191,14 @@ export interface SendEmailWithPdfAttachmentsParams {
   coverLetterPdf?: Uint8Array
 }
 
+export interface SendEmailParams {
+  to: string
+  name: string
+  documentType: 'resume' | 'both'
+  resume?: string
+  coverLetter?: string
+}
+
 export async function sendDocumentEmail(params: SendEmailParams): Promise<boolean> {
   try {
     let html: string
