@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { supabase } from '@/lib/supabase'
 
