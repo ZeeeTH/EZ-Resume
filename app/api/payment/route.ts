@@ -99,7 +99,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.error('Database connection test error:', testErr)
       }
       
-      const insertData = {
+      // Save order data
+      const orderData = {
         session_id: checkoutResult.sessionId,
         document_type: validatedData.documentType,
         template: validatedData.formData.template,
@@ -107,22 +108,49 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         name: validatedData.customerName,
         price: amount,
         currency: currency,
-        form_data: validatedData.formData, // Store complete form data
       };
       
-      console.log('Attempting to insert this data:', JSON.stringify(insertData, null, 2))
-      
-      const { data: insertResult, error: insertError } = await supabase.from('orders').insert([insertData]);
+      const { data: orderResult, error: orderError } = await supabase.from('orders').insert([orderData]);
 
-      if (insertError) {
-        console.error('Failed to insert order data into Supabase:', insertError)
+      if (orderError) {
+        console.error('Failed to insert order data into Supabase:', orderError)
+      } else {
+        console.log('Order data successfully saved to Supabase:', orderResult)
+      }
+      
+      // Save form data to separate table
+      const formData = {
+        session_id: checkoutResult.sessionId,
+        name: validatedData.customerName,
+        email: validatedData.customerEmail,
+        phone: validatedData.formData.phone || null,
+        job_title: validatedData.formData.jobTitle || null,
+        company: validatedData.formData.company || null,
+        skills: validatedData.formData.skills,
+        achievements: validatedData.formData.achievements,
+        location: validatedData.formData.location || null,
+        personal_summary: validatedData.formData.personalSummary || null,
+        cover_letter: validatedData.formData.coverLetter || false,
+        template: validatedData.formData.template,
+        color_variant: validatedData.formData.colorVariant || 0,
+        selected_colors: validatedData.formData.selectedColors ? JSON.stringify(validatedData.formData.selectedColors) : null,
+        work_experience: JSON.stringify(validatedData.formData.workExperience),
+        education: JSON.stringify(validatedData.formData.education),
+      };
+      
+      console.log('Attempting to insert form data:', JSON.stringify(formData, null, 2))
+      
+      const { data: formResult, error: formError } = await supabase.from('form_submissions').insert([formData]);
+
+      if (formError) {
+        console.error('Failed to insert form data into Supabase:', formError)
         console.error('Error details:', {
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint
+          message: formError.message,
+          details: formError.details,
+          hint: formError.hint
         })
       } else {
-        console.log('Order data successfully saved to Supabase:', insertResult)
+        console.log('Form data successfully saved to Supabase:', formResult)
       }
     }
 

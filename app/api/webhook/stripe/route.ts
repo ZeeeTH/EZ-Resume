@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe'
-import { sendEmailWithPdfAttachments } from '@/lib/email'
 import { supabase } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
@@ -34,26 +33,56 @@ export async function POST(request: NextRequest) {
       const metadata = session.metadata || {}
       const sessionId = session.id
       // Retrieve order data from Supabase
-      const { data, error } = await supabase
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .select('document_type, template, email, name, form_data')
+        .select('document_type, template, email, name')
         .eq('session_id', sessionId)
         .single()
 
-      if (error || !data) {
-        console.error('No order data found for session:', sessionId, error)
+      if (orderError || !orderData) {
+        console.error('No order data found for session:', sessionId, orderError)
         return NextResponse.json({ error: 'No order data found' }, { status: 400 })
       }
-      const documentType = data.document_type
-      const template = data.template
-      const customerEmail = data.email
-      const customerName = data.name
-      const formData = data.form_data
+      
+      // Retrieve form data from separate table
+      const { data: formData, error: formError } = await supabase
+        .from('form_submissions')
+        .select('*')
+        .eq('session_id', sessionId)
+        .single()
 
-      if (!documentType || !customerEmail || !customerName || !formData) {
+      if (formError || !formData) {
+        console.error('No form data found for session:', sessionId, formError)
+        return NextResponse.json({ error: 'No form data found' }, { status: 400 })
+      }
+      
+      const documentType = orderData.document_type
+      const customerEmail = orderData.email
+      const customerName = orderData.name
+
+      if (!documentType || !customerEmail || !customerName) {
         console.error('Missing required data in order')
         return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
       }
+
+      // Construct form data from individual fields
+      const processedFormData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        jobTitle: formData.job_title,
+        company: formData.company,
+        skills: formData.skills,
+        achievements: formData.achievements,
+        location: formData.location,
+        personalSummary: formData.personal_summary,
+        coverLetter: formData.cover_letter,
+        template: formData.template,
+        colorVariant: formData.color_variant,
+        selectedColors: formData.selected_colors ? JSON.parse(formData.selected_colors) : undefined,
+        workExperience: JSON.parse(formData.work_experience),
+        education: JSON.parse(formData.education),
+      };
 
       console.log('Checkout completed for:', {
         customerEmail,
@@ -61,80 +90,55 @@ export async function POST(request: NextRequest) {
         documentType,
         sessionId,
       })
+      
+      console.log('Form data constructed from database:', JSON.stringify(processedFormData, null, 2))
+      console.log('Form data type:', typeof processedFormData)
+      console.log('Form data keys:', Object.keys(processedFormData || {}))
 
       try {
         // Generate documents based on the payment type
-        let resumePdf: Uint8Array | null = null
-        let coverLetterPdf: Uint8Array | null = null
+        console.log('Generating documents with form data:', JSON.stringify(processedFormData, null, 2))
+        
+        // Call generate API only once - it will handle both resume and cover letter if needed
+        const generateResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(processedFormData),
+        })
 
-        if (documentType === 'resume' || documentType === 'both') {
-          // Generate resume
-          const resumeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...formData,
-              coverLetter: false, // Only generate resume for this call
-            }),
-          })
-
-          if (resumeResponse.ok) {
-            const resumeResult = await resumeResponse.arrayBuffer()
-            resumePdf = new Uint8Array(resumeResult)
-            console.log('Resume PDF generated, size:', resumePdf.length)
-          } else {
-            console.error('Failed to generate resume:', await resumeResponse.text())
-          }
-        }
-
-        if (documentType === 'both') {
-          // Generate cover letter for bundle
-          const coverLetterResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://ez-resume.xyz'}/api/generate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...formData,
-              coverLetter: true,
-            }),
-          })
-
-          if (coverLetterResponse.ok) {
-            const coverLetterResult = await coverLetterResponse.arrayBuffer()
-            coverLetterPdf = new Uint8Array(coverLetterResult)
-            console.log('Cover letter PDF generated, size:', coverLetterPdf.length)
-          } else {
-            console.error('Failed to generate cover letter:', await coverLetterResponse.text())
-          }
-        }
-
-        // Send email with PDF attachments
-        if (resumePdf || coverLetterPdf) {
-          const emailSent = await sendEmailWithPdfAttachments({
-            to: customerEmail,
-            name: customerName,
-            documentType: documentType as 'resume' | 'both',
-            resumePdf: resumePdf || undefined,
-            coverLetterPdf: coverLetterPdf || undefined,
-          })
-          
-          if (emailSent) {
-            console.log('Email with PDF attachments sent successfully to:', customerEmail)
-          } else {
-            console.error('Failed to send email with PDF attachments')
-          }
+        console.log('Document generation response status:', generateResponse.status)
+        
+        if (generateResponse.ok) {
+          // The generate API sends the email directly with both documents if needed
+          console.log('Documents generated and email sent successfully')
         } else {
-          console.error('No documents generated to send')
+          const errorText = await generateResponse.text()
+          console.error('Failed to generate documents:', errorText)
         }
 
-        // After successful email, mark as fulfilled
+        // Mark order as fulfilled
+        console.log('Document generation completed, marking order as fulfilled')
+        
+        // Mark order as fulfilled
         await supabase
           .from('orders')
           .update({ fulfilled: true, fulfilled_at: new Date().toISOString() })
           .eq('session_id', sessionId)
+
+        // Delete form data after successful processing
+        console.log('Deleting form data after successful processing')
+        const { error: deleteError } = await supabase
+          .from('form_submissions')
+          .delete()
+          .eq('session_id', sessionId)
+
+        if (deleteError) {
+          console.error('Failed to delete form data:', deleteError)
+        } else {
+          console.log('Form data successfully deleted')
+        }
 
         return NextResponse.json({ received: true })
       } catch (error) {

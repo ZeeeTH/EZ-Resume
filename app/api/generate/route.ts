@@ -263,13 +263,17 @@ export async function POST(request: NextRequest) {
 
     // Generate resume content using OpenAI
     console.log('Generating resume with OpenAI...')
+    console.log('Form data received:', JSON.stringify(formData, null, 2))
+    
     const resumePrompt = createResumePrompt(formData)
+    console.log('Resume prompt created, length:', resumePrompt.length)
+    
     const resumeResponse = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         {
           role: 'system',
-          content: 'You are a professional resume writer. Return ONLY the JSON object as instructed.'
+          content: 'You are a professional resume writer. Return only valid JSON as specified in the prompt.'
         },
         {
           role: 'user',
@@ -280,17 +284,17 @@ export async function POST(request: NextRequest) {
       max_tokens: 2000,
     })
 
-    const aiResumeContent = resumeResponse.choices[0]?.message?.content || ''
-    console.log('OpenAI response received, length:', aiResumeContent.length)
-
-    // Parse JSON response
+    const resumeContent = resumeResponse.choices[0]?.message?.content || ''
+    console.log('Resume content generated, length:', resumeContent.length)
+    console.log('Resume content preview:', resumeContent.substring(0, 200))
+    
     let resumeJson
     try {
-      resumeJson = JSON.parse(aiResumeContent)
-      console.log('Resume JSON parsed successfully')
-    } catch (error) {
-      console.error('Failed to parse resume JSON:', error)
-      console.error('Raw content:', aiResumeContent)
+      resumeJson = JSON.parse(resumeContent)
+      console.log('Resume JSON parsed successfully:', JSON.stringify(resumeJson, null, 2))
+    } catch (parseError) {
+      console.error('Failed to parse resume JSON:', parseError)
+      console.error('Raw content that failed to parse:', resumeContent)
       return NextResponse.json(
         { success: false, error: 'Failed to generate resume content' },
         { status: 500 }
@@ -304,8 +308,16 @@ export async function POST(request: NextRequest) {
 
     // Create PDFs using AI-generated content
     console.log('Creating PDF with template:', formData.template)
+    console.log('Resume JSON for PDF:', JSON.stringify(resumeJson, null, 2))
+    
     const resumePdf = await createResumePDF(resumeJson, formData.template, formData.selectedColors)
     console.log('Resume PDF created, size:', resumePdf.length)
+    
+    if (resumePdf.length === 0) {
+      console.error('❌ Resume PDF is empty!')
+    } else {
+      console.log('✅ Resume PDF created successfully with content')
+    }
     
     let coverLetterPdf: Uint8Array | null = null
 
