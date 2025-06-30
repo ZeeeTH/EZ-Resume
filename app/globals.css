@@ -30,4 +30,17 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Ensure each resume page starts on a new printed page for PDF output */
+.resume-page {
+  page-break-after: always;
+  break-after: page;
+}
+
+@media print {
+  .resume-page {
+    page-break-after: always;
+    break-after: page;
+  }
 } 
