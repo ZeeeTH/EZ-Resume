@@ -3,8 +3,19 @@ import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import nodemailer from 'nodemailer'
 import { getTemplateById } from '../../../data/templates'
-import fs from 'fs';
-import path from 'path';
+import {
+  Inter_24pt_Regular_ttf,
+  Inter_24pt_Bold_ttf,
+  Inter_24pt_Italic_ttf,
+  Inter_24pt_Medium_ttf,
+  georgia_ttf,
+  georgiab_ttf,
+  georgiai_ttf,
+} from '../../../lib/fonts/base64';
+
+function loadFontBytesBase64(base64: string) {
+  return Buffer.from(base64, 'base64');
+}
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -200,22 +211,6 @@ function checkRateLimit(ip: string): boolean {
 
   record.count++
   return true
-}
-
-// Font file paths
-const FONT_PATHS = {
-  'Inter-Regular': path.join(process.cwd(), 'public/fonts/Inter-Regular.ttf'),
-  'Inter-Bold': path.join(process.cwd(), 'public/fonts/Inter-Bold.ttf'),
-  'Inter-Italic': path.join(process.cwd(), 'public/fonts/Inter-Italic.ttf'),
-  'Inter-Medium': path.join(process.cwd(), 'public/fonts/Inter-Medium.ttf'),
-  'Georgia-Regular': path.join(process.cwd(), 'public/fonts/Georgia.ttf'),
-  'Georgia-Bold': path.join(process.cwd(), 'public/fonts/Georgia-Bold.ttf'),
-  'Georgia-Italic': path.join(process.cwd(), 'public/fonts/Georgia-Italic.ttf'),
-};
-
-// Helper to load font bytes
-function loadFontBytes(fontKey: keyof typeof FONT_PATHS) {
-  return fs.readFileSync(FONT_PATHS[fontKey]);
 }
 
 export async function POST(request: NextRequest) {
@@ -608,14 +603,14 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([612, 792]); // US Letter size
 
-  // Embed custom fonts for 1:1 matching
-  const interRegular = await pdfDoc.embedFont(loadFontBytes('Inter-Regular'));
-  const interBold = await pdfDoc.embedFont(loadFontBytes('Inter-Bold'));
-  const interItalic = await pdfDoc.embedFont(loadFontBytes('Inter-Italic'));
-  const interMedium = await pdfDoc.embedFont(loadFontBytes('Inter-Medium'));
-  const georgiaRegular = await pdfDoc.embedFont(loadFontBytes('Georgia-Regular'));
-  const georgiaBold = await pdfDoc.embedFont(loadFontBytes('Georgia-Bold'));
-  const georgiaItalic = await pdfDoc.embedFont(loadFontBytes('Georgia-Italic'));
+  // Embed custom fonts for 1:1 matching (from base64)
+  const interRegular = await pdfDoc.embedFont(loadFontBytesBase64(Inter_24pt_Regular_ttf));
+  const interBold = await pdfDoc.embedFont(loadFontBytesBase64(Inter_24pt_Bold_ttf));
+  const interItalic = await pdfDoc.embedFont(loadFontBytesBase64(Inter_24pt_Italic_ttf));
+  const interMedium = await pdfDoc.embedFont(loadFontBytesBase64(Inter_24pt_Medium_ttf));
+  const georgiaRegular = await pdfDoc.embedFont(loadFontBytesBase64(georgia_ttf));
+  const georgiaBold = await pdfDoc.embedFont(loadFontBytesBase64(georgiab_ttf));
+  const georgiaItalic = await pdfDoc.embedFont(loadFontBytesBase64(georgiai_ttf));
 
   // Get template styling
   const templateData = getTemplateById(template) || getTemplateById('modern')!;
