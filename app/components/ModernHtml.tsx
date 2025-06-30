@@ -114,42 +114,10 @@ export default function ModernHtml({ data }: { data: FormData }) {
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, opacity: 0.9 }}>{summary}</p>
         </div>
       )}
-      {/* Skills */}
-      {skills && skills.length > 0 && (
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1, fontFamily: fonts.section }}>
-            Skills
-          </div>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Design Tools</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {skills.map((skill, idx) => (
-                <span key={idx} style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 8px', borderRadius: 12, fontSize: 12, color: 'white' }}>{skill}</span>
-              ))}
-            </div>
-          </div>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Front-End</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {skills.map((skill, idx) => (
-                <span key={idx} style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 8px', borderRadius: 12, fontSize: 12, color: 'white' }}>{skill}</span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Research</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {skills.map((skill, idx) => (
-                <span key={idx} style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 8px', borderRadius: 12, fontSize: 12, color: 'white' }}>{skill}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 
-  // Main content blocks (experience, education)
+  // Main content blocks (experience, education, skills)
   const mainBlocks: React.ReactNode[] = [];
   const refs: React.RefObject<HTMLDivElement>[] = [];
 
@@ -200,6 +168,22 @@ export default function ModernHtml({ data }: { data: FormData }) {
             <div style={{ fontSize: 15, color: '#333' }}>{edu.institution}</div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  // Skills (now in main content)
+  if (skills && skills.length > 0) {
+    const skillsRef = useRef<HTMLDivElement>(null!);
+    refs.push(skillsRef);
+    mainBlocks.push(
+      <div ref={skillsRef} key="skills" style={{ marginBottom: 40 }}>
+        <div style={sectionTitleStyle}>Skills</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          {skills.map((skill, i) => (
+            <span key={i} style={{ backgroundColor: styling.primaryColor, color: 'white', padding: '6px 14px', borderRadius: 16, fontSize: 13, marginBottom: 8 }}>{skill}</span>
+          ))}
+        </div>
       </div>
     );
   }

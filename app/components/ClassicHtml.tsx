@@ -215,7 +215,7 @@ export default function ClassicHtml({ data }: { data: FormData }) {
             <div key={i}>{block}</div>
           ))
         : pageBlocks.map((blocks, i) => (
-            <div className="resume-page" key={i} style={{ padding: 48, maxWidth: 750, margin: '0 auto', minHeight: A4_HEIGHT_PX, boxSizing: 'border-box' }}>
+            <div className="resume-page" key={i} style={{ padding: '48px 48px', maxWidth: 750, margin: '0 auto', minHeight: A4_HEIGHT_PX, boxSizing: 'border-box' }}>
               {blocks}
             </div>
           ))}
