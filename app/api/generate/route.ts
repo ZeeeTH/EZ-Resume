@@ -3,6 +3,8 @@ import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import nodemailer from 'nodemailer'
 import { getTemplateById } from '../../../data/templates'
+import fs from 'fs';
+import path from 'path';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -198,6 +200,22 @@ function checkRateLimit(ip: string): boolean {
 
   record.count++
   return true
+}
+
+// Font file paths
+const FONT_PATHS = {
+  'Inter-Regular': path.join(process.cwd(), 'public/fonts/Inter-Regular.ttf'),
+  'Inter-Bold': path.join(process.cwd(), 'public/fonts/Inter-Bold.ttf'),
+  'Inter-Italic': path.join(process.cwd(), 'public/fonts/Inter-Italic.ttf'),
+  'Inter-Medium': path.join(process.cwd(), 'public/fonts/Inter-Medium.ttf'),
+  'Georgia-Regular': path.join(process.cwd(), 'public/fonts/Georgia.ttf'),
+  'Georgia-Bold': path.join(process.cwd(), 'public/fonts/Georgia-Bold.ttf'),
+  'Georgia-Italic': path.join(process.cwd(), 'public/fonts/Georgia-Italic.ttf'),
+};
+
+// Helper to load font bytes
+function loadFontBytes(fontKey: keyof typeof FONT_PATHS) {
+  return fs.readFileSync(FONT_PATHS[fontKey]);
 }
 
 export async function POST(request: NextRequest) {
@@ -590,6 +608,15 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   const pdfDoc = await PDFDocument.create();
   let page = pdfDoc.addPage([612, 792]); // US Letter size
 
+  // Embed custom fonts for 1:1 matching
+  const interRegular = await pdfDoc.embedFont(loadFontBytes('Inter-Regular'));
+  const interBold = await pdfDoc.embedFont(loadFontBytes('Inter-Bold'));
+  const interItalic = await pdfDoc.embedFont(loadFontBytes('Inter-Italic'));
+  const interMedium = await pdfDoc.embedFont(loadFontBytes('Inter-Medium'));
+  const georgiaRegular = await pdfDoc.embedFont(loadFontBytes('Georgia-Regular'));
+  const georgiaBold = await pdfDoc.embedFont(loadFontBytes('Georgia-Bold'));
+  const georgiaItalic = await pdfDoc.embedFont(loadFontBytes('Georgia-Italic'));
+
   // Get template styling
   const templateData = getTemplateById(template) || getTemplateById('modern')!;
   const { primaryColor, secondaryColor, fontFamily, spacing } = templateData.styling;
@@ -621,27 +648,6 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   const primaryRGB = hexToRgb(finalPrimaryColor) || { r: 37, g: 99, b: 235 };
   const secondaryRGB = hexToRgb(finalSecondaryColor) || { r: 100, g: 116, b: 139 };
   console.log('[PDF] Final colors:', { finalPrimaryColor, finalSecondaryColor, primaryRGB, secondaryRGB });
-
-  // Font selection
-  let font: any, boldFont: any;
-  const family = (fontFamily || '').toLowerCase();
-  if (family === 'georgia' || family.includes('times')) {
-    font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-    boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-    console.log('[PDF] Using Times Roman font (serif).');
-  } else if (family.includes('helvetica') || family.includes('inter') || family.includes('arial')) {
-    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    console.log('[PDF] Using Helvetica font.');
-  } else if (family.includes('courier')) {
-    font = await pdfDoc.embedFont(StandardFonts.Courier);
-    boldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
-    console.log('[PDF] Using Courier font.');
-  } else {
-    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    console.log('[PDF] Unknown fontFamily, defaulting to Helvetica.');
-  }
 
   // Spacing configuration
   const spacingConfig = {
@@ -814,760 +820,31 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
     return null;
   }
 
-  // 3. Debug logging for template and section keys
-  console.log('[PDF] Using template:', templateData.id);
-  console.log('[PDF] Section keys available:', Object.keys(sectionsByKey));
-
-  // Template-specific rendering
+  // Only support structured template for now
   if (template === 'structured') {
-    // Structured: specific design with centered layout and two-column skills
-    await renderStructuredTemplate();
-  } else if (layoutConfig.sidebar && layoutConfig.main) {
-    // Modern: sidebar + main
-    await renderModernTemplate();
-  } else if (layoutConfig.main) {
-    // Classic: main only
-    await renderClassicOrStructuredTemplate();
+    await renderStructuredTemplate({
+      pdfDoc,
+      page,
+      resumeJson,
+      layoutConfig,
+      primaryRGB,
+      secondaryRGB,
+      margin,
+      yStart: y,
+      ensureSpace,
+      fonts: {
+        interRegular,
+        interBold,
+        interItalic,
+        interMedium,
+        georgiaRegular,
+        georgiaBold,
+        georgiaItalic,
+      },
+      getSectionByKey,
+    });
   } else {
-    throw new Error('[PDF] No valid layout config found.');
-  }
-
-  async function renderStructuredTemplate() {
-    try {
-      console.log('[PDF] Starting renderStructuredTemplate');
-      console.log('[PDF] Resume JSON:', JSON.stringify(resumeJson, null, 2));
-      console.log('[PDF] Layout config:', layoutConfig);
-      
-      // 1. HEADER FORMATTING
-      ensureSpace(60);
-      
-      // Name: Large, centered, bold
-      page.drawText(resumeJson.name || 'Your Name', {
-        x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 28) / 2),
-        y: y,
-        size: 28,
-        font: boldFont,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      y -= 35;
-
-      // Job title: Centered, smaller, ALL CAPS
-      if (resumeJson.title) {
-        const titleText = resumeJson.title.toUpperCase();
-        const titleWidth = font.widthOfTextAtSize(titleText, 16);
-        page.drawText(titleText, {
-          x: 306 - (titleWidth / 2),
-          y: y,
-          size: 16,
-          font: font,
-          color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-        });
-        y -= 25;
-      }
-
-      // Horizontal line separator below job title
-      page.drawLine({
-        start: { x: margin, y: y },
-        end: { x: 612 - margin, y: y },
-        thickness: 1,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      y -= 20;
-
-      // Contact info: CENTERED
-      if (resumeJson.contact) {
-        const contactInfo = [
-          resumeJson.contact.phone,
-          resumeJson.contact.email,
-          resumeJson.contact.location
-        ].filter(Boolean).join(' • ');
-        const contactWidth = font.widthOfTextAtSize(contactInfo, 12);
-        page.drawText(contactInfo, {
-          x: 306 - (contactWidth / 2),
-          y: y,
-          size: 12,
-          font: font,
-          color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-        });
-        y -= 25;
-      }
-
-      // Another horizontal line below contact
-      page.drawLine({
-        start: { x: margin, y: y },
-        end: { x: 612 - margin, y: y },
-        thickness: 1,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      y -= 20;
-
-      // 2. SECTIONS
-      for (const sectionKey of layoutConfig.main) {
-        if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
-        console.log(`[PDF] Processing section key: ${sectionKey}`);
-        const section = getSectionByKey(sectionKey);
-        if (!section) {
-          console.log(`[PDF] Section not found for key: ${sectionKey}, skipping`);
-          continue;
-        }
-        console.log(`[PDF] Found section: ${section.title}`);
-        ensureSpace(40);
-
-        // Section header: Bold, left-aligned, with underline
-        const sectionTitle = section.title.toUpperCase();
-        const titleWidth = boldFont.widthOfTextAtSize(sectionTitle, 16);
-        page.drawText(sectionTitle, {
-          x: margin,
-          y: y,
-          size: 16,
-          font: boldFont,
-          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-        });
-        // Draw underline
-        page.drawLine({
-          start: { x: margin, y: y - 2 },
-          end: { x: margin + titleWidth, y: y - 2 },
-          thickness: 1,
-          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-        });
-        y -= 25;
-
-        // Section content (summary)
-        if (section.content) {
-          const lines = wrapText(section.content, 612 - 2 * margin, font, 12);
-          for (const line of lines) {
-            page.drawText(line, {
-              x: margin,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(0, 0, 0)
-            });
-            y -= 16;
-          }
-          y -= 10;
-        }
-
-        // 3. PROFESSIONAL EXPERIENCE
-        if (section.jobs) {
-          console.log(`[PDF] Processing ${section.jobs.length} jobs`);
-          for (const job of section.jobs) {
-            // Company: Bold, left-aligned, all caps
-            const companyText = job.company.toUpperCase();
-            page.drawText(companyText, {
-              x: margin,
-              y: y,
-              size: 14,
-              font: boldFont,
-              color: rgb(0, 0, 0)
-            });
-            y -= 18;
-
-            // Job title and dates on same line
-            const jobTitle = job.title;
-            const dateWidth = font.widthOfTextAtSize(job.dates, 12);
-            
-            // Job title: Regular weight, left-aligned
-            page.drawText(jobTitle, {
-              x: margin,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(0, 0, 0)
-            });
-
-            // Dates: Right-aligned on same line as job title
-            page.drawText(job.dates, {
-              x: 612 - margin - dateWidth,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-            });
-            y -= 18;
-
-            // Bullets: Standard bullet points, properly indented
-            if (job.bullets) {
-              for (const bullet of job.bullets) {
-                const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 11);
-                for (const line of lines) {
-                  page.drawText(line, {
-                    x: margin + 10,
-                    y: y,
-                    size: 11,
-                    font: font,
-                    color: rgb(0, 0, 0)
-                  });
-                  y -= 14;
-                }
-              }
-            }
-            y -= 8;
-          }
-        }
-
-        // 4. EDUCATION
-        if (section.education) {
-          console.log(`[PDF] Processing ${section.education.length} education entries`);
-          for (const edu of section.education) {
-            // Degree: Bold, left-aligned, all caps
-            const degreeText = edu.degree.toUpperCase();
-            page.drawText(degreeText, {
-              x: margin,
-              y: y,
-              size: 14,
-              font: boldFont,
-              color: rgb(0, 0, 0)
-            });
-            y -= 18;
-
-            // Institution and dates on same line
-            const institution = edu.institution;
-            const dateWidth = font.widthOfTextAtSize(edu.dates, 12);
-            
-            // Institution: Regular weight, left-aligned
-            page.drawText(institution, {
-              x: margin,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(0, 0, 0)
-            });
-
-            // Dates: Right-aligned
-            if (edu.dates) {
-              page.drawText(edu.dates, {
-                x: 612 - margin - dateWidth,
-                y: y,
-                size: 12,
-                font: font,
-                color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-              });
-            }
-            y -= 20;
-          }
-        }
-
-        // 5. SKILLS: True two-column layout with regular bullet points
-        if (section.categories) {
-          console.log(`[PDF] Processing skills categories`);
-          for (const [cat, skills] of Object.entries(section.categories)) {
-            // Category title
-            page.drawText(cat, {
-              x: margin,
-              y: y,
-              size: 14,
-              font: boldFont,
-              color: rgb(0, 0, 0)
-            });
-            y -= 20;
-
-            if (Array.isArray(skills)) {
-              // True two-column layout for skills with regular bullet points
-              const columnWidth = (612 - 2 * margin - 20) / 2; // 20px gap between columns
-              const leftColumnX = margin;
-              const rightColumnX = margin + columnWidth + 20;
-              let leftColumnY = y;
-              let rightColumnY = y;
-              let useLeftColumn = true;
-
-              for (const skill of skills) {
-                const skillText = `• ${skill}`;
-                const currentX = useLeftColumn ? leftColumnX : rightColumnX;
-                const currentY = useLeftColumn ? leftColumnY : rightColumnY;
-
-                page.drawText(skillText, {
-                  x: currentX,
-                  y: currentY,
-                  size: 11,
-                  font: font,
-                  color: rgb(0, 0, 0)
-                });
-
-                if (useLeftColumn) {
-                  leftColumnY -= 16;
-                  useLeftColumn = false;
-                } else {
-                  rightColumnY -= 16;
-                  useLeftColumn = true;
-                }
-              }
-
-              // Update y position to the lower of the two columns
-              y = Math.min(leftColumnY, rightColumnY) - 10;
-            }
-            y -= 15;
-          }
-        }
-      }
-      console.log('[PDF] renderStructuredTemplate completed successfully');
-    } catch (error) {
-      console.error('[PDF] Error in renderStructuredTemplate:', error);
-      throw error;
-    }
-  }
-
-  async function renderClassicOrStructuredTemplate() {
-    // Header with name - large and centered, serif font
-    ensureSpace(50);
-    page.drawText(resumeJson.name || 'Your Name', {
-      x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 28) / 2),
-      y: y,
-      size: 28,
-      font: boldFont,
-      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-    });
-    y -= 35;
-    // Job title - centered and styled
-    if (resumeJson.title) {
-      const titleWidth = font.widthOfTextAtSize(resumeJson.title, 14);
-      page.drawText(resumeJson.title, {
-        x: 306 - (titleWidth / 2),
-        y: y,
-        size: 14,
-        font: font,
-        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-      });
-      y -= 25;
-    }
-    // Contact information - centered
-    if (resumeJson.contact) {
-      const contactInfo = [
-        resumeJson.contact.email,
-        resumeJson.contact.phone,
-        resumeJson.contact.location
-      ].filter(Boolean).join(' • ');
-      const contactWidth = font.widthOfTextAtSize(contactInfo, 12);
-      page.drawText(contactInfo, {
-        x: 306 - (contactWidth / 2),
-        y: y,
-        size: 12,
-        font: font,
-        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-      });
-      y -= 30;
-    }
-    // Sections with traditional formatting
-    for (const sectionKey of layoutConfig.main) {
-      if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
-      const section = getSectionByKey(sectionKey);
-      if (!section) continue;
-      ensureSpace(40);
-      // Section title - underlined, left-aligned
-      const titleWidth = boldFont.widthOfTextAtSize(section.title.toUpperCase(), 16);
-      page.drawText(section.title.toUpperCase(), {
-        x: margin,
-        y: y,
-        size: 16,
-        font: boldFont,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      // Draw underline
-      page.drawLine({
-        start: { x: margin, y: y - 2 },
-        end: { x: margin + titleWidth, y: y - 2 },
-        thickness: 1,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      y -= 25;
-      // Section content (summary, experience, education, skills)
-      if (section.content) {
-        const lines = wrapText(section.content, 612 - 2 * margin, font, 12);
-        for (const line of lines) {
-          page.drawText(line, {
-            x: margin,
-            y: y,
-            size: 12,
-            font: font,
-            color: rgb(0, 0, 0)
-          });
-          y -= 16;
-        }
-        y -= 5;
-      }
-      if (section.jobs) {
-        for (const job of section.jobs) {
-          page.drawText(job.title, {
-            x: margin,
-            y: y,
-            size: 12,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          y -= 15;
-          page.drawText(`${job.company} | ${job.location} | ${job.dates}`, {
-            x: margin,
-            y: y,
-            size: 10,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          y -= 15;
-          if (job.bullets) {
-            for (const bullet of job.bullets) {
-              const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 10);
-              for (const line of lines) {
-                page.drawText(line, {
-                  x: margin + 10,
-                  y: y,
-                  size: 10,
-                  font: font,
-                  color: rgb(0, 0, 0)
-                });
-                y -= 13;
-              }
-            }
-          }
-          y -= 8;
-        }
-      }
-      if (section.education) {
-        for (const edu of section.education) {
-          page.drawText(edu.degree, {
-            x: margin,
-            y: y,
-            size: 10,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          y -= 12;
-          page.drawText(edu.institution, {
-            x: margin,
-            y: y,
-            size: 9,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          y -= 10;
-          if (edu.dates) {
-            page.drawText(edu.dates, {
-              x: margin,
-              y: y,
-              size: 9,
-              font: font,
-              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-            });
-            y -= 10;
-          }
-          y -= 5;
-        }
-      }
-      if (section.categories) {
-        for (const [cat, skills] of Object.entries(section.categories)) {
-          page.drawText(cat, {
-            x: margin,
-            y: y,
-            size: 11,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          y -= 15;
-          if (Array.isArray(skills)) {
-            const skillsText = skills.join(', ');
-            const lines = wrapText(skillsText, 612 - 2 * margin - 10, font, 9);
-            for (const line of lines) {
-              page.drawText(line, {
-                x: margin + 10,
-                y: y,
-                size: 9,
-                font: font,
-                color: rgb(0, 0, 0)
-              });
-              y -= 12;
-            }
-          }
-          y -= 8;
-        }
-      }
-    }
-  }
-
-  async function renderModernTemplate() {
-    // Two-column layout with sidebar
-    const sidebarWidth = 180;
-    const mainContentWidth = 612 - sidebarWidth - (margin * 2);
-    const sidebarX = margin;
-    const mainContentX = margin + sidebarWidth + 20;
-
-    // Header with name - spans full width
-    ensureSpace(40);
-    page.drawText(resumeJson.name || 'Your Name', {
-      x: margin,
-      y: y,
-      size: 26,
-      font: boldFont,
-      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-    });
-    y -= 30;
-
-    // Job title - spans full width
-    if (resumeJson.title) {
-      page.drawText(resumeJson.title, {
-        x: margin,
-        y: y,
-        size: 14,
-        font: font,
-        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-      });
-      y -= 20;
-    }
-
-    // Contact information - spans full width
-    if (resumeJson.contact) {
-      const contactInfo = [
-        resumeJson.contact.email,
-        resumeJson.contact.phone,
-        resumeJson.contact.location
-      ].filter(Boolean).join(' • ');
-      page.drawText(contactInfo, {
-        x: margin,
-        y: y,
-        size: 11,
-        font: font,
-        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-      });
-      y -= 25;
-    }
-
-    // Draw separator line
-    page.drawLine({
-      start: { x: margin, y: y - 10 },
-      end: { x: 612 - margin, y: y - 10 },
-      thickness: 1,
-      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-    });
-    y -= 20;
-
-    // Sidebar: render sections in layoutConfig.sidebar
-    let sidebarY = y;
-    for (const sectionKey of layoutConfig.sidebar) {
-      const section = getSectionByKey(sectionKey);
-      if (!section) continue;
-      // Skills section
-      if (section.categories) {
-        page.drawText(section.title.toUpperCase(), {
-          x: sidebarX,
-          y: sidebarY,
-          size: 14,
-          font: boldFont,
-          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-        });
-        sidebarY -= 20;
-        for (const [category, skills] of Object.entries(section.categories)) {
-          page.drawText(category, {
-            x: sidebarX,
-            y: sidebarY,
-            size: 11,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          sidebarY -= 15;
-          if (Array.isArray(skills)) {
-            const skillsText = skills.join(', ');
-            const lines = wrapText(skillsText, sidebarWidth - 10, font, 9);
-            for (const line of lines) {
-              page.drawText(line, {
-                x: sidebarX,
-                y: sidebarY,
-                size: 9,
-                font: font,
-                color: rgb(0, 0, 0)
-              });
-              sidebarY -= 12;
-            }
-          }
-          sidebarY -= 8;
-        }
-      }
-      // Education section
-      if (section.education) {
-        page.drawText(section.title.toUpperCase(), {
-          x: sidebarX,
-          y: sidebarY,
-          size: 14,
-          font: boldFont,
-          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-        });
-        sidebarY -= 20;
-        for (const edu of section.education) {
-          page.drawText(edu.degree, {
-            x: sidebarX,
-            y: sidebarY,
-            size: 10,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          sidebarY -= 12;
-          page.drawText(edu.institution, {
-            x: sidebarX,
-            y: sidebarY,
-            size: 9,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          sidebarY -= 10;
-          if (edu.dates) {
-            page.drawText(edu.dates, {
-              x: sidebarX,
-              y: sidebarY,
-              size: 9,
-              font: font,
-              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-            });
-            sidebarY -= 10;
-          }
-          sidebarY -= 5;
-        }
-      }
-      // Content section (summary, etc.)
-      if (section.content) {
-        page.drawText(section.title.toUpperCase(), {
-          x: sidebarX,
-          y: sidebarY,
-          size: 14,
-          font: boldFont,
-          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-        });
-        sidebarY -= 20;
-        const lines = wrapText(section.content, sidebarWidth - 10, font, 9);
-        for (const line of lines) {
-          page.drawText(line, {
-            x: sidebarX,
-            y: sidebarY,
-            size: 9,
-            font: font,
-            color: rgb(0, 0, 0)
-          });
-          sidebarY -= 12;
-        }
-        sidebarY -= 8;
-      }
-    }
-
-    // Main content: render sections in layoutConfig.main
-    let mainY = y;
-    for (const sectionKey of layoutConfig.main) {
-      const section = getSectionByKey(sectionKey);
-      if (!section) continue;
-      // Section title
-      page.drawText(section.title.toUpperCase(), {
-        x: mainContentX,
-        y: mainY,
-        size: 14,
-        font: boldFont,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      mainY -= 20;
-      // Section content
-      if (section.content) {
-        const lines = wrapText(section.content, mainContentWidth, font, 11);
-        for (const line of lines) {
-          page.drawText(line, {
-            x: mainContentX,
-            y: mainY,
-            size: 11,
-            font: font,
-            color: rgb(0, 0, 0)
-          });
-          mainY -= 15;
-        }
-        mainY -= 10;
-      }
-      if (section.jobs) {
-        for (const job of section.jobs) {
-          page.drawText(job.title, {
-            x: mainContentX,
-            y: mainY,
-            size: 12,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          mainY -= 15;
-          page.drawText(`${job.company} | ${job.location} | ${job.dates}`, {
-            x: mainContentX,
-            y: mainY,
-            size: 10,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          mainY -= 15;
-          if (job.bullets) {
-            for (const bullet of job.bullets) {
-              const lines = wrapText(`• ${bullet}`, mainContentWidth - 10, font, 10);
-              for (const line of lines) {
-                page.drawText(line, {
-                  x: mainContentX + 10,
-                  y: mainY,
-                  size: 10,
-                  font: font,
-                  color: rgb(0, 0, 0)
-                });
-                mainY -= 13;
-              }
-            }
-          }
-          mainY -= 8;
-        }
-      }
-      if (section.education) {
-        for (const edu of section.education) {
-          page.drawText(edu.degree, {
-            x: mainContentX,
-            y: mainY,
-            size: 10,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          mainY -= 12;
-          page.drawText(edu.institution, {
-            x: mainContentX,
-            y: mainY,
-            size: 9,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          mainY -= 10;
-          if (edu.dates) {
-            page.drawText(edu.dates, {
-              x: mainContentX,
-              y: mainY,
-              size: 9,
-              font: font,
-              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-            });
-            mainY -= 10;
-          }
-          mainY -= 5;
-        }
-      }
-      if (section.categories) {
-        for (const [cat, skills] of Object.entries(section.categories)) {
-          page.drawText(cat, {
-            x: mainContentX,
-            y: mainY,
-            size: 11,
-            font: boldFont,
-            color: rgb(0, 0, 0)
-          });
-          mainY -= 15;
-          if (Array.isArray(skills)) {
-            const skillsText = skills.join(', ');
-            const lines = wrapText(skillsText, mainContentWidth - 10, font, 9);
-            for (const line of lines) {
-              page.drawText(line, {
-                x: mainContentX + 10,
-                y: mainY,
-                size: 9,
-                font: font,
-                color: rgb(0, 0, 0)
-              });
-              mainY -= 12;
-            }
-          }
-          mainY -= 8;
-        }
-      }
-    }
+    throw new Error('Only the structured template is currently supported for PDF generation.');
   }
 
   return await pdfDoc.save();
@@ -1786,4 +1063,273 @@ function buildEmailHtml({ name, coverLetter }: { name: string; coverLetter: bool
     </div>
   </body>
 </html>`;
+}
+
+async function renderStructuredTemplate({
+  pdfDoc,
+  page,
+  resumeJson,
+  layoutConfig,
+  primaryRGB,
+  secondaryRGB,
+  margin,
+  yStart,
+  ensureSpace,
+  fonts,
+  getSectionByKey,
+}: {
+  pdfDoc: any,
+  page: any,
+  resumeJson: any,
+  layoutConfig: any,
+  primaryRGB: any,
+  secondaryRGB: any,
+  margin: number,
+  yStart: number,
+  ensureSpace: (neededSpace?: number) => void,
+  fonts: {
+    interRegular: any,
+    interBold: any,
+    interItalic: any,
+    interMedium: any,
+    georgiaRegular: any,
+    georgiaBold: any,
+    georgiaItalic: any,
+  },
+  getSectionByKey: (key: string) => any,
+}) {
+  let y = yStart;
+  try {
+    // HEADER
+    ensureSpace(80);
+    // Name: Georgia Bold, 36pt, centered
+    const nameFontSize = 36;
+    const name = resumeJson.name || 'Your Name';
+    page.drawText(name, {
+      x: 306 - (fonts.georgiaBold.widthOfTextAtSize(name, nameFontSize) / 2),
+      y,
+      size: nameFontSize,
+      font: fonts.georgiaBold,
+      color: rgb(0.14, 0.15, 0.17), // #23272B
+    });
+    y -= 38;
+    // Job Title: Inter Medium, 16pt, all caps, centered
+    if (resumeJson.title) {
+      const jobTitle = resumeJson.title.toUpperCase();
+      const jobFontSize = 16;
+      const jobFont = fonts.interMedium;
+      const jobWidth = jobFont.widthOfTextAtSize(jobTitle, jobFontSize);
+      page.drawText(jobTitle, {
+        x: 306 - (jobWidth / 2),
+        y,
+        size: jobFontSize,
+        font: jobFont,
+        color: rgb(0.14, 0.15, 0.17),
+      });
+      y -= 24;
+    }
+    // Line below job title
+    page.drawLine({
+      start: { x: margin, y: y },
+      end: { x: 612 - margin, y: y },
+      thickness: 1.2,
+      color: rgb(0.14, 0.15, 0.17),
+    });
+    y -= 18;
+    // Contact info: Inter Regular, 12pt, centered
+    if (resumeJson.contact) {
+      const contactInfo = [
+        resumeJson.contact.phone,
+        resumeJson.contact.email,
+        resumeJson.contact.location
+      ].filter(Boolean).join(' • ');
+      const contactFontSize = 12;
+      const contactWidth = fonts.interRegular.widthOfTextAtSize(contactInfo, contactFontSize);
+      page.drawText(contactInfo, {
+        x: 306 - (contactWidth / 2),
+        y,
+        size: contactFontSize,
+        font: fonts.interRegular,
+        color: rgb(0.14, 0.15, 0.17),
+      });
+      y -= 18;
+    }
+    // Line below contact
+    page.drawLine({
+      start: { x: margin, y: y },
+      end: { x: 612 - margin, y: y },
+      thickness: 1.2,
+      color: rgb(0.14, 0.15, 0.17),
+    });
+    y -= 28;
+    // Summary (italic, centered)
+    const summarySection = getSectionByKey('summary');
+    if (summarySection && summarySection.content) {
+      const summaryFontSize = 13;
+      const lines = wrapText(summarySection.content, 612 - 2 * margin, fonts.interItalic, summaryFontSize);
+      for (const line of lines) {
+        const lineWidth = fonts.interItalic.widthOfTextAtSize(line, summaryFontSize);
+        page.drawText(line, {
+          x: 306 - (lineWidth / 2),
+          y,
+          size: summaryFontSize,
+          font: fonts.interItalic,
+          color: rgb(0.14, 0.15, 0.17),
+        });
+        y -= 18;
+      }
+      y -= 10;
+    }
+    // Render all other sections
+    for (const sectionKey of layoutConfig.main) {
+      if (['name', 'title', 'contact', 'summary'].includes(sectionKey)) continue;
+      const section = getSectionByKey(sectionKey);
+      if (!section) continue;
+      ensureSpace(60);
+      // Section Header: Inter Bold, 18pt, all caps, left, underline/line below
+      const sectionTitle = section.title.toUpperCase();
+      const sectionFontSize = 18;
+      page.drawText(sectionTitle, {
+        x: margin,
+        y,
+        size: sectionFontSize,
+        font: fonts.interBold,
+        color: rgb(0.14, 0.15, 0.17),
+      });
+      // Line below section header
+      const titleWidth = fonts.interBold.widthOfTextAtSize(sectionTitle, sectionFontSize);
+      page.drawLine({
+        start: { x: margin, y: y - 2 },
+        end: { x: margin + titleWidth + 10, y: y - 2 },
+        thickness: 2,
+        color: rgb(0.14, 0.15, 0.17),
+      });
+      y -= 28;
+      // Experience Section
+      if (section.jobs) {
+        for (const job of section.jobs) {
+          // Company: Inter Bold, 13pt, all caps
+          const companyText = job.company.toUpperCase();
+          page.drawText(companyText, {
+            x: margin,
+            y,
+            size: 13,
+            font: fonts.interBold,
+            color: rgb(0.14, 0.15, 0.17),
+          });
+          y -= 16;
+          // Job Title: Inter Regular, 13pt, left; Dates: Inter Italic, 12pt, right
+          page.drawText(job.title, {
+            x: margin,
+            y,
+            size: 13,
+            font: fonts.interRegular,
+            color: rgb(0.14, 0.15, 0.17),
+          });
+          if (job.dates) {
+            const dateFontSize = 12;
+            const dateWidth = fonts.interItalic.widthOfTextAtSize(job.dates, dateFontSize);
+            page.drawText(job.dates, {
+              x: 612 - margin - dateWidth,
+              y,
+              size: dateFontSize,
+              font: fonts.interItalic,
+              color: rgb(0.14, 0.15, 0.17),
+            });
+          }
+          y -= 16;
+          // Bullets: Inter Regular, 12pt, bullet, indented
+          if (job.bullets) {
+            for (const bullet of job.bullets) {
+              const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, fonts.interRegular, 12);
+              for (const line of lines) {
+                page.drawText(line, {
+                  x: margin + 10,
+                  y,
+                  size: 12,
+                  font: fonts.interRegular,
+                  color: rgb(0.14, 0.15, 0.17),
+                });
+                y -= 15;
+              }
+            }
+          }
+          y -= 6;
+        }
+      }
+      // Education Section
+      if (section.education) {
+        for (const edu of section.education) {
+          // Degree: Inter Bold, 13pt, all caps
+          const degreeText = edu.degree.toUpperCase();
+          page.drawText(degreeText, {
+            x: margin,
+            y,
+            size: 13,
+            font: fonts.interBold,
+            color: rgb(0.14, 0.15, 0.17),
+          });
+          // Dates: Inter Italic, 12pt, right
+          if (edu.dates) {
+            const dateFontSize = 12;
+            const dateWidth = fonts.interItalic.widthOfTextAtSize(edu.dates, dateFontSize);
+            page.drawText(edu.dates, {
+              x: 612 - margin - dateWidth,
+              y,
+              size: dateFontSize,
+              font: fonts.interItalic,
+              color: rgb(0.14, 0.15, 0.17),
+            });
+          }
+          y -= 16;
+          // Institution: Inter Regular, 13pt
+          page.drawText(edu.institution, {
+            x: margin,
+            y,
+            size: 13,
+            font: fonts.interRegular,
+            color: rgb(0.14, 0.15, 0.17),
+          });
+          y -= 22;
+        }
+      }
+      // Skills Section: two columns, Inter Regular, 12pt, bullets
+      if (section.categories) {
+        // Draw a line under the section header (already done above)
+        // Flatten all skills into a single array for two columns
+        const allSkills: string[] = [];
+        for (const skills of Object.values(section.categories)) {
+          if (Array.isArray(skills)) allSkills.push(...skills);
+        }
+        const colCount = 2;
+        const colWidth = (612 - 2 * margin - 20) / colCount;
+        const colX = [margin, margin + colWidth + 20];
+        const colY = [y, y];
+        for (let i = 0; i < allSkills.length; i++) {
+          const col = i % 2;
+          const skill = `• ${allSkills[i]}`;
+          page.drawText(skill, {
+            x: colX[col],
+            y: colY[col],
+            size: 12,
+            font: fonts.interRegular,
+            color: rgb(0.14, 0.15, 0.17),
+          });
+          colY[col] -= 16;
+        }
+        y = Math.min(...colY) - 10;
+        // Draw a line under the skills section
+        page.drawLine({
+          start: { x: margin, y },
+          end: { x: 612 - margin, y },
+          thickness: 1.2,
+          color: rgb(0.14, 0.15, 0.17),
+        });
+        y -= 10;
+      }
+    }
+  } catch (error) {
+    console.error('[PDF] Error in renderStructuredTemplate:', error);
+    throw error;
+  }
 } 
