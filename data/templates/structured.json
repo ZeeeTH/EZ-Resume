@@ -7,7 +7,7 @@
   "styling": {
     "primaryColor": "#374151",
     "secondaryColor": "#6B7280",
-    "fontFamily": "Helvetica",
+    "fontFamily": "Georgia",
     "spacing": "standard",
     "layout": "single-column-centered-header"
   },

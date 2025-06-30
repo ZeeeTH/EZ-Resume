@@ -682,15 +682,135 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   }
   // 2. Helper for case-insensitive section matching
   function getSectionByKey(key: string) {
-    if (!key) return undefined;
-    const section = sectionsByKey[key.toLowerCase()];
-    if (!section) {
-      console.log(`[PDF] Section not found for key: '${key}'`);
-    } else {
-      console.log(`[PDF] Matched section for key: '${key}'`);
+    // 1. Comprehensive alias mapping for common variations
+    const aliasMap: { [key: string]: string[] } = {
+      'summary': ['professional summary', 'profile', 'objective', 'summary', 'personal summary'],
+      'experience': ['professional experience', 'work experience', 'employment', 'experience', 'work history'],
+      'education': ['education', 'academic background', 'academic', 'qualifications'],
+      'skills': ['skills', 'competencies', 'abilities', 'technical skills', 'expertise'],
+      'contact': ['contact', 'contact information', 'contact details'],
+      'name': ['name', 'full name'],
+      'title': ['title', 'job title', 'position']
+    };
+
+    // 2. Helper function to normalize text for fuzzy matching
+    function normalizeText(text: string): string {
+      return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '') // Remove punctuation
+        .replace(/\s+/g, ' ') // Normalize spaces
+        .trim();
     }
-    return section;
+
+    // 3. Helper function to remove common prefixes
+    function removePrefixes(text: string): string {
+      const prefixes = ['professional', 'work', 'academic', 'personal'];
+      let normalized = text.toLowerCase();
+      for (const prefix of prefixes) {
+        if (normalized.startsWith(prefix + ' ')) {
+          normalized = normalized.substring(prefix.length + 1);
+        }
+      }
+      return normalized;
+    }
+
+    // 4. Helper function to handle singular/plural forms
+    function getSingularPluralForms(text: string): string[] {
+      const forms = [text];
+      if (text.endsWith('s')) {
+        forms.push(text.slice(0, -1)); // Remove 's' for singular
+      } else {
+        forms.push(text + 's'); // Add 's' for plural
+      }
+      return forms;
+    }
+
+    // 5. Try exact match first
+    let section = sectionsByKey[key];
+    if (section) {
+      console.log(`[PDF] Exact match found for key: '${key}'`);
+      return section;
+    }
+
+    // 6. Try alias mapping
+    const aliases = aliasMap[key];
+    if (aliases) {
+      for (const alias of aliases) {
+        section = sectionsByKey[alias];
+        if (section) {
+          console.log(`[PDF] Alias match found for key: '${key}' -> '${alias}'`);
+          return section;
+        }
+      }
+    }
+
+    // 7. Try fuzzy matching with normalized keys
+    const normalizedKey = normalizeText(key);
+    const normalizedKeyNoPrefix = removePrefixes(normalizedKey);
+    
+    // Get all possible forms of the key
+    const keyForms = [
+      normalizedKey,
+      normalizedKeyNoPrefix,
+      ...getSingularPluralForms(normalizedKey),
+      ...getSingularPluralForms(normalizedKeyNoPrefix)
+    ];
+
+    // Try matching against all section titles
+    for (const sectionTitle of Object.keys(sectionsByKey)) {
+      const normalizedTitle = normalizeText(sectionTitle);
+      const normalizedTitleNoPrefix = removePrefixes(normalizedTitle);
+      
+      const titleForms = [
+        normalizedTitle,
+        normalizedTitleNoPrefix,
+        ...getSingularPluralForms(normalizedTitle),
+        ...getSingularPluralForms(normalizedTitleNoPrefix)
+      ];
+
+      // Check if any key form matches any title form
+      for (const keyForm of keyForms) {
+        for (const titleForm of titleForms) {
+          if (keyForm === titleForm) {
+            section = sectionsByKey[sectionTitle];
+            if (section) {
+              console.log(`[PDF] Fuzzy match found for key: '${key}' -> '${sectionTitle}'`);
+              return section;
+            }
+          }
+        }
+      }
+    }
+
+    // 8. Fallback: try partial matching
+    for (const sectionTitle of Object.keys(sectionsByKey)) {
+      const normalizedTitle = normalizeText(sectionTitle);
+      const normalizedKey = normalizeText(key);
+      
+      if (normalizedTitle.includes(normalizedKey) || normalizedKey.includes(normalizedTitle)) {
+        section = sectionsByKey[sectionTitle];
+        if (section) {
+          console.log(`[PDF] Partial match found for key: '${key}' -> '${sectionTitle}'`);
+          return section;
+        }
+      }
+    }
+
+    // 9. Final fallback: try case-insensitive exact match
+    for (const sectionTitle of Object.keys(sectionsByKey)) {
+      if (sectionTitle.toLowerCase() === key.toLowerCase()) {
+        section = sectionsByKey[sectionTitle];
+        if (section) {
+          console.log(`[PDF] Case-insensitive match found for key: '${key}' -> '${sectionTitle}'`);
+          return section;
+        }
+      }
+    }
+
+    console.log(`[PDF] No match found for key: '${key}'`);
+    return null;
   }
+
   // 3. Debug logging for template and section keys
   console.log('[PDF] Using template:', templateData.id);
   console.log('[PDF] Section keys available:', Object.keys(sectionsByKey));
