@@ -11,6 +11,9 @@ import { Inter_24pt_Medium_ttf } from '../../../lib/fonts/inter_24pt-medium.js';
 import { georgia_ttf } from '../../../lib/fonts/georgia.js';
 import { georgiab_ttf } from '../../../lib/fonts/georgiab.js';
 import { georgiai_ttf } from '../../../lib/fonts/georgiai.js';
+import ReactDOMServer from 'react-dom/server';
+import React from 'react';
+import ResumeHtml from '../../../app/components/ResumeHtml';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -269,126 +272,32 @@ export async function POST(request: NextRequest) {
     }
     console.log('Gmail credentials found')
 
-    // Generate resume content using OpenAI
-    console.log('Generating resume with OpenAI...')
-    console.log('Form data received:', JSON.stringify(formData, null, 2))
-    
-    const resumePrompt = createResumePrompt(formData)
-    console.log('Resume prompt created, length:', resumePrompt.length)
-    
-    const resumeResponse = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional resume writer. Return only valid JSON as specified in the prompt.'
-        },
-        {
-          role: 'user',
-          content: resumePrompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    })
+    // Render the resume HTML using the new ResumeHtml component
+    const resumeHtml = ReactDOMServer.renderToStaticMarkup(
+      React.createElement(ResumeHtml, { data: formData })
+    );
 
-    const resumeContent = resumeResponse.choices[0]?.message?.content || ''
-    console.log('Resume content generated, length:', resumeContent.length)
-    console.log('Resume content preview:', resumeContent.substring(0, 200))
+    // Call the Puppeteer PDF service
+    const response = await fetch('https://puppeteer-pdf-service-981431761351.us-central1.run.app/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: resumeHtml }),
+    });
 
-    let resumeJson
-    try {
-      resumeJson = JSON.parse(resumeContent)
-      console.log('Resume JSON parsed successfully:', JSON.stringify(resumeJson, null, 2))
-    } catch (parseError) {
-      console.error('Failed to parse resume JSON:', parseError)
-      console.error('Raw content that failed to parse:', resumeContent)
-      return NextResponse.json(
-        { success: false, error: 'Failed to generate resume content' },
-        { status: 500 }
-      )
+    if (!response.ok) {
+      return new NextResponse('Failed to generate PDF', { status: 500 });
     }
 
-    // Ensure job title is included in the resume JSON if provided by user
-    if (!resumeJson.title && formData.jobTitle && formData.jobTitle.trim()) {
-      resumeJson.title = formData.jobTitle.trim()
-    }
+    const pdfBuffer = await response.arrayBuffer();
 
-    // Create PDFs using AI-generated content
-    console.log('Creating PDF with template:', formData.template)
-    console.log('Resume JSON for PDF:', JSON.stringify(resumeJson, null, 2))
-    
-    const resumePdf = await createResumePDF(resumeJson, formData.template, formData.selectedColors)
-    console.log('Resume PDF created, size:', resumePdf.length)
-    
-    if (resumePdf.length === 0) {
-      console.error('❌ Resume PDF is empty!')
-    } else {
-      console.log('✅ Resume PDF created successfully with content')
-    }
-    
-    let coverLetterPdf: Uint8Array | null = null
-
-    if (formData.coverLetter && formData.company) {
-      console.log('Generating cover letter...')
-      const coverLetterPrompt = createCoverLetterPrompt(formData)
-      const coverLetterResponse = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional cover letter writer. Create a compelling, personalized cover letter based on the provided information. Return ONLY the cover letter content, no additional text.'
-          },
-          {
-            role: 'user',
-            content: coverLetterPrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500,
-      })
-
-      const aiCoverLetterContent = coverLetterResponse.choices[0]?.message?.content || ''
-      coverLetterPdf = await createCoverLetterPDF(aiCoverLetterContent, formData)
-      console.log('Cover letter PDF created, size:', coverLetterPdf.length)
-    }
-
-    // Send email with PDFs attached
-    console.log('Sending email to:', formData.email)
-    try {
-      console.log('Verifying email transporter...')
-      await transporter.verify()
-      console.log('Email transporter verified successfully')
-      
-      console.log('Sending email with PDFs...')
-      await sendEmailWithTwoPdfs(formData.email, resumePdf, coverLetterPdf, formData.name, formData.coverLetter)
-      console.log('Email sent successfully')
-    } catch (emailError: any) {
-      console.error('Email sending failed:', emailError)
-      console.error('Error code:', emailError.code)
-      console.error('Error message:', emailError.message)
-      
-      // Provide more specific error messages
-      let errorMessage = 'Failed to send email. Please try again.'
-      if (emailError.code === 'EAUTH') {
-        errorMessage = 'Email authentication failed. Please check Gmail settings.'
-      } else if (emailError.code === 'ECONNECTION') {
-        errorMessage = 'Email connection failed. Please try again later.'
-      } else if (emailError.message?.includes('Invalid login')) {
-        errorMessage = 'Gmail authentication failed. Please check your app password.'
-      }
-      
-      return NextResponse.json(
-        { success: false, error: errorMessage },
-        { status: 500 }
-      )
-    }
-
-    console.log('Resume generation completed successfully')
-    return NextResponse.json({
-      success: true,
-      message: 'Resume (and cover letter) generated and sent successfully!'
-    })
+    // Return the PDF as a response
+    return new NextResponse(Buffer.from(pdfBuffer), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="resume.pdf"',
+      },
+    });
 
   } catch (error) {
     console.error('Error generating resume:', error)
