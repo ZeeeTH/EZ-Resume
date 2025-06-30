@@ -1,96 +1,373 @@
 import React from 'react';
-import modernTemplate from '../../data/templates/modern.json';
+import { getTemplateById } from '../../data/templates/index';
 import { FormData } from '../../types';
 
 export default function ModernHtml({ data }: { data: FormData }) {
-  const { styling } = modernTemplate;
+  const template = getTemplateById('modern')!;
+  const { styling, fonts } = template;
+  
   const sectionTitleStyle = {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 700,
     color: styling.primaryColor,
-    margin: '40px 0 16px 0',
-    borderBottom: `2px solid ${styling.secondaryColor}`,
-    paddingBottom: 4,
+    margin: '32px 0 16px 0',
+    borderBottom: `3px solid ${styling.primaryColor}`,
+    paddingBottom: 8,
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
+    fontFamily: fonts.section,
   };
-  const labelStyle = { color: styling.secondaryColor, fontWeight: 400 };
+
   return (
-    <div style={{ fontFamily: styling.fontFamily, padding: 48, maxWidth: 800, margin: '0 auto', background: 'white', color: styling.primaryColor, fontSize: 16 }}>
-      {/* Header */}
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: styling.primaryColor, letterSpacing: 1 }}>{data.name}</h1>
-        {data.jobTitle && <h2 style={{ fontSize: 22, fontWeight: 400, margin: '4px 0 0 0', color: styling.secondaryColor }}>{data.jobTitle}</h2>}
-        <div style={{ margin: '12px 0', fontSize: 16, color: styling.secondaryColor }}>
-          {data.phone && <span>{data.phone}</span>}
-          {data.phone && data.email && <span> • </span>}
-          {data.email && <span>{data.email}</span>}
-          {(data.phone || data.email) && data.location && <span> • </span>}
-          {data.location && <span>{data.location}</span>}
+    <div style={{ 
+      fontFamily: fonts.body, 
+      display: 'flex',
+      minHeight: '100vh',
+      background: 'white',
+      fontSize: 14
+    }}>
+      {/* Left Sidebar */}
+      <div style={{
+        width: '35%',
+        backgroundColor: styling.primaryColor,
+        color: 'white',
+        padding: '48px 32px',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        {/* Name and Title */}
+        <div style={{ marginBottom: 40 }}>
+          <h1 style={{ 
+            fontSize: 32, 
+            fontWeight: 700, 
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: 16,
+            fontFamily: fonts.header
+          }}>
+            {data.name}
+          </h1>
+          {data.jobTitle && (
+            <h2 style={{ 
+              fontSize: 16, 
+              fontWeight: 400, 
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: 2,
+              opacity: 0.9
+            }}>
+              {data.jobTitle}
+            </h2>
+          )}
+          
+          {/* Divider line */}
+          <div style={{
+            width: 60,
+            height: 3,
+            backgroundColor: 'white',
+            margin: '20px 0'
+          }} />
+        </div>
+
+        {/* Contact Info */}
+        <div style={{ marginBottom: 40 }}>
+          {data.phone && (
+            <div style={{ 
+              marginBottom: 12, 
+              fontSize: 14,
+              opacity: 0.9
+            }}>
+              {data.phone}
+            </div>
+          )}
+          {data.email && (
+            <div style={{ 
+              marginBottom: 12, 
+              fontSize: 14,
+              opacity: 0.9,
+              wordBreak: 'break-word'
+            }}>
+              {data.email}
+            </div>
+          )}
+          {data.location && (
+            <div style={{ 
+              fontSize: 14,
+              opacity: 0.9
+            }}>
+              {data.location}
+            </div>
+          )}
         </div>
       </div>
-      {/* Summary */}
-      {data.personalSummary && (
-        <div style={{ margin: '24px 0 0 0' }}>
-          <div style={sectionTitleStyle}>Summary</div>
-          <p style={{ fontStyle: 'italic', color: styling.secondaryColor, margin: 0 }}>{data.personalSummary}</p>
-        </div>
-      )}
-      {/* Skills */}
-      {data.skills && (
-        <div style={{ marginTop: 32 }}>
-          <div style={sectionTitleStyle}>Skills</div>
-          <ul style={{
-            columns: 2,
-            fontSize: 16,
-            margin: '0 auto',
-            padding: 0,
-            listStyle: 'disc inside',
-            maxWidth: 600,
-            textAlign: 'left',
-          }}>
-            {data.skills.split(',').map((skill, i) => (
-              <li key={i} style={{ marginBottom: 4 }}>{skill.trim()}</li>
+
+      {/* Right Content */}
+      <div style={{
+        width: '65%',
+        padding: '48px 40px',
+        backgroundColor: 'white'
+      }}>
+        {/* Summary */}
+        {data.personalSummary && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={sectionTitleStyle}>Summary</div>
+            <p style={{ 
+              margin: 0, 
+              fontSize: 15, 
+              lineHeight: 1.6,
+              color: '#333'
+            }}>
+              {data.personalSummary}
+            </p>
+          </div>
+        )}
+
+        {/* Professional Experience */}
+        {data.workExperience && data.workExperience.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={sectionTitleStyle}>Professional Experience</div>
+            {data.workExperience.map((exp, i) => (
+              <div key={i} style={{ marginBottom: 32 }}>
+                {/* Company and Date */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: 4
+                }}>
+                  <div style={{ 
+                    fontWeight: 700, 
+                    fontSize: 16, 
+                    color: styling.primaryColor
+                  }}>
+                    {exp.company}
+                  </div>
+                  <div style={{ 
+                    fontSize: 14, 
+                    color: '#666',
+                    fontStyle: 'italic'
+                  }}>
+                    {exp.startMonth} {exp.startYear} – {exp.endMonth} {exp.endYear}
+                  </div>
+                </div>
+                
+                {/* Job Title */}
+                <div style={{ 
+                  fontSize: 15, 
+                  fontWeight: 600, 
+                  marginBottom: 12,
+                  color: '#333'
+                }}>
+                  {exp.title}
+                </div>
+                
+                {/* Description as bullet points */}
+                <div style={{ fontSize: 14, color: '#333' }}>
+                  {exp.description.split('.').filter(item => item.trim()).map((bullet, idx) => (
+                    <div key={idx} style={{ 
+                      marginBottom: 6,
+                      paddingLeft: 16,
+                      position: 'relative',
+                      lineHeight: 1.5
+                    }}>
+                      <span style={{ 
+                        position: 'absolute', 
+                        left: 0, 
+                        top: 0,
+                        color: styling.primaryColor,
+                        fontWeight: 'bold'
+                      }}>•</span>
+                      {bullet.trim()}.
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
-          </ul>
-        </div>
-      )}
-      {/* Achievements */}
-      {data.achievements && (
-        <div style={{ marginTop: 32 }}>
-          <div style={sectionTitleStyle}>Key Achievements</div>
-          <p style={{ fontSize: 16, margin: 0 }}>{data.achievements}</p>
-        </div>
-      )}
-      {/* Work Experience */}
-      {data.workExperience && data.workExperience.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <div style={sectionTitleStyle}>Work Experience</div>
-          {data.workExperience.map((exp, i) => (
-            <div key={i} style={{ marginBottom: 24, maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
-              <div style={{ fontWeight: 600, fontSize: 17 }}>{exp.title} <span style={labelStyle}>@ {exp.company}</span></div>
-              <div style={{ fontSize: 14, color: styling.secondaryColor, marginBottom: 2 }}>
-                {exp.startMonth} {exp.startYear} - {exp.endMonth} {exp.endYear}
+          </div>
+        )}
+
+        {/* Education */}
+        {data.education && data.education.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={sectionTitleStyle}>Education</div>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: 20 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: 4
+                }}>
+                  <div style={{ 
+                    fontWeight: 700, 
+                    fontSize: 16, 
+                    color: styling.primaryColor
+                  }}>
+                    {edu.degree}
+                  </div>
+                  <div style={{ 
+                    fontSize: 14, 
+                    color: '#666',
+                    fontStyle: 'italic'
+                  }}>
+                    {edu.endMonth} {edu.endYear}
+                  </div>
+                </div>
+                <div style={{ 
+                  fontSize: 15, 
+                  color: '#333' 
+                }}>
+                  {edu.school}
+                </div>
               </div>
-              <div style={{ fontSize: 16 }}>{exp.description}</div>
-            </div>
-          ))}
-        </div>
-      )}
-      {/* Education */}
-      {data.education && data.education.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <div style={sectionTitleStyle}>Education</div>
-          {data.education.map((edu, i) => (
-            <div key={i} style={{ marginBottom: 20, maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
-              <div style={{ fontWeight: 600, fontSize: 17 }}>{edu.degree} <span style={labelStyle}>@ {edu.school}</span></div>
-              <div style={{ fontSize: 14, color: styling.secondaryColor, marginBottom: 2 }}>
-                {edu.startMonth} {edu.startYear} - {edu.endMonth} {edu.endYear}
+            ))}
+          </div>
+        )}
+
+        {/* Skills */}
+        {data.skills && (
+          <div>
+            <div style={sectionTitleStyle}>Skills</div>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+              gap: 32,
+              marginBottom: 24
+            }}>
+              {/* Design Tools */}
+              <div>
+                <div style={{ 
+                  fontWeight: 700, 
+                  fontSize: 15, 
+                  marginBottom: 12,
+                  color: styling.primaryColor
+                }}>
+                  Design Tools
+                </div>
+                <div style={{ 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 12
+                }}>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>Figma</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>Sketch</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>Adobe XD</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>InVision</span>
+                </div>
+              </div>
+              
+              {/* Front-End */}
+              <div>
+                <div style={{ 
+                  fontWeight: 700, 
+                  fontSize: 15, 
+                  marginBottom: 12,
+                  color: styling.primaryColor
+                }}>
+                  Front-End
+                </div>
+                <div style={{ 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 12
+                }}>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>HTML5</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>CSS3</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>JavaScript</span>
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    fontSize: 13,
+                    color: '#374151'
+                  }}>React</span>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            
+            {/* Research */}
+            <div>
+              <div style={{ 
+                fontWeight: 700, 
+                fontSize: 15, 
+                marginBottom: 12,
+                color: styling.primaryColor
+              }}>
+                Research
+              </div>
+              <div style={{ 
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 12
+              }}>
+                <span style={{
+                  backgroundColor: '#f3f4f6',
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  color: '#374151'
+                }}>User Interviews</span>
+                <span style={{
+                  backgroundColor: '#f3f4f6',
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  color: '#374151'
+                }}>Usability Testing</span>
+                <span style={{
+                  backgroundColor: '#f3f4f6',
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  color: '#374151'
+                }}>A/B Testing</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-} 
+}
