@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormData } from '../../types'; // Adjust path if needed
+import { FormData } from '../../types';
 
 export default function CoverLetterHtml({ content, data }: { content: string; data: FormData }) {
   return (

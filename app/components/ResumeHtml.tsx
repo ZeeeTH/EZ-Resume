@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormData } from '../../types'; // Adjust path if needed
+import { FormData } from '../../types';
 
 export default function ResumeHtml({ data }: { data: FormData }) {
   return (
