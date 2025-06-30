@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Fonts - Preload for consistent rendering */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -32,15 +39,71 @@ body {
   }
 }
 
+/* Print and PDF Support */
+@media print {
+  /* Ensure exact color reproduction */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Hide non-print elements */
+  nav, .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure page breaks work properly */
+  .page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  
+  /* Prevent page breaks within elements */
+  .no-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+
 /* Ensure each resume page starts on a new printed page for PDF output */
 .resume-page {
   page-break-after: always;
   break-after: page;
 }
 
-@media print {
-  .resume-page {
-    page-break-after: always;
-    break-after: page;
-  }
+.resume-page:last-child {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* Font Loading and Fallbacks */
+.font-inter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.font-merriweather {
+  font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.font-lato {
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.font-lora {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+}
+
+/* A4 Preview Container for HTML preview */
+.a4-preview {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 20px auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 20mm;
+  box-sizing: border-box;
 } 
