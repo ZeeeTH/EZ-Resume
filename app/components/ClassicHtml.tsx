@@ -15,7 +15,7 @@ export default function ClassicHtml({ data }: { data: FormData }) {
           ? `${job.startMonth} ${job.startYear} – ${job.endMonth} ${job.endYear}`
           : '',
         bullets: job.description
-          ? job.description.split('.').filter(Boolean).map(s => s.trim() + '.')
+          ? job.description.split('.').filter(Boolean).map(s => s.trim() + '.').slice(0, 3) // Limit to 3 bullets
           : [],
       }))
     : [];
@@ -55,7 +55,7 @@ export default function ClassicHtml({ data }: { data: FormData }) {
         <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet" />
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* A4 Print Styles - Exact dimensions for consistent PDF output */
+            /* A4 Print Styles - Optimized for single page */
             * {
               box-sizing: border-box !important;
             }
@@ -65,71 +65,71 @@ export default function ClassicHtml({ data }: { data: FormData }) {
               height: 297mm !important;
               margin: 0 !important;
               padding: 0 !important;
-              font-size: 12pt !important;
-              line-height: 1.4 !important;
+              font-size: 10pt !important;
+              line-height: 1.3 !important;
             }
             
             body {
               width: 210mm !important;
               height: 297mm !important;
               margin: 0 !important;
-              padding: 20mm !important;
+              padding: 15mm !important;
               background: white !important;
               color: #000 !important;
               font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
-              font-size: 12pt !important;
-              line-height: 1.4 !important;
+              font-size: 10pt !important;
+              line-height: 1.3 !important;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
               box-sizing: border-box !important;
             }
             
-            /* Typography */
+            /* Typography - Reduced sizes for single page */
             h1 {
               font-family: 'Merriweather', Georgia, 'Times New Roman', serif !important;
-              font-size: 24pt !important;
+              font-size: 20pt !important;
               font-weight: 700 !important;
-              line-height: 1.2 !important;
-              margin: 0 0 6pt 0 !important;
+              line-height: 1.1 !important;
+              margin: 0 0 4pt 0 !important;
               color: ${styling.primaryColor} !important;
             }
             
             h2 {
               font-family: 'Lato', Arial, sans-serif !important;
-              font-size: 16pt !important;
+              font-size: 13pt !important;
               font-weight: 400 !important;
-              line-height: 1.3 !important;
-              margin: 0 0 4pt 0 !important;
+              line-height: 1.2 !important;
+              margin: 0 0 8pt 0 !important;
               color: ${styling.secondaryColor} !important;
             }
             
             h3 {
               font-family: 'Lato', Arial, sans-serif !important;
-              font-size: 16pt !important;
+              font-size: 12pt !important;
               font-weight: 700 !important;
-              line-height: 1.3 !important;
-              margin: 20pt 0 8pt 0 !important;
+              line-height: 1.2 !important;
+              margin: 12pt 0 6pt 0 !important;
               color: ${styling.primaryColor} !important;
-              border-bottom: 2pt solid ${styling.primaryColor} !important;
-              padding-bottom: 4pt !important;
+              border-bottom: 1.5pt solid ${styling.primaryColor} !important;
+              padding-bottom: 2pt !important;
               text-transform: uppercase !important;
-              letter-spacing: 1pt !important;
+              letter-spacing: 0.5pt !important;
             }
             
             p {
-              font-size: 12pt !important;
-              line-height: 1.4 !important;
-              margin: 0 0 8pt 0 !important;
+              font-size: 10pt !important;
+              line-height: 1.3 !important;
+              margin: 0 0 6pt 0 !important;
             }
             
             .contact-info {
-              font-size: 12pt !important;
+              font-size: 10pt !important;
               color: ${styling.secondaryColor} !important;
-              margin-bottom: 16pt !important;
+              margin-bottom: 12pt !important;
             }
             
             .job-item {
-              margin-bottom: 20pt !important;
+              margin-bottom: 12pt !important;
               page-break-inside: avoid !important;
             }
             
@@ -137,25 +137,25 @@ export default function ClassicHtml({ data }: { data: FormData }) {
               display: flex !important;
               justify-content: space-between !important;
               align-items: baseline !important;
-              margin-bottom: 2pt !important;
+              margin-bottom: 1pt !important;
             }
             
             .job-company {
               font-weight: 600 !important;
-              font-size: 13pt !important;
+              font-size: 11pt !important;
               color: ${styling.primaryColor} !important;
             }
             
             .job-dates {
-              font-size: 12pt !important;
+              font-size: 9pt !important;
               color: ${styling.secondaryColor} !important;
               font-style: italic !important;
             }
             
             .job-title {
-              font-size: 13pt !important;
+              font-size: 10pt !important;
               font-weight: 600 !important;
-              margin-bottom: 6pt !important;
+              margin-bottom: 3pt !important;
               color: #333 !important;
             }
             
@@ -165,11 +165,11 @@ export default function ClassicHtml({ data }: { data: FormData }) {
             }
             
             .bullet-item {
-              margin-bottom: 4pt !important;
-              padding-left: 12pt !important;
+              margin-bottom: 2pt !important;
+              padding-left: 10pt !important;
               position: relative !important;
-              font-size: 12pt !important;
-              line-height: 1.4 !important;
+              font-size: 9pt !important;
+              line-height: 1.3 !important;
             }
             
             .bullet-item:before {
@@ -181,7 +181,7 @@ export default function ClassicHtml({ data }: { data: FormData }) {
             }
             
             .education-item {
-              margin-bottom: 12pt !important;
+              margin-bottom: 8pt !important;
             }
             
             .education-header {
@@ -192,27 +192,27 @@ export default function ClassicHtml({ data }: { data: FormData }) {
             
             .education-degree {
               font-weight: 600 !important;
-              font-size: 13pt !important;
+              font-size: 11pt !important;
               color: ${styling.primaryColor} !important;
-              margin-bottom: 2pt !important;
+              margin-bottom: 1pt !important;
             }
             
             .education-school {
-              font-size: 12pt !important;
+              font-size: 10pt !important;
               color: #333 !important;
             }
             
             .skills-grid {
               display: grid !important;
               grid-template-columns: 1fr 1fr !important;
-              gap: 20pt !important;
+              gap: 12pt !important;
             }
             
             .skill-item {
-              margin-bottom: 4pt !important;
-              padding-left: 12pt !important;
+              margin-bottom: 2pt !important;
+              padding-left: 10pt !important;
               position: relative !important;
-              font-size: 12pt !important;
+              font-size: 9pt !important;
             }
             
             .skill-item:before {
