@@ -838,8 +838,10 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       console.log('[PDF] Resume JSON:', JSON.stringify(resumeJson, null, 2));
       console.log('[PDF] Layout config:', layoutConfig);
       
-      // Header: Large centered name
-      ensureSpace(50);
+      // 1. HEADER FORMATTING
+      ensureSpace(60);
+      
+      // Name: Large, centered, bold
       page.drawText(resumeJson.name || 'Your Name', {
         x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 28) / 2),
         y: y,
@@ -849,10 +851,11 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       });
       y -= 35;
 
-      // Smaller centered job title
+      // Job title: Centered, smaller, ALL CAPS
       if (resumeJson.title) {
-        const titleWidth = font.widthOfTextAtSize(resumeJson.title, 16);
-        page.drawText(resumeJson.title, {
+        const titleText = resumeJson.title.toUpperCase();
+        const titleWidth = font.widthOfTextAtSize(titleText, 16);
+        page.drawText(titleText, {
           x: 306 - (titleWidth / 2),
           y: y,
           size: 16,
@@ -862,24 +865,43 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
         y -= 25;
       }
 
-      // Left-aligned contact info
+      // Horizontal line separator below job title
+      page.drawLine({
+        start: { x: margin, y: y },
+        end: { x: 612 - margin, y: y },
+        thickness: 1,
+        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+      });
+      y -= 20;
+
+      // Contact info: CENTERED
       if (resumeJson.contact) {
         const contactInfo = [
-          resumeJson.contact.email,
           resumeJson.contact.phone,
+          resumeJson.contact.email,
           resumeJson.contact.location
         ].filter(Boolean).join(' • ');
+        const contactWidth = font.widthOfTextAtSize(contactInfo, 12);
         page.drawText(contactInfo, {
-          x: margin,
+          x: 306 - (contactWidth / 2),
           y: y,
           size: 12,
           font: font,
           color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
         });
-        y -= 30;
+        y -= 25;
       }
 
-      // Sections: Clean bold headers (no underlines), left-aligned
+      // Another horizontal line below contact
+      page.drawLine({
+        start: { x: margin, y: y },
+        end: { x: 612 - margin, y: y },
+        thickness: 1,
+        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+      });
+      y -= 20;
+
+      // 2. SECTIONS
       for (const sectionKey of layoutConfig.main) {
         if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
         console.log(`[PDF] Processing section key: ${sectionKey}`);
@@ -891,17 +913,26 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
         console.log(`[PDF] Found section: ${section.title}`);
         ensureSpace(40);
 
-        // Section title - clean bold header, no underline
-        page.drawText(section.title.toUpperCase(), {
+        // Section header: Bold, left-aligned, with underline
+        const sectionTitle = section.title.toUpperCase();
+        const titleWidth = boldFont.widthOfTextAtSize(sectionTitle, 16);
+        page.drawText(sectionTitle, {
           x: margin,
           y: y,
           size: 16,
           font: boldFont,
           color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
         });
+        // Draw underline
+        page.drawLine({
+          start: { x: margin, y: y - 2 },
+          end: { x: margin + titleWidth, y: y - 2 },
+          thickness: 1,
+          color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+        });
         y -= 25;
 
-        // Section content
+        // Section content (summary)
         if (section.content) {
           const lines = wrapText(section.content, 612 - 2 * margin, font, 12);
           for (const line of lines) {
@@ -917,21 +948,35 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           y -= 10;
         }
 
-        // Experience: Bold job titles, regular company names, right-aligned dates, bulleted descriptions
+        // 3. PROFESSIONAL EXPERIENCE
         if (section.jobs) {
           console.log(`[PDF] Processing ${section.jobs.length} jobs`);
           for (const job of section.jobs) {
-            // Job title (bold, left-aligned)
-            page.drawText(job.title, {
+            // Company: Bold, left-aligned, all caps
+            const companyText = job.company.toUpperCase();
+            page.drawText(companyText, {
               x: margin,
               y: y,
               size: 14,
               font: boldFont,
               color: rgb(0, 0, 0)
             });
+            y -= 18;
 
-            // Right-aligned dates on same line as job title
+            // Job title and dates on same line
+            const jobTitle = job.title;
             const dateWidth = font.widthOfTextAtSize(job.dates, 12);
+            
+            // Job title: Regular weight, left-aligned
+            page.drawText(jobTitle, {
+              x: margin,
+              y: y,
+              size: 12,
+              font: font,
+              color: rgb(0, 0, 0)
+            });
+
+            // Dates: Right-aligned on same line as job title
             page.drawText(job.dates, {
               x: 612 - margin - dateWidth,
               y: y,
@@ -941,17 +986,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             });
             y -= 18;
 
-            // Company name (regular text, left-aligned)
-            page.drawText(job.company, {
-              x: margin,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(0, 0, 0)
-            });
-            y -= 18;
-
-            // Bulleted descriptions
+            // Bullets: Standard bullet points, properly indented
             if (job.bullets) {
               for (const bullet of job.bullets) {
                 const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 11);
@@ -971,22 +1006,36 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           }
         }
 
-        // Education: Degree (bold), institution (regular), right-aligned dates
+        // 4. EDUCATION
         if (section.education) {
           console.log(`[PDF] Processing ${section.education.length} education entries`);
           for (const edu of section.education) {
-            // Degree (bold, left-aligned)
-            page.drawText(edu.degree, {
+            // Degree: Bold, left-aligned, all caps
+            const degreeText = edu.degree.toUpperCase();
+            page.drawText(degreeText, {
               x: margin,
               y: y,
               size: 14,
               font: boldFont,
               color: rgb(0, 0, 0)
             });
+            y -= 18;
 
-            // Right-aligned dates on same line as degree
+            // Institution and dates on same line
+            const institution = edu.institution;
+            const dateWidth = font.widthOfTextAtSize(edu.dates, 12);
+            
+            // Institution: Regular weight, left-aligned
+            page.drawText(institution, {
+              x: margin,
+              y: y,
+              size: 12,
+              font: font,
+              color: rgb(0, 0, 0)
+            });
+
+            // Dates: Right-aligned
             if (edu.dates) {
-              const dateWidth = font.widthOfTextAtSize(edu.dates, 12);
               page.drawText(edu.dates, {
                 x: 612 - margin - dateWidth,
                 y: y,
@@ -995,21 +1044,11 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
                 color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
               });
             }
-            y -= 18;
-
-            // Institution (regular text, left-aligned)
-            page.drawText(edu.institution, {
-              x: margin,
-              y: y,
-              size: 12,
-              font: font,
-              color: rgb(0, 0, 0)
-            });
             y -= 20;
           }
         }
 
-        // Skills: Each skill prefixed with • symbol, arranged in two-column grid layout
+        // 5. SKILLS: True two-column layout with regular bullet points
         if (section.categories) {
           console.log(`[PDF] Processing skills categories`);
           for (const [cat, skills] of Object.entries(section.categories)) {
@@ -1024,7 +1063,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             y -= 20;
 
             if (Array.isArray(skills)) {
-              // Two-column grid layout for skills with • symbols
+              // True two-column layout for skills with regular bullet points
               const columnWidth = (612 - 2 * margin - 20) / 2; // 20px gap between columns
               const leftColumnX = margin;
               const rightColumnX = margin + columnWidth + 20;
