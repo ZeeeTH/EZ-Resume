@@ -696,14 +696,266 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   console.log('[PDF] Section keys available:', Object.keys(sectionsByKey));
 
   // Template-specific rendering
-  if (layoutConfig.sidebar && layoutConfig.main) {
+  if (template === 'structured') {
+    // Structured: specific design with centered layout and two-column skills
+    await renderStructuredTemplate();
+  } else if (layoutConfig.sidebar && layoutConfig.main) {
     // Modern: sidebar + main
     await renderModernTemplate();
   } else if (layoutConfig.main) {
-    // Classic/Structured: main only
+    // Classic: main only
     await renderClassicOrStructuredTemplate();
   } else {
     throw new Error('[PDF] No valid layout config found.');
+  }
+
+  async function renderStructuredTemplate() {
+    // 1. Large centered name (serif font)
+    ensureSpace(50);
+    page.drawText(resumeJson.name || 'Your Name', {
+      x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 32) / 2),
+      y: y,
+      size: 32,
+      font: boldFont,
+      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+    });
+    y -= 40;
+
+    // 2. Centered job title below name
+    if (resumeJson.title) {
+      const titleWidth = font.widthOfTextAtSize(resumeJson.title.toUpperCase(), 16);
+      page.drawText(resumeJson.title.toUpperCase(), {
+        x: 306 - (titleWidth / 2),
+        y: y,
+        size: 16,
+        font: font,
+        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+      });
+      y -= 30;
+    }
+
+    // 3. Horizontal line separator across page
+    page.drawLine({
+      start: { x: margin, y: y - 10 },
+      end: { x: 612 - margin, y: y - 10 },
+      thickness: 2,
+      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+    });
+    y -= 25;
+
+    // 4. Centered contact info below line
+    if (resumeJson.contact) {
+      const contactInfo = [
+        resumeJson.contact.email,
+        resumeJson.contact.phone,
+        resumeJson.contact.location
+      ].filter(Boolean).join(' • ');
+      const contactWidth = font.widthOfTextAtSize(contactInfo, 12);
+      page.drawText(contactInfo, {
+        x: 306 - (contactWidth / 2),
+        y: y,
+        size: 12,
+        font: font,
+        color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+      });
+      y -= 30;
+    }
+
+    // 5. Left-aligned section headers with underlines
+    for (const sectionKey of layoutConfig.main) {
+      if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
+      const section = getSectionByKey(sectionKey);
+      if (!section) continue;
+      ensureSpace(40);
+
+      // Section title - underlined, left-aligned
+      const titleWidth = boldFont.widthOfTextAtSize(section.title.toUpperCase(), 18);
+      page.drawText(section.title.toUpperCase(), {
+        x: margin,
+        y: y,
+        size: 18,
+        font: boldFont,
+        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+      });
+      // Draw underline
+      page.drawLine({
+        start: { x: margin, y: y - 3 },
+        end: { x: margin + titleWidth, y: y - 3 },
+        thickness: 2,
+        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
+      });
+      y -= 30;
+
+      // Section content
+      if (section.content) {
+        const lines = wrapText(section.content, 612 - 2 * margin, font, 12);
+        for (const line of lines) {
+          page.drawText(line, {
+            x: margin,
+            y: y,
+            size: 12,
+            font: font,
+            color: rgb(0, 0, 0)
+          });
+          y -= 16;
+        }
+        y -= 10;
+      }
+
+      // 6. Company names in ALL CAPS and bold, 7. Job titles in regular text below company, 8. Right-aligned dates
+      if (section.jobs) {
+        for (const job of section.jobs) {
+          // Company name in ALL CAPS and bold
+          page.drawText(job.company.toUpperCase(), {
+            x: margin,
+            y: y,
+            size: 14,
+            font: boldFont,
+            color: rgb(0, 0, 0)
+          });
+          y -= 18;
+
+          // Job title in regular text
+          page.drawText(job.title, {
+            x: margin,
+            y: y,
+            size: 12,
+            font: font,
+            color: rgb(0, 0, 0)
+          });
+          y -= 16;
+
+          // Right-aligned dates
+          const dateWidth = font.widthOfTextAtSize(job.dates, 10);
+          page.drawText(job.dates, {
+            x: 612 - margin - dateWidth,
+            y: y + 6, // Align with job title
+            size: 10,
+            font: font,
+            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+          });
+
+          // Location if available
+          if (job.location) {
+            const locationWidth = font.widthOfTextAtSize(job.location, 10);
+            page.drawText(job.location, {
+              x: 612 - margin - locationWidth,
+              y: y - 4, // Below dates
+              size: 10,
+              font: font,
+              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+            });
+          }
+          y -= 20;
+
+          // Job bullets
+          if (job.bullets) {
+            for (const bullet of job.bullets) {
+              const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 10);
+              for (const line of lines) {
+                page.drawText(line, {
+                  x: margin + 10,
+                  y: y,
+                  size: 10,
+                  font: font,
+                  color: rgb(0, 0, 0)
+                });
+                y -= 13;
+              }
+            }
+          }
+          y -= 10;
+        }
+      }
+
+      if (section.education) {
+        for (const edu of section.education) {
+          // Degree in bold
+          page.drawText(edu.degree, {
+            x: margin,
+            y: y,
+            size: 12,
+            font: boldFont,
+            color: rgb(0, 0, 0)
+          });
+          y -= 16;
+
+          // Institution
+          page.drawText(edu.institution, {
+            x: margin,
+            y: y,
+            size: 11,
+            font: font,
+            color: rgb(0, 0, 0)
+          });
+          y -= 14;
+
+          // Right-aligned dates
+          if (edu.dates) {
+            const dateWidth = font.widthOfTextAtSize(edu.dates, 10);
+            page.drawText(edu.dates, {
+              x: 612 - margin - dateWidth,
+              y: y + 2, // Align with institution
+              size: 10,
+              font: font,
+              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+            });
+          }
+          y -= 15;
+        }
+      }
+
+      // 9. Skills in two-column grid layout
+      if (section.categories) {
+        for (const [cat, skills] of Object.entries(section.categories)) {
+          // Category title
+          page.drawText(cat, {
+            x: margin,
+            y: y,
+            size: 14,
+            font: boldFont,
+            color: rgb(0, 0, 0)
+          });
+          y -= 20;
+
+          if (Array.isArray(skills)) {
+            // Two-column layout for skills
+            const columnWidth = (612 - 2 * margin - 20) / 2; // 20px gap between columns
+            const leftColumnX = margin;
+            const rightColumnX = margin + columnWidth + 20;
+            let leftColumnY = y;
+            let rightColumnY = y;
+            let useLeftColumn = true;
+
+            for (const skill of skills) {
+              const skillWidth = font.widthOfTextAtSize(skill, 10);
+              const currentX = useLeftColumn ? leftColumnX : rightColumnX;
+              const currentY = useLeftColumn ? leftColumnY : rightColumnY;
+
+              page.drawText(skill, {
+                x: currentX,
+                y: currentY,
+                size: 10,
+                font: font,
+                color: rgb(0, 0, 0)
+              });
+
+              if (useLeftColumn) {
+                leftColumnY -= 15;
+                useLeftColumn = false;
+              } else {
+                rightColumnY -= 15;
+                useLeftColumn = true;
+              }
+            }
+
+            // Update y position to the lower of the two columns
+            y = Math.min(leftColumnY, rightColumnY) - 10;
+          }
+          y -= 15;
+        }
+      }
+    }
   }
 
   async function renderClassicOrStructuredTemplate() {
