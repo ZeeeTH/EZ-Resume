@@ -625,10 +625,10 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   // Font selection
   let font: any, boldFont: any;
   const family = (fontFamily || '').toLowerCase();
-  if (family.includes('times')) {
+  if (family === 'georgia' || family.includes('times')) {
     font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
     boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-    console.log('[PDF] Using Times Roman font.');
+    console.log('[PDF] Using Times Roman font (serif).');
   } else if (family.includes('helvetica') || family.includes('inter') || family.includes('arial')) {
     font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -925,7 +925,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       // 6. Company names in ALL CAPS and bold, 7. Job titles in regular text below company, 8. Right-aligned dates
       if (section.jobs) {
         for (const job of section.jobs) {
-          // Company name in ALL CAPS and bold
+          // Company name in ALL CAPS and bold (left-aligned)
           page.drawText(job.company.toUpperCase(), {
             x: margin,
             y: y,
@@ -935,7 +935,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           });
           y -= 18;
 
-          // Job title in regular text
+          // Job title (left-aligned) and dates (right-aligned) on same line
           page.drawText(job.title, {
             x: margin,
             y: y,
@@ -943,32 +943,19 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             font: font,
             color: rgb(0, 0, 0)
           });
-          y -= 16;
 
-          // Right-aligned dates
+          // Right-aligned dates on same line as job title
           const dateWidth = font.widthOfTextAtSize(job.dates, 10);
           page.drawText(job.dates, {
             x: 612 - margin - dateWidth,
-            y: y + 6, // Align with job title
+            y: y,
             size: 10,
             font: font,
             color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
           });
+          y -= 16;
 
-          // Location if available
-          if (job.location) {
-            const locationWidth = font.widthOfTextAtSize(job.location, 10);
-            page.drawText(job.location, {
-              x: 612 - margin - locationWidth,
-              y: y - 4, // Below dates
-              size: 10,
-              font: font,
-              color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-            });
-          }
-          y -= 20;
-
-          // Job bullets
+          // Job bullets (indented, below all the above)
           if (job.bullets) {
             for (const bullet of job.bullets) {
               const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 10);
@@ -990,7 +977,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
 
       if (section.education) {
         for (const edu of section.education) {
-          // Degree in bold
+          // Degree (bold, left-aligned)
           page.drawText(edu.degree, {
             x: margin,
             y: y,
@@ -1000,7 +987,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           });
           y -= 16;
 
-          // Institution
+          // Institution (left-aligned) and dates (right-aligned) on same line
           page.drawText(edu.institution, {
             x: margin,
             y: y,
@@ -1008,14 +995,13 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             font: font,
             color: rgb(0, 0, 0)
           });
-          y -= 14;
 
-          // Right-aligned dates
+          // Right-aligned dates on same line as institution
           if (edu.dates) {
             const dateWidth = font.widthOfTextAtSize(edu.dates, 10);
             page.drawText(edu.dates, {
               x: 612 - margin - dateWidth,
-              y: y + 2, // Align with institution
+              y: y,
               size: 10,
               font: font,
               color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
