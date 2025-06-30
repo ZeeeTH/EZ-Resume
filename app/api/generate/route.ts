@@ -1009,7 +1009,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           }
         }
 
-        // Skills: Each skill prefixed with ■ symbol, arranged in two-column grid layout
+        // Skills: Each skill prefixed with • symbol, arranged in two-column grid layout
         if (section.categories) {
           console.log(`[PDF] Processing skills categories`);
           for (const [cat, skills] of Object.entries(section.categories)) {
@@ -1024,7 +1024,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             y -= 20;
 
             if (Array.isArray(skills)) {
-              // Two-column grid layout for skills with ■ symbols
+              // Two-column grid layout for skills with • symbols
               const columnWidth = (612 - 2 * margin - 20) / 2; // 20px gap between columns
               const leftColumnX = margin;
               const rightColumnX = margin + columnWidth + 20;
@@ -1033,7 +1033,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
               let useLeftColumn = true;
 
               for (const skill of skills) {
-                const skillText = `■ ${skill}`;
+                const skillText = `• ${skill}`;
                 const currentX = useLeftColumn ? leftColumnX : rightColumnX;
                 const currentY = useLeftColumn ? leftColumnY : rightColumnY;
 
