@@ -229,9 +229,9 @@ export default function ModernHtml({ data }: { data: FormData }) {
     <>
       {pageBlocks.length === 0
         ? (
-          <div style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, padding: '96px', boxSizing: 'border-box' }}>
+          <div style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box' }}>
             {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%' } })}
-            <div style={{ width: '65%', padding: 0, backgroundColor: 'white', height: '100%' }}>
+            <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white', height: '100%' }}>
               {mainBlocks.map((block, i) => {
                 if (i === 0 && isStyledReactElement(block)) {
                   return React.cloneElement(block, { style: { ...block.props.style, marginTop: 0 } });
@@ -242,9 +242,9 @@ export default function ModernHtml({ data }: { data: FormData }) {
           </div>
         )
         : pageBlocks.map((blocks, i) => (
-          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box', padding: '96px' }}>
+          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box' }}>
             {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%' } })}
-            <div style={{ width: '65%', padding: 0, backgroundColor: 'white', height: '100%' }}>
+            <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white', height: '100%' }}>
               {blocks.map((block, j) => {
                 if (j === 0 && isStyledReactElement(block)) {
                   return React.cloneElement(block, { style: { ...block.props.style, marginTop: 0 } });
