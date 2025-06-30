@@ -229,8 +229,26 @@ export default function ModernHtml({ data }: { data: FormData }) {
     <>
       {pageBlocks.length === 0
         ? (
-          <div style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box', overflow: 'hidden' }}>
-            {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%', overflow: 'hidden' } })}
+          <div style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box' }}>
+            <div style={{ width: '35%', height: '100%', overflow: 'hidden', backgroundColor: styling.primaryColor, color: 'white', padding: '48px 32px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', position: 'relative' }}>
+              {/* Name and Title */}
+              <div style={{ marginBottom: 40 }}>
+                <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0, lineHeight: 1.1, marginBottom: 16, fontFamily: fonts.header }}>{name}</h1>
+                <h2 style={{ fontSize: 16, fontWeight: 400, margin: 0, textTransform: 'uppercase', letterSpacing: 2, opacity: 0.9 }}>{jobTitle}</h2>
+                <div style={{ width: 60, height: 3, backgroundColor: 'white', margin: '20px 0' }} />
+              </div>
+              <div style={{ marginBottom: 40 }}>
+                {phone && <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.9 }}>{phone}</div>}
+                {email && <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.9, wordBreak: 'break-word' }}>{email}</div>}
+                {location && <div style={{ fontSize: 14, opacity: 0.9 }}>{location}</div>}
+              </div>
+              {summary && (
+                <div style={{ marginBottom: 40 }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1, fontFamily: fonts.section }}>Summary</div>
+                  <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, opacity: 0.9 }}>{summary}</p>
+                </div>
+              )}
+            </div>
             <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white', height: '100%' }}>
               {mainBlocks.map((block, i) => {
                 if (i === 0 && isStyledReactElement(block)) {
@@ -242,8 +260,26 @@ export default function ModernHtml({ data }: { data: FormData }) {
           </div>
         )
         : pageBlocks.map((blocks, i) => (
-          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box', overflow: 'hidden' }}>
-            {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%', overflow: 'hidden' } })}
+          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box' }}>
+            <div style={{ width: '35%', height: '100%', overflow: 'hidden', backgroundColor: styling.primaryColor, color: 'white', padding: '48px 32px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', position: 'relative' }}>
+              {/* Name and Title */}
+              <div style={{ marginBottom: 40 }}>
+                <h1 style={{ fontSize: 32, fontWeight: 700, margin: 0, lineHeight: 1.1, marginBottom: 16, fontFamily: fonts.header }}>{name}</h1>
+                <h2 style={{ fontSize: 16, fontWeight: 400, margin: 0, textTransform: 'uppercase', letterSpacing: 2, opacity: 0.9 }}>{jobTitle}</h2>
+                <div style={{ width: 60, height: 3, backgroundColor: 'white', margin: '20px 0' }} />
+              </div>
+              <div style={{ marginBottom: 40 }}>
+                {phone && <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.9 }}>{phone}</div>}
+                {email && <div style={{ marginBottom: 12, fontSize: 14, opacity: 0.9, wordBreak: 'break-word' }}>{email}</div>}
+                {location && <div style={{ fontSize: 14, opacity: 0.9 }}>{location}</div>}
+              </div>
+              {summary && (
+                <div style={{ marginBottom: 40 }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1, fontFamily: fonts.section }}>Summary</div>
+                  <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, opacity: 0.9 }}>{summary}</p>
+                </div>
+              )}
+            </div>
             <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white', height: '100%' }}>
               {blocks.map((block, j) => {
                 if (j === 0 && isStyledReactElement(block)) {
