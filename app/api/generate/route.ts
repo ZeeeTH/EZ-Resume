@@ -3,19 +3,13 @@ import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import nodemailer from 'nodemailer'
 import { getTemplateById } from '../../../data/templates'
-import {
-  Inter_24pt_Regular_ttf,
-  Inter_24pt_Bold_ttf,
-  Inter_24pt_Italic_ttf,
-  Inter_24pt_Medium_ttf,
-  georgia_ttf,
-  georgiab_ttf,
-  georgiai_ttf,
-} from '../../../lib/fonts/base64';
-
-function loadFontBytesBase64(base64: string) {
-  return Buffer.from(base64, 'base64');
-}
+import { Inter_24pt_Regular_ttf } from '../../../lib/fonts/inter_24pt-regular.js';
+import { Inter_24pt_Bold_ttf } from '../../../lib/fonts/inter_24pt-bold.js';
+import { Inter_24pt_Italic_ttf } from '../../../lib/fonts/inter_24pt-italic.js';
+import { Inter_24pt_Medium_ttf } from '../../../lib/fonts/inter_24pt-medium.js';
+import { georgia_ttf } from '../../../lib/fonts/georgia.js';
+import { georgiab_ttf } from '../../../lib/fonts/georgiab.js';
+import { georgiai_ttf } from '../../../lib/fonts/georgiai.js';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -1327,4 +1321,8 @@ async function renderStructuredTemplate({
     console.error('[PDF] Error in renderStructuredTemplate:', error);
     throw error;
   }
+}
+
+function loadFontBytesBase64(base64: string) {
+  return Buffer.from(base64, 'base64');
 } 
