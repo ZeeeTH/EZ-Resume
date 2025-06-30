@@ -592,8 +592,19 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   
   // Get template styling
   const templateData = getTemplateById(template) || getTemplateById('modern')!
-  const { primaryColor, secondaryColor, fontFamily, spacing, layout } = templateData.styling
+  const { primaryColor, secondaryColor, fontFamily, spacing, layout: layoutType } = templateData.styling
   
+  // Logging template and styling
+  console.log('[PDF] Using template:', templateData.id);
+  console.log('[PDF] Styling:', { primaryColor, secondaryColor, fontFamily, spacing });
+  const layoutConfig = (layoutType || {}) as any;
+  console.log('[PDF] Layout config:', layoutConfig);
+
+  // Validate layout structure
+  if (!layoutConfig || (!layoutConfig.main && !layoutConfig.sidebar)) {
+    console.warn('[PDF] Invalid or missing layout config for template', templateData.id, '- using fallback layout.');
+  }
+
   // Use selected colors if available (for classic template), otherwise use template defaults
   const finalPrimaryColor = selectedColors?.primary || primaryColor
   const finalSecondaryColor = selectedColors?.secondary || secondaryColor
@@ -602,20 +613,27 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   const primaryRGB = hexToRgb(finalPrimaryColor) || { r: 37, g: 99, b: 235 }
   const secondaryRGB = hexToRgb(finalSecondaryColor) || { r: 100, g: 116, b: 139 }
   
-  // Choose fonts based on template
+  console.log('[PDF] Final colors:', { finalPrimaryColor, finalSecondaryColor, primaryRGB, secondaryRGB });
+  
+  // Font selection
   let font: any, boldFont: any;
-  switch (fontFamily.toLowerCase()) {
-    case 'times new roman':
-      font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-      boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-      break;
-    case 'helvetica':
-      font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      break;
-    default: // Inter/Modern
-      font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const family = (fontFamily || '').toLowerCase();
+  if (family.includes('times')) {
+    font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    console.log('[PDF] Using Times Roman font.');
+  } else if (family.includes('helvetica') || family.includes('inter') || family.includes('arial')) {
+    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    console.log('[PDF] Using Helvetica font.');
+  } else if (family.includes('courier')) {
+    font = await pdfDoc.embedFont(StandardFonts.Courier);
+    boldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+    console.log('[PDF] Using Courier font.');
+  } else {
+    font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    console.log('[PDF] Unknown fontFamily, defaulting to Helvetica.');
   }
   
   // Spacing configuration
@@ -629,10 +647,13 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   let y = 750 - config.margin;
   const margin = config.margin;
   
+  console.log('[PDF] Spacing config:', config);
+
   function ensureSpace(neededSpace = 20) {
     if (y - neededSpace < margin) {
       page = pdfDoc.addPage([612, 792]);
       y = 750 - config.margin;
+      console.log('[PDF] Added new page for space.');
     }
   }
 
@@ -645,17 +666,46 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
     } : null;
   }
 
-  // Template-specific rendering
-  const layoutConfig = templateData.layout as any;
+  // Robust section matching
+  const sectionAliases: Record<string, string[]> = {
+    summary: ['summary', 'professional summary'],
+    experience: ['experience', 'professional experience', 'work experience'],
+    education: ['education'],
+    skills: ['skills']
+  };
+  function normalizeKey(key: string) {
+    return key.toLowerCase().replace(/\s+/g, '');
+  }
+  function findSectionByKey(key: string, sectionsByTitle: Record<string, any>) {
+    const norm = normalizeKey(key);
+    for (const [main, aliases] of Object.entries(sectionAliases)) {
+      if (aliases.some(a => norm === normalizeKey(a))) {
+        for (const k of aliases) {
+          if (sectionsByTitle[k]) return sectionsByTitle[k];
+          if (sectionsByTitle[capitalizeFirst(k)]) return sectionsByTitle[capitalizeFirst(k)];
+        }
+      }
+    }
+    // fallback: try direct
+    if (sectionsByTitle[key]) return sectionsByTitle[key];
+    if (sectionsByTitle[capitalizeFirst(key)]) return sectionsByTitle[capitalizeFirst(key)];
+    return null;
+  }
+
+  // Build sectionsByTitle map (case-insensitive)
   const sectionsByTitle: Record<string, any> = {};
   if (resumeJson.sections) {
     for (const section of resumeJson.sections) {
       if (section && section.title) {
-        sectionsByTitle[(section.title as string).toLowerCase()] = section;
+        sectionsByTitle[normalizeKey(section.title)] = section;
+        sectionsByTitle[section.title] = section;
+        sectionsByTitle[capitalizeFirst(section.title)] = section;
       }
     }
   }
+  console.log('[PDF] Sections found:', Object.keys(sectionsByTitle));
 
+  // Template-specific rendering
   if (template === 'classic') {
     await renderClassicTemplate();
   } else if (template === 'structured') {
@@ -703,7 +753,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       y -= 30;
     }
     // Render sections in layout order
-    for (const sectionKey of layoutConfig.main) {
+    for (const sectionKey of (layoutConfig.main || [])) {
       if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
       const section = sectionsByTitle[sectionKey] || sectionsByTitle[capitalizeFirst(sectionKey)];
       if (!section) continue;
@@ -836,7 +886,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   }
 
   async function renderModernTemplate() {
-    // Two-column layout with sidebar and main, using layoutConfig
+    // Two-column layout with sidebar and main, using layoutType
     const sidebarWidth = 180;
     const mainContentWidth = 612 - sidebarWidth - (margin * 2);
     const sidebarX = margin;
@@ -844,7 +894,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
     let sidebarY = y;
     let mainY = y;
     // Sidebar sections
-    for (const sectionKey of layoutConfig.sidebar) {
+    for (const sectionKey of (layoutConfig.sidebar || [])) {
       if (sectionKey === 'name') {
         page.drawText(resumeJson.name || 'Your Name', {
           x: sidebarX,
@@ -934,7 +984,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       }
     }
     // Main sections
-    for (const sectionKey of layoutConfig.main) {
+    for (const sectionKey of (layoutConfig.main || [])) {
       const section = sectionsByTitle[sectionKey] || sectionsByTitle[capitalizeFirst(sectionKey)];
       if (!section) continue;
       // Section title
