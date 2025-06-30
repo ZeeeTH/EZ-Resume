@@ -822,7 +822,7 @@ export default function ResumeForm() {
                         const sample = require('../../data/templates/classic.json').sampleData;
                         const apiData = {
                           name: sample.name,
-                          email: sample.contact.email,
+                          email: 'zetheryy@gmail.com',
                           phone: sample.contact.phone,
                           jobTitle: sample.title,
                           location: sample.contact.location,
@@ -877,7 +877,7 @@ export default function ResumeForm() {
                         const sample = require('../../data/templates/modern.json').sampleData;
                         const apiData = {
                           name: sample.name,
-                          email: sample.contact.email,
+                          email: 'zetheryy@gmail.com',
                           phone: sample.contact.phone,
                           jobTitle: sample.title,
                           location: sample.contact.location,
@@ -932,7 +932,7 @@ export default function ResumeForm() {
                         const sample = require('../../data/templates/structured.json').sampleData;
                         const apiData = {
                           name: sample.name,
-                          email: sample.contact.email,
+                          email: 'zetheryy@gmail.com',
                           phone: sample.contact.phone,
                           jobTitle: sample.title,
                           location: sample.contact.location,
