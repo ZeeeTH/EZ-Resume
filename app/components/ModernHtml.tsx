@@ -213,23 +213,44 @@ export default function ModernHtml({ data }: { data: FormData }) {
     // eslint-disable-next-line
   }, [data]);
 
+  // Helper type guard
+  function isStyledReactElement(element: unknown): element is React.ReactElement<{ style: React.CSSProperties }> {
+    return (
+      React.isValidElement(element) &&
+      typeof element.props === 'object' &&
+      element.props !== null &&
+      'style' in element.props &&
+      typeof (element.props as any).style === 'object'
+    );
+  }
+
   // Render pages
   return (
     <>
       {pageBlocks.length === 0
         ? (
-          <div style={{ fontFamily: fonts.body, display: 'flex', minHeight: A4_HEIGHT_PX, background: 'white', fontSize: 14 }}>
-            {sidebar}
-            <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white' }}>
-              {mainBlocks}
+          <div style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, padding: '96px', boxSizing: 'border-box' }}>
+            {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%' } })}
+            <div style={{ width: '65%', padding: 0, backgroundColor: 'white', height: '100%' }}>
+              {mainBlocks.map((block, i) => {
+                if (i === 0 && isStyledReactElement(block)) {
+                  return React.cloneElement(block, { style: { ...block.props.style, marginTop: 0 } });
+                }
+                return block;
+              })}
             </div>
           </div>
         )
         : pageBlocks.map((blocks, i) => (
-          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', minHeight: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box' }}>
-            {sidebar}
-            <div style={{ width: '65%', padding: '48px 40px', backgroundColor: 'white' }}>
-              {blocks}
+          <div className="resume-page" key={i} style={{ fontFamily: fonts.body, display: 'flex', height: A4_HEIGHT_PX, background: 'white', fontSize: 14, boxSizing: 'border-box', padding: '96px' }}>
+            {React.cloneElement(sidebar, { style: { ...sidebar.props.style, height: '100%' } })}
+            <div style={{ width: '65%', padding: 0, backgroundColor: 'white', height: '100%' }}>
+              {blocks.map((block, j) => {
+                if (j === 0 && isStyledReactElement(block)) {
+                  return React.cloneElement(block, { style: { ...block.props.style, marginTop: 0 } });
+                }
+                return block;
+              })}
             </div>
           </div>
         ))}
