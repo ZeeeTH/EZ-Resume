@@ -830,49 +830,39 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
   }
 
   async function renderStructuredTemplate() {
-    // 1. Large centered name (serif font)
+    // Header: Large centered name
     ensureSpace(50);
     page.drawText(resumeJson.name || 'Your Name', {
-      x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 32) / 2),
+      x: 306 - (boldFont.widthOfTextAtSize(resumeJson.name || 'Your Name', 28) / 2),
       y: y,
-      size: 32,
+      size: 28,
       font: boldFont,
       color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
     });
-    y -= 40;
+    y -= 35;
 
-    // 2. Centered job title below name
+    // Smaller centered job title
     if (resumeJson.title) {
-      const titleWidth = font.widthOfTextAtSize(resumeJson.title.toUpperCase(), 16);
-      page.drawText(resumeJson.title.toUpperCase(), {
+      const titleWidth = font.widthOfTextAtSize(resumeJson.title, 16);
+      page.drawText(resumeJson.title, {
         x: 306 - (titleWidth / 2),
         y: y,
         size: 16,
         font: font,
         color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
       });
-      y -= 30;
+      y -= 25;
     }
 
-    // 3. Horizontal line separator across page
-    page.drawLine({
-      start: { x: margin, y: y - 10 },
-      end: { x: 612 - margin, y: y - 10 },
-      thickness: 2,
-      color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-    });
-    y -= 25;
-
-    // 4. Centered contact info below line
+    // Left-aligned contact info
     if (resumeJson.contact) {
       const contactInfo = [
         resumeJson.contact.email,
         resumeJson.contact.phone,
         resumeJson.contact.location
       ].filter(Boolean).join(' • ');
-      const contactWidth = font.widthOfTextAtSize(contactInfo, 12);
       page.drawText(contactInfo, {
-        x: 306 - (contactWidth / 2),
+        x: margin,
         y: y,
         size: 12,
         font: font,
@@ -881,30 +871,22 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
       y -= 30;
     }
 
-    // 5. Left-aligned section headers with underlines
+    // Sections: Clean bold headers (no underlines), left-aligned
     for (const sectionKey of layoutConfig.main) {
       if (sectionKey === 'name' || sectionKey === 'title' || sectionKey === 'contact') continue;
       const section = getSectionByKey(sectionKey);
       if (!section) continue;
       ensureSpace(40);
 
-      // Section title - underlined, left-aligned
-      const titleWidth = boldFont.widthOfTextAtSize(section.title.toUpperCase(), 18);
+      // Section title - clean bold header, no underline
       page.drawText(section.title.toUpperCase(), {
         x: margin,
         y: y,
-        size: 18,
+        size: 16,
         font: boldFont,
         color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
       });
-      // Draw underline
-      page.drawLine({
-        start: { x: margin, y: y - 3 },
-        end: { x: margin + titleWidth, y: y - 3 },
-        thickness: 2,
-        color: rgb(primaryRGB.r / 255, primaryRGB.g / 255, primaryRGB.b / 255)
-      });
-      y -= 30;
+      y -= 25;
 
       // Section content
       if (section.content) {
@@ -922,96 +904,97 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
         y -= 10;
       }
 
-      // 6. Company names in ALL CAPS and bold, 7. Job titles in regular text below company, 8. Right-aligned dates
+      // Experience: Bold job titles, regular company names, right-aligned dates, bulleted descriptions
       if (section.jobs) {
         for (const job of section.jobs) {
-          // Company name in ALL CAPS and bold (left-aligned)
-          page.drawText(job.company.toUpperCase(), {
+          // Job title (bold, left-aligned)
+          page.drawText(job.title, {
             x: margin,
             y: y,
             size: 14,
             font: boldFont,
             color: rgb(0, 0, 0)
           });
+
+          // Right-aligned dates on same line as job title
+          const dateWidth = font.widthOfTextAtSize(job.dates, 12);
+          page.drawText(job.dates, {
+            x: 612 - margin - dateWidth,
+            y: y,
+            size: 12,
+            font: font,
+            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
+          });
           y -= 18;
 
-          // Job title (left-aligned) and dates (right-aligned) on same line
-          page.drawText(job.title, {
+          // Company name (regular text, left-aligned)
+          page.drawText(job.company, {
             x: margin,
             y: y,
             size: 12,
             font: font,
             color: rgb(0, 0, 0)
           });
+          y -= 18;
 
-          // Right-aligned dates on same line as job title
-          const dateWidth = font.widthOfTextAtSize(job.dates, 10);
-          page.drawText(job.dates, {
-            x: 612 - margin - dateWidth,
-            y: y,
-            size: 10,
-            font: font,
-            color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
-          });
-          y -= 16;
-
-          // Job bullets (indented, below all the above)
+          // Bulleted descriptions
           if (job.bullets) {
             for (const bullet of job.bullets) {
-              const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 10);
+              const lines = wrapText(`• ${bullet}`, 612 - 2 * margin - 10, font, 11);
               for (const line of lines) {
                 page.drawText(line, {
                   x: margin + 10,
                   y: y,
-                  size: 10,
+                  size: 11,
                   font: font,
                   color: rgb(0, 0, 0)
                 });
-                y -= 13;
+                y -= 14;
               }
             }
           }
-          y -= 10;
+          y -= 8;
         }
       }
 
+      // Education: Degree (bold), institution (regular), right-aligned dates
       if (section.education) {
         for (const edu of section.education) {
           // Degree (bold, left-aligned)
           page.drawText(edu.degree, {
             x: margin,
             y: y,
-            size: 12,
+            size: 14,
             font: boldFont,
             color: rgb(0, 0, 0)
           });
-          y -= 16;
 
-          // Institution (left-aligned) and dates (right-aligned) on same line
-          page.drawText(edu.institution, {
-            x: margin,
-            y: y,
-            size: 11,
-            font: font,
-            color: rgb(0, 0, 0)
-          });
-
-          // Right-aligned dates on same line as institution
+          // Right-aligned dates on same line as degree
           if (edu.dates) {
-            const dateWidth = font.widthOfTextAtSize(edu.dates, 10);
+            const dateWidth = font.widthOfTextAtSize(edu.dates, 12);
             page.drawText(edu.dates, {
               x: 612 - margin - dateWidth,
               y: y,
-              size: 10,
+              size: 12,
               font: font,
               color: rgb(secondaryRGB.r / 255, secondaryRGB.g / 255, secondaryRGB.b / 255)
             });
           }
-          y -= 15;
+          y -= 18;
+
+          // Institution (regular text, left-aligned)
+          page.drawText(edu.institution, {
+            x: margin,
+            y: y,
+            size: 12,
+            font: font,
+            color: rgb(0, 0, 0)
+          });
+          y -= 20;
         }
       }
 
-      // 9. Skills in two-column grid layout
+      // Skills: Each skill prefixed with ■ symbol, arranged in two-column grid layout
       if (section.categories) {
         for (const [cat, skills] of Object.entries(section.categories)) {
           // Category title
@@ -1025,7 +1008,7 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
           y -= 20;
 
           if (Array.isArray(skills)) {
-            // Two-column layout for skills
+            // Two-column grid layout for skills with ■ symbols
             const columnWidth = (612 - 2 * margin - 20) / 2; // 20px gap between columns
             const leftColumnX = margin;
             const rightColumnX = margin + columnWidth + 20;
@@ -1034,23 +1017,23 @@ async function createResumePDF(resumeJson: any, template: string = 'modern', sel
             let useLeftColumn = true;
 
             for (const skill of skills) {
-              const skillWidth = font.widthOfTextAtSize(skill, 10);
+              const skillText = `■ ${skill}`;
               const currentX = useLeftColumn ? leftColumnX : rightColumnX;
               const currentY = useLeftColumn ? leftColumnY : rightColumnY;
 
-              page.drawText(skill, {
+              page.drawText(skillText, {
                 x: currentX,
                 y: currentY,
-                size: 10,
+                size: 11,
                 font: font,
                 color: rgb(0, 0, 0)
               });
 
               if (useLeftColumn) {
-                leftColumnY -= 15;
+                leftColumnY -= 16;
                 useLeftColumn = false;
               } else {
-                rightColumnY -= 15;
+                rightColumnY -= 16;
                 useLeftColumn = true;
               }
             }

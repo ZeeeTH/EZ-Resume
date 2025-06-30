@@ -9,7 +9,7 @@
     "secondaryColor": "#6B7280",
     "fontFamily": "Georgia",
     "spacing": "standard",
-    "layout": "single-column-centered-header"
+    "layout": "structured"
   },
   "colorOptions": {
     "allowUserColorOverride": true,
