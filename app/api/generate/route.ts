@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 import nodemailer from 'nodemailer'
 import { getTemplateById } from '../../../data/templates'
 import { Inter_24pt_Regular_ttf } from '../../../lib/fonts/inter_24pt-regular.js';
@@ -595,6 +596,10 @@ function formatMonthYear(dateStr: string): string {
 
 async function createResumePDF(resumeJson: any, template: string = 'modern', selectedColors?: { label: string; primary: string; secondary: string }): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
+  
+  // Register fontkit for custom font support
+  pdfDoc.registerFontkit(fontkit);
+  
   let page = pdfDoc.addPage([612, 792]); // US Letter size
 
   // Embed custom fonts for 1:1 matching (from base64)
