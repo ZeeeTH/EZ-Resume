@@ -66,7 +66,7 @@ export default function ModernHtml({ data }: { data: FormData }) {
       padding: '48px 32px',
       display: 'flex',
       flexDirection: 'column',
-      minHeight: A4_HEIGHT_PX,
+      height: '100%',
       boxSizing: 'border-box',
     }}>
       {/* Name and Title */}
