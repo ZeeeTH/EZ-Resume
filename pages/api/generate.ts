@@ -5,6 +5,9 @@ import ResumeHtml from '../../app/components/ResumeHtml';
 import CoverLetterHtml from '../../app/components/CoverLetterHtml';
 import nodemailer from 'nodemailer';
 import OpenAI from 'openai';
+import ClassicHtml from '../../app/components/ClassicHtml';
+import ModernHtml from '../../app/components/ModernHtml';
+import StructuredHtml from '../../app/components/StructuredHtml';
 
 function buildEmailHtml({ name, coverLetter }: { name: string; coverLetter: boolean }) {
   const year = new Date().getFullYear();
@@ -90,9 +93,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const formData = req.body;
-    // Render the resume HTML using the new ResumeHtml component
+    // Render the resume HTML using the correct template component
+    let ResumeComponent: any;
+    switch (formData.template) {
+      case 'modern':
+        ResumeComponent = ModernHtml;
+        break;
+      case 'structured':
+        ResumeComponent = StructuredHtml;
+        break;
+      case 'classic':
+      default:
+        ResumeComponent = ClassicHtml;
+        break;
+    }
     const resumeHtml = ReactDOMServer.renderToStaticMarkup(
-      React.createElement(ResumeHtml, { data: formData })
+      React.createElement(ResumeComponent, { data: formData })
     );
 
     // Call the Puppeteer PDF service for resume
