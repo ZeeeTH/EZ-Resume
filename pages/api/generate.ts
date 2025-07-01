@@ -107,12 +107,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ResumeComponent = ClassicHtml;
         break;
     }
-    const resumeHtml = ReactDOMServer.renderToStaticMarkup(
-      React.createElement(ResumeComponent, { 
-        data: formData,
-        selectedColors: formData.selectedColors
-      })
-    );
+    
+    // Since template components now return HTML strings directly, call them as functions
+    const resumeHtml = ResumeComponent({ 
+      data: formData,
+      selectedColors: formData.selectedColors
+    });
 
     // Call the Puppeteer PDF service for resume
     const resumeResponse = await fetch('https://puppeteer-pdf-service-981431761351.us-central1.run.app/pdf', {
