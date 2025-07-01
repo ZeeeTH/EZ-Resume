@@ -93,6 +93,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const formData = req.body;
+    
+    // Debug color selection
+    console.log('=== PDF Generation Debug ===');
+    console.log('Template:', formData.template);
+    console.log('Selected Colors:', JSON.stringify(formData.selectedColors, null, 2));
+    console.log('Color Variant:', formData.colorVariant);
+    
     // Render the resume HTML using the correct template component
     let ResumeComponent: any;
     switch (formData.template) {
@@ -113,6 +120,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: formData,
       selectedColors: formData.selectedColors
     });
+    
+    // Debug the generated HTML (first 500 chars to check if colors are applied)
+    console.log('Generated HTML preview:', resumeHtml.substring(0, 500));
+    console.log('=== End Debug ===');
 
     // Call the Puppeteer PDF service for resume
     const resumeResponse = await fetch('https://puppeteer-pdf-service-981431761351.us-central1.run.app/pdf', {
