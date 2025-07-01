@@ -84,14 +84,6 @@ export async function POST(request: NextRequest) {
         education: JSON.parse(formData.education),
       };
 
-      // Debug color selection specifically
-      console.log('=== Webhook Color Debug ===');
-      console.log('Raw selected_colors from DB:', formData.selected_colors);
-      console.log('Parsed selectedColors:', JSON.stringify(processedFormData.selectedColors, null, 2));
-      console.log('Color variant:', formData.color_variant);
-      console.log('Template:', formData.template);
-      console.log('=== End Webhook Color Debug ===');
-
       console.log('Checkout completed for:', {
           customerEmail,
           customerName,

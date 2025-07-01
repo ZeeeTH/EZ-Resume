@@ -839,6 +839,7 @@ export default function ResumeForm() {
                       setError('');
                       try {
                         const sample = require('../../data/templates/classic.json').sampleData;
+                        const selectedTemplateData = templateMetadata.find(t => t.id === 'classic');
                         const apiData = {
                           name: sample.name,
                           email: 'zetheryy@gmail.com',
@@ -850,6 +851,10 @@ export default function ResumeForm() {
                           achievements: '',
                           coverLetter: false,
                           template: 'classic',
+                          ...(selectedTemplateData?.colorOptions && {
+                            colorVariant: selectedColorVariants['classic'] ?? 0,
+                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['classic'] ?? 0]
+                          }),
                           workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
                             title: job.title,
                             company: job.company,
@@ -894,6 +899,7 @@ export default function ResumeForm() {
                       setError('');
                       try {
                         const sample = require('../../data/templates/modern.json').sampleData;
+                        const selectedTemplateData = templateMetadata.find(t => t.id === 'modern');
                         const apiData = {
                           name: sample.name,
                           email: 'zetheryy@gmail.com',
@@ -905,6 +911,10 @@ export default function ResumeForm() {
                           achievements: '',
                           coverLetter: false,
                           template: 'modern',
+                          ...(selectedTemplateData?.colorOptions && {
+                            colorVariant: selectedColorVariants['modern'] ?? 0,
+                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['modern'] ?? 0]
+                          }),
                           workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
                             title: job.title,
                             company: job.company,
@@ -949,6 +959,7 @@ export default function ResumeForm() {
                       setError('');
                       try {
                         const sample = require('../../data/templates/structured.json').sampleData;
+                        const selectedTemplateData = templateMetadata.find(t => t.id === 'structured');
                         const apiData = {
                           name: sample.name,
                           email: 'zetheryy@gmail.com',
@@ -960,6 +971,10 @@ export default function ResumeForm() {
                           achievements: '',
                           coverLetter: false,
                           template: 'structured',
+                          ...(selectedTemplateData?.colorOptions && {
+                            colorVariant: selectedColorVariants['structured'] ?? 0,
+                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['structured'] ?? 0]
+                          }),
                           workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
                             title: job.title,
                             company: job.company,
