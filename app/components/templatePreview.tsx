@@ -18,44 +18,52 @@ interface TemplatePreviewProps {
 // Sample FormData for template previews - uses the EXACT same structure as the actual form
 const getSampleFormData = (templateId: string): FormData => {
   const baseData: FormData = {
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com", 
-    phone: "(555) 123-4567",
-    location: "New York, NY",
-    jobTitle: "Senior Software Engineer",
-    personalSummary: "Experienced software engineer with 8+ years developing scalable web applications. Passionate about clean code, user experience, and mentoring junior developers.",
+    name: "Elena Rodriguez",
+    email: "elena.rodriguez@email.com", 
+    phone: "(415) 762-3849",
+    location: "San Francisco, CA",
+    jobTitle: "Senior Product Manager",
+    personalSummary: "Results-driven Product Manager with 8+ years of experience leading cross-functional teams to deliver innovative digital products. Proven track record of driving user engagement by 150% and revenue growth of $12M+ through strategic product roadmaps, data-driven decision making, and customer-centric design principles.",
     workExperience: [
       {
-        title: "Senior Software Engineer",
-        company: "TechCorp Inc",
-        startMonth: "Jan",
-        startYear: "2020",
+        title: "Senior Product Manager",
+        company: "Stripe Technologies",
+        startMonth: "Mar",
+        startYear: "2021",
         endMonth: "",
         endYear: "",
-        description: "Led development of microservices architecture serving 2M+ users. Mentored team of 5 engineers and improved system performance by 40%. Implemented automated testing pipelines reducing bugs by 60%."
+        description: "Lead product strategy for payment infrastructure serving 2M+ merchants globally. Collaborated with engineering, design, and data science teams to launch 8 major features resulting in 40% increase in transaction volume. Managed $25M product budget and reduced customer churn by 30% through improved onboarding experience."
       },
       {
-        title: "Software Engineer",
-        company: "StartupXYZ",
-        startMonth: "Jun",
+        title: "Product Manager",
+        company: "Airbnb Inc",
+        startMonth: "Aug",
         startYear: "2018",
-        endMonth: "Dec",
-        endYear: "2019",
-        description: "Built responsive web applications using React and Node.js. Collaborated with design team to implement user-friendly interfaces. Optimized database queries improving response times by 35%."
+        endMonth: "Feb",
+        endYear: "2021",
+        description: "Owned the host experience product for marketplace with 4M+ active hosts worldwide. Launched machine learning-powered pricing recommendations that increased host revenue by 22%. Led A/B testing program across 12 markets resulting in $8M incremental revenue."
       }
     ],
     education: [
       {
-        degree: "Bachelor of Science in Computer Science",
-        school: "University of Technology",
+        degree: "Master of Business Administration (MBA)",
+        school: "Stanford Graduate School of Business",
         startMonth: "Sep",
-        startYear: "2014",
+        startYear: "2013",
+        endMonth: "Jun",
+        endYear: "2015"
+      },
+      {
+        degree: "Bachelor of Science in Computer Science",
+        school: "University of California, Berkeley",
+        startMonth: "Aug",
+        startYear: "2009",
         endMonth: "May",
-        endYear: "2018"
+        endYear: "2013"
       }
     ],
-    skills: "JavaScript, React, Node.js, Python, PostgreSQL, AWS, Docker, Git, Agile Development",
-    achievements: "Built award-winning mobile app with 100K+ downloads. Speaker at 3 tech conferences. Open source contributor with 500+ GitHub stars.",
+    skills: "Product Strategy & Go-to-Market, Data Analysis & Product Analytics, Agile Project Management, Market Research & Customer Development, Leadership & Stakeholder Management, Financial Modeling & Business Planning, User Experience Design, Presentation & Communication",
+    achievements: "Named 'Rising Star Product Manager' by Product School 2022. Led product that won 'Best Innovation Award' at TechCrunch Disrupt. Mentored 15+ junior product managers through company mentorship program. Guest speaker at ProductCon and Mind the Product conferences. Published thought leadership articles in Harvard Business Review and Medium with 50K+ combined views.",
     coverLetter: false,
     template: templateId,
     company: ""
@@ -170,24 +178,39 @@ export default function TemplatePreview({
 
   // Generate the exact same HTML that would be sent to PDF service
   const getReactComponentHTML = () => {
-    let ResumeComponent: any;
-    switch (previewTemplate.id) {
-      case 'modern':
-        ResumeComponent = ModernHtml;
-        break;
-      case 'structured':
-        ResumeComponent = StructuredHtml;
-        break;
-      case 'classic':
-      default:
-        ResumeComponent = ClassicHtml;
-        break;
+    try {
+      let ResumeComponent: any;
+      switch (previewTemplate.id) {
+        case 'modern':
+          ResumeComponent = ModernHtml;
+          break;
+        case 'structured':
+          ResumeComponent = StructuredHtml;
+          break;
+        case 'classic':
+        default:
+          ResumeComponent = ClassicHtml;
+          break;
+      }
+      
+      // Get selected color from user's selection
+      const selectedColorIndex = selectedColorVariants[previewTemplate.id] ?? 0;
+      const selectedColors = previewTemplate.colorOptions?.palette[selectedColorIndex];
+      
+      // Ensure we have valid data for rendering
+      if (!sampleFormData || !ResumeComponent) {
+        return '<html><body><p>Error: Unable to load template data</p></body></html>';
+      }
+      
+      // Since template components now return HTML strings directly, call them as functions
+      return ResumeComponent({ 
+        data: sampleFormData,
+        selectedColors: selectedColors || undefined
+      });
+    } catch (error) {
+      console.error('Template rendering error:', error);
+      return '<html><body><p>Error: Template failed to render</p></body></html>';
     }
-    
-    // This is EXACTLY the same as what's done in the PDF generation API
-    return ReactDOMServer.renderToStaticMarkup(
-      React.createElement(ResumeComponent, { data: sampleFormData })
-    );
   };
 
   return (

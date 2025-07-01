@@ -108,7 +108,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         break;
     }
     const resumeHtml = ReactDOMServer.renderToStaticMarkup(
-      React.createElement(ResumeComponent, { data: formData })
+      React.createElement(ResumeComponent, { 
+        data: formData,
+        selectedColors: formData.selectedColors
+      })
     );
 
     // Call the Puppeteer PDF service for resume
