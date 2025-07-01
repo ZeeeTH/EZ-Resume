@@ -7,7 +7,8 @@ import { ResumeTemplate } from '../../types/templates';
 import { templateMetadata } from '../../data/templates';
 import { templates } from '../../data/templates';
 import TemplatePreview from './templatePreview';
-import PdfPreview from './pdfPreview';
+// import PdfPreview from './pdfPreview';
+// import MyResumePreview from './MyResumePreview';
 import { formSchema, workExperienceSchema, educationSchema, FormData, WorkExperience, Education } from '../../types';
 
 // Helper arrays for months and years
@@ -40,6 +41,7 @@ export default function ResumeForm() {
   const [showCoverLetterPreview, setShowCoverLetterPreview] = useState(false);
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null);
+  const [showMyResumePreview, setShowMyResumePreview] = useState(false);
 
   // Form setup
   const { control, ...formMethods } = useForm<FormData>({
@@ -231,9 +233,9 @@ export default function ResumeForm() {
     setShowTemplatePreview(true);
   };
 
-  // Lock scroll when sample preview modal is open
+  // Lock scroll when preview modals are open
   useEffect(() => {
-    if (showTemplatePreview) {
+    if (showTemplatePreview || showMyResumePreview) {
       document.body.classList.add('overflow-hidden');
     } else {
       document.body.classList.remove('overflow-hidden');
@@ -241,7 +243,7 @@ export default function ResumeForm() {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [showTemplatePreview]);
+  }, [showTemplatePreview, showMyResumePreview]);
 
   return (
     <>
@@ -790,6 +792,23 @@ export default function ResumeForm() {
                 </div>
               )}
 
+              {/* Preview My Resume Button */}
+              {formProgress >= 75 && (
+                <div className="text-center mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowMyResumePreview(true)}
+                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 flex items-center justify-center space-x-2 mx-auto"
+                  >
+                    <FileText className="h-5 w-5" />
+                    <span>📋 Preview My Resume (A4 PDF Format)</span>
+                  </button>
+                  <p className="text-xs text-gray-400 mt-2">
+                    See exactly how your PDF will look with your data
+                  </p>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="text-center mb-2">
                 <button
@@ -1016,12 +1035,84 @@ export default function ResumeForm() {
       />
 
       {/* PDF Preview Modals */}
-      <PdfPreview
+      {/* <PdfPreview
         showResumePreview={showResumePreview}
         showCoverLetterPreview={showCoverLetterPreview}
         setShowResumePreview={setShowResumePreview}
         setShowCoverLetterPreview={setShowCoverLetterPreview}
-      />
+      /> */}
+
+      {/* My Resume PDF Preview */}
+      {showMyResumePreview && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80 p-4">
+          <div className="relative max-w-full max-h-full overflow-hidden">
+            <button
+              onClick={() => setShowMyResumePreview(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-red-400 text-2xl font-bold z-10 bg-white/90 rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-colors duration-200"
+              aria-label="Close PDF preview"
+            >
+              ×
+            </button>
+            
+            {/* A4 Preview Container */}
+            <div 
+              className="bg-white shadow-2xl mx-auto overflow-hidden p-8" 
+              style={{ 
+                width: '210mm', 
+                height: '297mm',
+                maxWidth: 'calc(100vw - 2rem)',
+                maxHeight: 'calc(100vh - 6rem)',
+                transform: 'scale(0.8)',
+                transformOrigin: 'center center'
+              }}
+            >
+              <div className="text-center border-b border-black pb-4 mb-6">
+                <h1 className="text-2xl font-bold mb-2">{watchedFields.name || 'Your Name'}</h1>
+                {watchedFields.jobTitle && <div className="text-sm">{watchedFields.jobTitle}</div>}
+                <div className="text-sm">{watchedFields.email || 'email@example.com'}</div>
+                {watchedFields.phone && <div className="text-sm">{watchedFields.phone}</div>}
+                {watchedFields.location && <div className="text-sm">{watchedFields.location}</div>}
+              </div>
+              
+              {watchedFields.personalSummary && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold uppercase border-b border-black pb-1 mb-3">Professional Summary</h2>
+                  <p className="text-sm">{watchedFields.personalSummary}</p>
+                </div>
+              )}
+
+              {watchedFields.workExperience?.length && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold uppercase border-b border-black pb-1 mb-3">Work Experience</h2>
+                  {watchedFields.workExperience.map((job, index) => (
+                    <div key={index} className="mb-4">
+                      <div className="font-semibold text-sm mb-1">
+                        {job.title || 'Job Title'} at {job.company || 'Company'}
+                      </div>
+                      <div className="italic text-xs mb-2 text-gray-600">
+                        {job.startMonth} {job.startYear} - {job.endMonth || 'Present'} {job.endYear}
+                      </div>
+                      <div className="text-xs">{job.description || 'Job description'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {watchedFields.skills && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold uppercase border-b border-black pb-1 mb-3">Skills</h2>
+                  <div className="text-sm">{watchedFields.skills}</div>
+                </div>
+              )}
+            </div>
+            
+            {/* Preview label */}
+            <div className="text-white text-center mt-2 text-sm opacity-75">
+              📋 PDF Preview - This is how your PDF will look
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
