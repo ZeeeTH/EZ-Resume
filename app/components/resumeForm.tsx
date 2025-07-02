@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield } from 'lucide-react';
+import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown } from 'lucide-react';
 import { ResumeTemplate } from '../../types/templates';
-import { templateMetadata } from '../../data/templates';
-import { templates } from '../../data/templates';
+import { templateMetadata, templates } from '../../data/templates';
 import TemplatePreview from './templatePreview';
 // import PdfPreview from './pdfPreview';
 // import MyResumePreview from './MyResumePreview';
 import { formSchema, workExperienceSchema, educationSchema, FormData, WorkExperience, Education } from '../../types';
 import IndustryDropdown from './IndustrySelector/IndustryDropdown';
 import UpgradeModal from './IndustrySelector/UpgradeModal';
+import TemplateCard from './IndustrySelector/TemplateCard';
+import { getTemplatesForUser, getLockedTemplatesForIndustry, hasPremiumTemplates } from '../../data/templates';
 
 // Helper arrays for months and years
 const months = [
@@ -249,14 +250,32 @@ export default function ResumeForm() {
     }
   }, [watchedFields.industry]);
 
+  // Ensure classic template is selected by default
+  useEffect(() => {
+    if (!selectedTemplate || selectedTemplate === '') {
+      setSelectedTemplate('classic');
+      setValue('template', 'classic');
+    }
+  }, [selectedTemplate, setValue]);
+
   // Industry selector handlers
   const handleIndustrySelect = (industryId: string) => {
     setSelectedIndustry(industryId);
     setValue('industry', industryId);
     trigger('industry'); // Trigger validation for the field
+    
+    // Keep classic template selected when industry changes
+    if (selectedTemplate === '') {
+      setSelectedTemplate('classic');
+      setValue('template', 'classic');
+    }
   };
 
   const handleUpgradeClick = () => {
+    setShowUpgradeModal(true);
+  };
+
+  const handleTemplateUpgradeClick = () => {
     setShowUpgradeModal(true);
   };
 
@@ -756,73 +775,92 @@ export default function ResumeForm() {
               <input type="hidden" {...register('template')} />
               <div className="mb-10">
                 <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Choose Your Template</h2>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {templates.map((template) => (
-                    <div
-                      key={template.id}
-                      onClick={() => {
-                        setSelectedTemplate(template.id);
-                        setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
-                        setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
-                      }}
-                      className={`
-                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 hover:scale-105 flex flex-col
-                        ${selectedTemplate === template.id
-                          ? 'border-green-400 bg-green-500/10 shadow-lg'
-                          : 'border-white/20 bg-white/5 hover:border-purple-500/50'
-                        }
-                      `}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-white text-sm mb-2">{template.name}</h3>
-                          {selectedTemplate === template.id && (
-                            <CheckCircle className="h-5 w-5 text-green-400" />
-                          )}
-                        </div>
-                        <p className="text-gray-400 text-xs mb-4">{template.description}</p>
-                        {/* Color Dots and Label */}
-                        {template.colorOptions && (
-                          <div className="pt-3 border-t border-white/10 mt-3">
-                            <div className="flex items-center justify-center space-x-2">
-                              {template.colorOptions.palette.map((color, index) => (
-                                <button
-                                  key={index}
-                                  type="button"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setSelectedColorVariants(prev => ({ ...prev, [template.id]: index }));
-                                  }}
-                                  className={`w-6 h-6 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
-                                    selectedTemplate === template.id && selectedColorVariants[template.id] === index
-                                      ? 'border-white shadow-lg'
-                                      : 'border-white/30'
-                                  }`}
-                                  style={{ backgroundColor: color.primary }}
-                                  title={color.label}
-                                />
-                              ))}
-                            </div>
-                            <p className="text-xs text-gray-400 text-center mt-1 min-h-[20px]">
-                              {template.colorOptions.palette[selectedColorVariants[template.id] ?? 0]?.label || template.colorOptions.palette[0]?.label}
-                            </p>
-                          </div>
-                        )}
-                        {/* Preview Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTemplatePreview(template);
-                          }}
-                          className="mt-3 w-full bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 hover:text-pink-200 text-xs font-medium py-2 px-3 rounded-lg transition-all duration-200 border border-pink-500/30 hover:border-pink-500/50"
-                        >
-                          Preview Sample
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                
+                {/* Template Selection */}
+                {!selectedIndustry ? (
+                  /* No industry selected - Show only Classic template centered */
+                  <div className="flex justify-center gap-4 mb-6">
+                    {getTemplatesForUser(selectedIndustry, userTier).map((template) => (
+                      <TemplateCard
+                        key={template.id}
+                        template={template}
+                        isSelected={selectedTemplate === template.id}
+                        onClick={() => {
+                          setSelectedTemplate(template.id);
+                          setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
+                        }}
+                        selectedColorVariant={selectedColorVariants[template.id] ?? 0}
+                        onColorSelect={(colorIndex) => {
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: colorIndex }));
+                        }}
+                        onPreview={() => handleTemplatePreview(template)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  /* Industry selected - Show all templates (available + locked) in same row */
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
+                    {/* Available templates (Classic) */}
+                    {getTemplatesForUser(selectedIndustry, userTier).map((template) => (
+                      <TemplateCard
+                        key={template.id}
+                        template={template}
+                        isSelected={selectedTemplate === template.id}
+                        onClick={() => {
+                          setSelectedTemplate(template.id);
+                          setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
+                        }}
+                        selectedColorVariant={selectedColorVariants[template.id] ?? 0}
+                        onColorSelect={(colorIndex) => {
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: colorIndex }));
+                        }}
+                        onPreview={() => handleTemplatePreview(template)}
+                      />
+                    ))}
+                    
+                    {/* Locked premium templates (for free users) in same row */}
+                    {userTier === 'free' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
+                      <TemplateCard
+                        key={template.id}
+                        template={template}
+                        isSelected={false}
+                        onClick={handleTemplateUpgradeClick}
+                        isLocked={true}
+                      />
+                    ))}
+                    
+                    {/* Premium templates (for paid users) in same row */}
+                    {userTier === 'paid' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
+                      <TemplateCard
+                        key={template.id}
+                        template={template}
+                        isSelected={selectedTemplate === template.id}
+                        onClick={() => {
+                          setSelectedTemplate(template.id);
+                          setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
+                        }}
+                        selectedColorVariant={selectedColorVariants[template.id] ?? 0}
+                        onColorSelect={(colorIndex) => {
+                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: colorIndex }));
+                        }}
+                        onPreview={() => handleTemplatePreview(template)}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Industry Selection Prompt - Only show when no industry selected and classic is centered */}
+                {!selectedIndustry && (
+                  <div className="text-center py-6 bg-white/5 rounded-lg border border-white/10 mt-6">
+                    <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">
+                      Select your industry above to unlock premium templates designed for your field
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Privacy Statement */}
@@ -1185,6 +1223,7 @@ export default function ResumeForm() {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         onUpgrade={handleUpgrade}
+        selectedIndustry={selectedIndustry}
       />
     </>
   );

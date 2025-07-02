@@ -8,6 +8,9 @@ export interface ResumeTemplate {
   description: string;
   popularity: number;
   category: string;
+  industries: string[]; // which industries this template serves
+  tier: 'free' | 'premium'; // template tier
+  isUniversal: boolean; // true for templates that work for all industries
   styling: {
     primaryColor: string;
     secondaryColor: string;
@@ -65,8 +68,12 @@ export interface ResumeTemplate {
 }
 
 export const templates: ResumeTemplate[] = [
+  // Free Universal Template
   {
     ...classicTemplate,
+    industries: ['universal'],
+    tier: 'free',
+    isUniversal: true,
     styling: {
       ...classicTemplate.styling,
       spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
@@ -78,41 +85,153 @@ export const templates: ResumeTemplate[] = [
       body: 'Lato, Arial, sans-serif',
     },
   },
+
+  // Technology Templates
   {
     ...modernTemplate,
+    id: 'tech-modern',
+    name: 'Tech Modern',
+    description: 'Clean, minimal design with prominent technical skills section. Perfect for developers and software engineers.',
+    industries: ['technology'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Technology',
     styling: {
       ...modernTemplate.styling,
       spacing: modernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
       layout: modernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
-      header: 'Montserrat, Arial, sans-serif',
-      section: 'Montserrat, Arial, sans-serif',
+      header: 'Inter, Arial, sans-serif',
+      section: 'Inter, Arial, sans-serif',
       body: 'Inter, Arial, sans-serif',
     },
   },
   {
     ...structuredTemplate,
+    id: 'developer-pro',
+    name: 'Developer Pro',
+    description: 'Two-column layout with skills sidebar and project showcase. Ideal for senior developers and tech leads.',
+    industries: ['technology'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Technology',
     styling: {
       ...structuredTemplate.styling,
       spacing: structuredTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
       layout: structuredTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
-      header: 'Lora, Georgia, serif',
+      header: 'Roboto, Arial, sans-serif',
+      section: 'Roboto, Arial, sans-serif',
+      body: 'Source Code Pro, monospace',
+    },
+  },
+
+  // Healthcare Templates
+  {
+    ...classicTemplate,
+    id: 'medical-professional',
+    name: 'Medical Professional',
+    description: 'Traditional, certification-focused layout perfect for doctors, nurses, and healthcare professionals.',
+    industries: ['healthcare'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Healthcare',
+    styling: {
+      ...classicTemplate.styling,
+      primaryColor: '#1E40AF',
+      secondaryColor: '#475569',
+      spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: classicTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
+    fonts: {
+      header: 'Times New Roman, serif',
       section: 'Lato, Arial, sans-serif',
       body: 'Lato, Arial, sans-serif',
+    },
+  },
+  {
+    ...modernTemplate,
+    id: 'healthcare-modern',
+    name: 'Healthcare Modern',
+    description: 'Clean but conservative design with clinical experience emphasis. Perfect for modern healthcare roles.',
+    industries: ['healthcare'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Healthcare',
+    styling: {
+      ...modernTemplate.styling,
+      primaryColor: '#059669',
+      secondaryColor: '#047857',
+      spacing: modernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: modernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
+    fonts: {
+      header: 'Merriweather, Georgia, serif',
+      section: 'Lato, Arial, sans-serif',
+      body: 'Lato, Arial, sans-serif',
+    },
+  },
+
+  // Finance Templates
+  {
+    ...classicTemplate,
+    id: 'finance-classic',
+    name: 'Finance Classic',
+    description: 'Ultra-professional, traditional banking style. Perfect for investment banking and financial services.',
+    industries: ['finance'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Finance',
+    styling: {
+      ...classicTemplate.styling,
+      primaryColor: '#1F2937',
+      secondaryColor: '#4B5563',
+      spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: classicTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
+    fonts: {
+      header: 'Times New Roman, serif',
+      section: 'Arial, sans-serif',
+      body: 'Arial, sans-serif',
+    },
+  },
+  {
+    ...structuredTemplate,
+    id: 'investment-pro',
+    name: 'Investment Pro',
+    description: 'Metrics-focused layout with quantified achievements emphasis. Ideal for analysts and investment professionals.',
+    industries: ['finance'],
+    tier: 'premium',
+    isUniversal: false,
+    category: 'Finance',
+    styling: {
+      ...structuredTemplate.styling,
+      primaryColor: '#DC2626',
+      secondaryColor: '#991B1B',
+      spacing: structuredTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: structuredTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
+    fonts: {
+      header: 'Georgia, serif',
+      section: 'Arial, sans-serif',
+      body: 'Arial, sans-serif',
     },
   },
 ];
 
 export const templateMetadata = [
+  // Free Universal Template
   {
     id: 'classic',
-    name: 'Classic',
-    description: `Traditional single-column resume with clean section breaks, subtle icons, and serif headings. Ideal for finance and professional roles.`,
+    name: 'Classic Professional',
+    description: `Traditional single-column resume suitable for any industry. Clean section breaks with professional formatting that works everywhere.`,
     popularity: 4,
-    category: 'Traditional',
+    category: 'Universal',
+    industries: ['universal'],
+    tier: 'free',
+    isUniversal: true,
     colorOptions: {
       allowUserColorOverride: true,
       defaultPrimaryColor: "#374151",
@@ -124,37 +243,129 @@ export const templateMetadata = [
       ]
     }
   },
+
+  // Technology Templates
   {
-    id: 'modern',
-    name: 'Modern',
-    description: `Two-column layout with bold color accents and modern style. Ideal for tech, marketing, and creative roles.`,
+    id: 'tech-modern',
+    name: 'Tech Modern',
+    description: `Sleek, minimalist design with prominent technical skills section and modern typography. Perfect for software developers.`,
     popularity: 5,
-    category: 'Professional',
+    category: 'Technology',
+    industries: ['technology'],
+    tier: 'premium',
+    isUniversal: false,
     colorOptions: {
       allowUserColorOverride: true,
-      defaultPrimaryColor: "#374151",
-      defaultSecondaryColor: "#6B7280",
+      defaultPrimaryColor: "#2563EB",
+      defaultSecondaryColor: "#1E40AF",
       palette: [
-        { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
-        { label: "Pale Orange", primary: "#F59E0B", secondary: "#92400E" },
-        { label: "Teal", primary: "#0D9488", secondary: "#134E4A" }
+        { label: "Tech Blue", primary: "#2563EB", secondary: "#1E40AF" },
+        { label: "Code Green", primary: "#059669", secondary: "#047857" },
+        { label: "Dark Mode", primary: "#374151", secondary: "#1F2937" }
       ]
     }
   },
   {
-    id: 'structured',
-    name: 'Structured',
-    description: `A polished, single-column layout with centered headings, subtle lines, and formal structure. Ideal for academic, administrative, and professional roles.`,
-    popularity: 3,
-    category: 'Clean',
+    id: 'developer-pro',
+    name: 'Developer Pro',
+    description: `Advanced two-column layout with dedicated skills sidebar and project showcase area. Ideal for senior developers and tech leads.`,
+    popularity: 4,
+    category: 'Technology',
+    industries: ['technology'],
+    tier: 'premium',
+    isUniversal: false,
     colorOptions: {
       allowUserColorOverride: true,
-      defaultPrimaryColor: "#374151",
-      defaultSecondaryColor: "#6B7280",
+      defaultPrimaryColor: "#7C3AED",
+      defaultSecondaryColor: "#5B21B6",
       palette: [
-        { label: "Greyscale", primary: "#374151", secondary: "#6B7280" },
-        { label: "Soft Deep Blue", primary: "#1E40AF", secondary: "#475569" },
-        { label: "Sage Green", primary: "#6B7280", secondary: "#4B5563" }
+        { label: "Code Purple", primary: "#7C3AED", secondary: "#5B21B6" },
+        { label: "Terminal Green", primary: "#10B981", secondary: "#059669" },
+        { label: "GitHub Dark", primary: "#1F2937", secondary: "#111827" }
+      ]
+    }
+  },
+
+  // Healthcare Templates
+  {
+    id: 'medical-professional',
+    name: 'Medical Professional',
+    description: `Conservative layout emphasizing medical credentials and clinical experience with certification focus. Ideal for doctors and nurses.`,
+    popularity: 3,
+    category: 'Healthcare',
+    industries: ['healthcare'],
+    tier: 'premium',
+    isUniversal: false,
+    colorOptions: {
+      allowUserColorOverride: true,
+      defaultPrimaryColor: "#1E40AF",
+      defaultSecondaryColor: "#1E3A8A",
+      palette: [
+        { label: "Medical Blue", primary: "#1E40AF", secondary: "#1E3A8A" },
+        { label: "Health Green", primary: "#059669", secondary: "#047857" },
+        { label: "Navy Professional", primary: "#1E3A8A", secondary: "#1E40AF" }
+      ]
+    }
+  },
+  {
+    id: 'healthcare-modern',
+    name: 'Healthcare Modern',
+    description: `Contemporary yet professional design with clean sections for clinical experience and patient care achievements. Modern healthcare.`,
+    popularity: 3,
+    category: 'Healthcare',
+    industries: ['healthcare'],
+    tier: 'premium',
+    isUniversal: false,
+    colorOptions: {
+      allowUserColorOverride: true,
+      defaultPrimaryColor: "#059669",
+      defaultSecondaryColor: "#047857",
+      palette: [
+        { label: "Clinical Green", primary: "#059669", secondary: "#047857" },
+        { label: "Medical Teal", primary: "#0D9488", secondary: "#0F766E" },
+        { label: "Healthcare Blue", primary: "#2563EB", secondary: "#1D4ED8" }
+      ]
+    }
+  },
+
+  // Finance Templates
+  {
+    id: 'finance-classic',
+    name: 'Finance Classic',
+    description: `Ultra-professional, traditional banking layout with emphasis on quantified achievements and financial metrics. Investment banking.`,
+    popularity: 4,
+    category: 'Finance',
+    industries: ['finance'],
+    tier: 'premium',
+    isUniversal: false,
+    colorOptions: {
+      allowUserColorOverride: true,
+      defaultPrimaryColor: "#1F2937",
+      defaultSecondaryColor: "#374151",
+      palette: [
+        { label: "Banking Grey", primary: "#1F2937", secondary: "#374151" },
+        { label: "Finance Navy", primary: "#1E3A8A", secondary: "#1E40AF" },
+        { label: "Executive Black", primary: "#111827", secondary: "#1F2937" }
+      ]
+    }
+  },
+  {
+    id: 'investment-pro',
+    name: 'Investment Pro',
+    description: `Metrics-driven layout optimized for quantified results and portfolio performance. Perfect for analysts and investment pros.`,
+    popularity: 3,
+    category: 'Finance',
+    industries: ['finance'],
+    tier: 'premium',
+    isUniversal: false,
+    colorOptions: {
+      allowUserColorOverride: true,
+      defaultPrimaryColor: "#DC2626",
+      defaultSecondaryColor: "#B91C1C",
+      palette: [
+        { label: "Market Red", primary: "#DC2626", secondary: "#B91C1C" },
+        { label: "Bull Green", primary: "#059669", secondary: "#047857" },
+        { label: "Wall Street Navy", primary: "#1E3A8A", secondary: "#1E40AF" }
       ]
     }
   },
@@ -185,4 +396,57 @@ export const searchTemplates = (query: string): ResumeTemplate[] => {
     template.description.toLowerCase().includes(lowercaseQuery) ||
     template.category.toLowerCase().includes(lowercaseQuery)
   );
+};
+
+// Industry-specific template filtering functions
+export const getTemplatesForUser = (selectedIndustry: string, userTier: 'free' | 'paid'): ResumeTemplate[] => {
+  let availableTemplates: ResumeTemplate[] = [];
+  
+  // Always include the free Classic template
+  const universalTemplate = templates.find(template => template.isUniversal && template.tier === 'free');
+  if (universalTemplate) {
+    availableTemplates.push(universalTemplate);
+  }
+  
+  // Add industry-specific premium templates for paid users
+  if (userTier === 'paid' && selectedIndustry && selectedIndustry !== '') {
+    const industryTemplates = templates.filter(template => 
+      template.industries.includes(selectedIndustry) && 
+      template.tier === 'premium'
+    );
+    availableTemplates = [...availableTemplates, ...industryTemplates];
+  }
+  
+  return availableTemplates;
+};
+
+export const getLockedTemplatesForIndustry = (selectedIndustry: string): ResumeTemplate[] => {
+  if (!selectedIndustry || selectedIndustry === '') {
+    return [];
+  }
+  
+  return templates.filter(template => 
+    template.industries.includes(selectedIndustry) && 
+    template.tier === 'premium'
+  );
+};
+
+export const getTemplatesByIndustry = (industry: string): ResumeTemplate[] => {
+  return templates.filter(template => 
+    template.industries.includes(industry) || template.isUniversal
+  );
+};
+
+export const hasPremiumTemplates = (industry: string): boolean => {
+  return templates.some(template => 
+    template.industries.includes(industry) && template.tier === 'premium'
+  );
+};
+
+export const getAllPremiumTemplates = (): ResumeTemplate[] => {
+  return templates.filter(template => template.tier === 'premium');
+};
+
+export const getFreeTemplates = (): ResumeTemplate[] => {
+  return templates.filter(template => template.tier === 'free');
 }; 

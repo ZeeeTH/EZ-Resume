@@ -6,12 +6,14 @@ interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
+  selectedIndustry?: string;
 }
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({
   isOpen,
   onClose,
-  onUpgrade
+  onUpgrade,
+  selectedIndustry
 }) => {
   if (!isOpen) return null;
 
@@ -35,19 +37,38 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
         
         <div className="mb-6">
           <p className="text-gray-300 mb-4">
-            Upgrade to unlock all {industries.length} industries and get industry-specific resume optimization!
+            {selectedIndustry 
+              ? `Unlock premium templates designed specifically for ${selectedIndustry} professionals!`
+              : `Upgrade to unlock all ${industries.length} industries and get industry-specific resume optimization!`
+            }
           </p>
           
-          <div className="space-y-2 mb-4">
-            <p className="text-sm font-medium text-gray-200">Locked Industries:</p>
-            {lockedIndustries.map(industry => (
-              <div key={industry.id} className="flex items-center text-sm text-gray-300">
-                <Lock className="h-3 w-3 text-yellow-400 mr-2" />
-                <span className="font-medium">{industry.name}</span>
-                <span className="text-gray-400 ml-2">- {industry.description}</span>
-              </div>
-            ))}
-          </div>
+          {!selectedIndustry && (
+            <div className="space-y-2 mb-4">
+              <p className="text-sm font-medium text-gray-200">Locked Industries:</p>
+              {lockedIndustries.map(industry => (
+                <div key={industry.id} className="flex items-center text-sm text-gray-300">
+                  <Lock className="h-3 w-3 text-yellow-400 mr-2" />
+                  <span className="font-medium">{industry.name}</span>
+                  <span className="text-gray-400 ml-2">- {industry.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {selectedIndustry && (
+            <div className="bg-white/5 rounded-lg p-3 mb-4">
+              <p className="text-sm font-medium text-blue-400 mb-2">
+                🎯 {selectedIndustry.charAt(0).toUpperCase() + selectedIndustry.slice(1)} Benefits:
+              </p>
+              <ul className="text-xs text-gray-300 space-y-1 ml-3">
+                <li>• 2-3 premium templates designed for your industry</li>
+                <li>• Industry-specific keywords and formatting</li>
+                <li>• Optimized for {selectedIndustry} hiring managers</li>
+                <li>• Professional color schemes and layouts</li>
+              </ul>
+            </div>
+          )}
           
           <div className="bg-white/5 rounded-lg p-3 mb-4">
             <p className="text-sm font-medium text-green-400 mb-2 flex items-center">
