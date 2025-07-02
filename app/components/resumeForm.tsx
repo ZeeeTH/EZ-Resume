@@ -16,6 +16,7 @@ import UpgradeModal from './IndustrySelector/UpgradeModal';
 import TemplateCard from './IndustrySelector/TemplateCard';
 import { getTemplatesForUser, getLockedTemplatesForIndustry, hasPremiumTemplates } from '../../data/templates';
 import AIGenerateButton from './AIGenerateButton';
+import AuthModal from './AuthModal';
 import SkillsSuggestions from './SkillsSuggestions';
 import { AIContentResponse } from '../../lib/ai-utils';
 import { useAuth } from '../../contexts/AuthContext';
@@ -68,6 +69,9 @@ export default function ResumeForm() {
     bulletPoint: false
   });
   const [aiError, setAiError] = useState<string>('');
+
+  // Auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Form setup
   const { control, ...formMethods } = useForm<FormData>({
@@ -330,6 +334,10 @@ export default function ResumeForm() {
     // This would integrate with your payment system
     console.log('Upgrade clicked - integrate with payment system');
     setShowUpgradeModal(false);
+  };
+
+  const handleAuthRequired = () => {
+    setShowAuthModal(true);
   };
 
   // AI Generation Functions
@@ -634,6 +642,7 @@ export default function ResumeForm() {
                       loading={aiLoading.summary}
                       selectedIndustry={selectedIndustry}
                       onUpgradeClick={handleUpgradeClick}
+                      onAuthRequired={handleAuthRequired}
                     />
                   </div>
 
@@ -749,6 +758,7 @@ export default function ResumeForm() {
                            loading={aiLoading.bulletPoint}
                            selectedIndustry={selectedIndustry}
                            onUpgradeClick={handleUpgradeClick}
+                           onAuthRequired={handleAuthRequired}
                          />
                          <p className="text-xs text-gray-400 mt-1">
                            AI will add a professional bullet point to your existing description
@@ -1216,6 +1226,12 @@ export default function ResumeForm() {
         }}
       />
 
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultMode="signin"
+      />
 
     </>
   );
