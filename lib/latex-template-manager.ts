@@ -145,7 +145,7 @@ export class LaTeXTemplateManager {
       if (filters.industry) {
         templates = templates.filter(t => 
           t.industry === filters.industry || 
-          t.tags?.includes(filters.industry)
+          (t.tags && filters.industry ? t.tags.includes(filters.industry) : false)
         );
       }
     }
