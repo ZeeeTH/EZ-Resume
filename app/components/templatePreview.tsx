@@ -5,6 +5,7 @@ import { FormData } from '../../types';
 import ClassicHtml from './ClassicHtml';
 import ModernHtml from './ModernHtml';
 import StructuredHtml from './StructuredHtml';
+import JsonTemplateRenderer from './JsonTemplateRenderer';
 
 interface TemplatePreviewProps {
   showTemplatePreview: boolean;
@@ -15,7 +16,7 @@ interface TemplatePreviewProps {
   setValue: (name: any, value: any, options?: any) => void;
 }
 
-// Sample FormData for template previews - uses the EXACT same structure as the actual form
+// Sample FormData for legacy template previews - uses the EXACT same structure as the actual form
 const getSampleFormData = (templateId: string): FormData => {
   const baseData: FormData = {
     name: "Elena Rodriguez",
@@ -173,40 +174,82 @@ export default function TemplatePreview({
     return null;
   }
 
-  // Get sample data with proper FormData structure
-  const sampleFormData = getSampleFormData(previewTemplate.id);
+  // Check if this is one of the new JSON-based templates (excluding classic/modern/structured)
+  const newJsonTemplateIds = [
+    'tech-modern',
+    'developer-pro', 
+    'senior-tech-executive',
+    'medical-professional',
+    'healthcare-modern',
+    'allied-health-specialist'
+  ];
+  const isJsonTemplate = newJsonTemplateIds.includes(previewTemplate.id);
 
-  // Generate the exact same HTML that would be sent to PDF service
-  const getReactComponentHTML = () => {
+  // Generate the template HTML
+  const getTemplateHTML = () => {
     try {
-      let ResumeComponent: any;
-      switch (previewTemplate.id) {
-        case 'modern':
-          ResumeComponent = ModernHtml;
-          break;
-        case 'structured':
-          ResumeComponent = StructuredHtml;
-          break;
-        case 'classic':
-        default:
-          ResumeComponent = ClassicHtml;
-          break;
+      if (isJsonTemplate) {
+        // Use JsonTemplateRenderer for new JSON-based templates
+        const selectedColorIndex = selectedColorVariants[previewTemplate.id] ?? 0;
+        const selectedColors = previewTemplate.colorOptions?.palette[selectedColorIndex];
+        
+        const templateElement = React.createElement(JsonTemplateRenderer, {
+          template: previewTemplate,
+          selectedColors: selectedColors ? {
+            primary: selectedColors.primary,
+            secondary: selectedColors.secondary
+          } : undefined
+        });
+        
+        const htmlString = ReactDOMServer.renderToStaticMarkup(templateElement);
+        
+        return `<!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Template Preview</title>
+            <style>
+              body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+              * { box-sizing: border-box; }
+            </style>
+          </head>
+          <body>
+            ${htmlString}
+          </body>
+        </html>`;
+      } else {
+        // Use legacy template rendering for classic/modern/structured
+        const sampleFormData = getSampleFormData(previewTemplate.id);
+        let ResumeComponent: any;
+        
+        switch (previewTemplate.id) {
+          case 'modern':
+            ResumeComponent = ModernHtml;
+            break;
+          case 'structured':
+            ResumeComponent = StructuredHtml;
+            break;
+          case 'classic':
+          default:
+            ResumeComponent = ClassicHtml;
+            break;
+        }
+        
+        // Get selected color from user's selection
+        const selectedColorIndex = selectedColorVariants[previewTemplate.id] ?? 0;
+        const selectedColors = previewTemplate.colorOptions?.palette[selectedColorIndex];
+        
+        // Ensure we have valid data for rendering
+        if (!sampleFormData || !ResumeComponent) {
+          return '<html><body><p>Error: Unable to load template data</p></body></html>';
+        }
+        
+        // Since template components now return HTML strings directly, call them as functions
+        return ResumeComponent({ 
+          data: sampleFormData,
+          selectedColors: selectedColors || undefined
+        });
       }
-      
-      // Get selected color from user's selection
-      const selectedColorIndex = selectedColorVariants[previewTemplate.id] ?? 0;
-      const selectedColors = previewTemplate.colorOptions?.palette[selectedColorIndex];
-      
-      // Ensure we have valid data for rendering
-      if (!sampleFormData || !ResumeComponent) {
-        return '<html><body><p>Error: Unable to load template data</p></body></html>';
-      }
-      
-      // Since template components now return HTML strings directly, call them as functions
-      return ResumeComponent({ 
-        data: sampleFormData,
-        selectedColors: selectedColors || undefined
-      });
     } catch (error) {
       console.error('Template rendering error:', error);
       return '<html><body><p>Error: Template failed to render</p></body></html>';
@@ -214,8 +257,8 @@ export default function TemplatePreview({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80 p-4">
-      <div className="relative max-w-full max-h-full overflow-hidden">
+    <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/80 p-8 overflow-hidden">
+      <div className="relative flex justify-center items-center overflow-hidden" style={{ maxWidth: '100%', maxHeight: '100%' }}>
         <button
           onClick={() => setShowTemplatePreview(false)}
           className="absolute top-2 right-2 text-gray-400 hover:text-pink-400 text-2xl font-bold z-10 bg-white/90 rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-colors duration-200"
@@ -224,34 +267,18 @@ export default function TemplatePreview({
           ×
         </button>
         
-        {/* Template Selection Buttons */}
-        <div className="absolute top-2 left-2 z-10 flex gap-2">
-          <button
-            onClick={() => {
-              setSelectedTemplate(previewTemplate.id);
-              setValue('template', previewTemplate.id, { shouldValidate: true, shouldDirty: true });
-              setShowTemplatePreview(false);
-            }}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
-          >
-            ✓ Select This Template
-          </button>
-        </div>
-        
-        {/* A4 Preview Container - Exact PDF dimensions */}
+        {/* A4 Preview Container - Fixed scale to ensure it fits */}
         <div 
-          className="bg-white shadow-2xl mx-auto overflow-hidden" 
+          className="bg-white shadow-2xl overflow-hidden" 
           style={{ 
             width: '210mm', 
             height: '297mm',
-            maxWidth: 'calc(100vw - 2rem)',
-            maxHeight: 'calc(100vh - 6rem)',
-            transform: 'scale(0.7)',
+            transform: 'scale(0.75)',
             transformOrigin: 'center center'
           }}
         >
           <iframe
-            srcDoc={getReactComponentHTML()}
+            srcDoc={getTemplateHTML()}
             style={{
               width: '100%',
               height: '100%',
@@ -260,11 +287,6 @@ export default function TemplatePreview({
             }}
             title="Template Preview - Exact PDF Styling"
           />
-        </div>
-        
-        {/* Preview label */}
-        <div className="text-white text-center mt-2 text-sm opacity-75">
-          📄 {previewTemplate.name} Template - This is exactly how your PDF will look
         </div>
       </div>
     </div>

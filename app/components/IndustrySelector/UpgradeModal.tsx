@@ -1,102 +1,115 @@
 import React from 'react';
-import { X, Star, Lock, Check } from 'lucide-react';
-import { industries } from '../../../data/industry-data';
+import { X, Crown, CheckCircle, Sparkles, Lock } from 'lucide-react';
 
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
-  selectedIndustry?: string;
+  trigger?: 'skills' | 'industry' | 'ai_limit' | 'general';
+  context?: {
+    industry?: string;
+    experienceLevel?: string;
+    lockedCount?: number;
+  };
 }
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({
   isOpen,
   onClose,
   onUpgrade,
-  selectedIndustry
+  trigger = 'general',
+  context = {}
 }) => {
   if (!isOpen) return null;
 
-  const lockedIndustries = industries.filter(industry => !industry.availableInFreeTier);
+  const getUpgradeMessage = () => {
+    switch (trigger) {
+      case 'skills':
+        return `Unlock ${context.lockedCount || 'more'} professional ${context.industry || ''} skills for ${context.experienceLevel || ''} level professionals`;
+      case 'industry':
+        return `Access industry-specific templates and skills for all 9 industries`;
+      case 'ai_limit':
+        return `Get unlimited AI content generation for better resume writing`;
+      default:
+        return `Upgrade to Professional for the complete resume building experience`;
+    }
+  };
+
+  const getContextualBenefits = () => {
+    const baseBenefits = [
+      'All 9 industries with specialized templates',
+      '200+ professional skills across all experience levels',
+      'Unlimited AI content generation',
+      'Cover letter generator',
+      'One-time payment - no monthly fees'
+    ];
+
+    if (trigger === 'skills') {
+      return [
+        `${context.lockedCount || 'More'} additional ${context.industry || ''} skills`,
+        ...baseBenefits
+      ];
+    }
+
+    if (trigger === 'industry') {
+      return [
+        '6 additional locked industries',
+        ...baseBenefits
+      ];
+    }
+
+    return baseBenefits;
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 max-w-md w-full shadow-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-white flex items-center">
-            <Star className="h-5 w-5 text-yellow-400 mr-2" />
-            Unlock All Industries
-          </h3>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md w-full shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+              <Crown className="h-6 w-6 text-black" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">Upgrade to Professional</h3>
+              <p className="text-gray-400 text-sm">Unlock the full experience</p>
+            </div>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         </div>
-        
-        <div className="mb-6">
-          <p className="text-gray-300 mb-4">
-            {selectedIndustry 
-              ? `Unlock premium templates designed specifically for ${selectedIndustry} professionals!`
-              : `Upgrade to unlock all ${industries.length} industries and get industry-specific resume optimization!`
-            }
+
+        <div className="contextual-upgrade-prompt">
+          <p className="text-gray-300 mb-6 text-center">
+            {getUpgradeMessage()}
           </p>
-          
-          {!selectedIndustry && (
-            <div className="space-y-2 mb-4">
-              <p className="text-sm font-medium text-gray-200">Locked Industries:</p>
-              {lockedIndustries.map(industry => (
-                <div key={industry.id} className="flex items-center text-sm text-gray-300">
-                  <Lock className="h-3 w-3 text-yellow-400 mr-2" />
-                  <span className="font-medium">{industry.name}</span>
-                  <span className="text-gray-400 ml-2">- {industry.description}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {selectedIndustry && (
-            <div className="bg-white/5 rounded-lg p-3 mb-4">
-              <p className="text-sm font-medium text-blue-400 mb-2">
-                🎯 {selectedIndustry.charAt(0).toUpperCase() + selectedIndustry.slice(1)} Benefits:
+
+          <ul className="upgrade-benefits space-y-3 mb-8">
+            {getContextualBenefits().map((benefit, index) => (
+              <li key={index} className="flex items-center space-x-3 text-sm text-gray-300">
+                <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="space-y-4">
+            <button 
+              onClick={onUpgrade}
+              className="upgrade-btn-primary w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+            >
+              Upgrade Now - $49 AUD
+            </button>
+            
+            <div className="text-center">
+              <p className="text-xs text-gray-400">
+                One-time payment • No recurring fees • Instant access
               </p>
-              <ul className="text-xs text-gray-300 space-y-1 ml-3">
-                <li>• 2-3 premium templates designed for your industry</li>
-                <li>• Industry-specific keywords and formatting</li>
-                <li>• Optimized for {selectedIndustry} hiring managers</li>
-                <li>• Professional color schemes and layouts</li>
-              </ul>
             </div>
-          )}
-          
-          <div className="bg-white/5 rounded-lg p-3 mb-4">
-            <p className="text-sm font-medium text-green-400 mb-2 flex items-center">
-              <Check className="h-4 w-4 mr-1" />
-              Premium Benefits:
-            </p>
-            <ul className="text-xs text-gray-300 space-y-1 ml-5">
-              <li>• Industry-specific resume templates</li>
-              <li>• Tailored keyword optimization</li>
-              <li>• Industry-focused AI suggestions</li>
-              <li>• Unlimited resume generations</li>
-            </ul>
           </div>
-        </div>
-        
-        <div className="flex space-x-3">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium py-3 px-4 rounded-lg border border-white/20 transition-all duration-200"
-          >
-            Maybe Later
-          </button>
-          <button
-            onClick={onUpgrade}
-            className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105"
-          >
-            Upgrade Now
-          </button>
         </div>
       </div>
     </div>

@@ -1,0 +1,57 @@
+# LaTeX-enabled Docker image for EZ-Resume
+FROM node:18-alpine
+
+# Install LaTeX and required packages
+RUN apk update && apk add --no-cache \
+    texlive \
+    texlive-latex-extra \
+    texlive-fonts-extra \
+    texlive-xetex \
+    texlive-luatex \
+    font-noto \
+    font-noto-cjk \
+    fontconfig \
+    && fc-cache -fv
+
+# Install additional LaTeX packages
+RUN tlmgr update --self \
+    && tlmgr install \
+    moderncv \
+    enumitem \
+    titlesec \
+    xcolor \
+    hyperref \
+    microtype \
+    multicol \
+    tikz \
+    geometry \
+    fontspec
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install Node.js dependencies
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p latex-templates generated-pdfs
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV LATEX_COMPILER=pdflatex
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start the application
+CMD ["npm", "start"] 

@@ -106,4 +106,149 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   padding: 20mm;
   box-sizing: border-box;
+}
+
+/* Skills tier restrictions */
+.suggestions-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.skills-tier-badge {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.skill-chip.locked {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  space-x: 1.5;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.skill-chip.locked:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-style: solid;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.skills-upgrade-prompt {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+}
+
+.skills-upgrade-prompt p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.upgrade-btn-small {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgrade-btn-small:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Industry tier info */
+.industry-tier-info {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+}
+
+.inline-upgrade-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.inline-upgrade-link:hover {
+  color: #ffffff;
+}
+
+/* Experience level tier hint */
+.level-tier-hint {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.level-tier-hint small {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+}
+
+/* Contextual upgrade prompt */
+.contextual-upgrade-prompt {
+  text-align: center;
+}
+
+.upgrade-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upgrade-benefits li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.upgrade-btn-primary {
+  background: linear-gradient(to right, #8b5cf6, #ec4899);
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: scale(1);
+}
+
+.upgrade-btn-primary:hover {
+  background: linear-gradient(to right, #ec4899, #8b5cf6);
+  transform: scale(1.05);
+}
+
+/* Industry selector wrapper */
+.industry-selector {
+  position: relative;
 } 

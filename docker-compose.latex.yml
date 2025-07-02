@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  ez-resume-latex:
+    build:
+      context: .
+      dockerfile: Dockerfile.latex
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - LATEX_COMPILER=pdflatex
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_PASS=${GMAIL_PASS}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    volumes:
+      # Mount templates directory for easy development
+      - ./latex-templates:/app/latex-templates:ro
+      # Mount generated PDFs directory (optional, for debugging)
+      - ./generated-pdfs:/app/generated-pdfs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: LaTeX compilation service (microservice approach)
+  latex-compiler:
+    build:
+      context: .
+      dockerfile: Dockerfile.latex-service
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - LATEX_COMPILER=pdflatex
+    volumes:
+      - ./latex-templates:/app/latex-templates:ro
+      - latex-temp:/tmp/latex
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  latex-temp:
+    driver: local 

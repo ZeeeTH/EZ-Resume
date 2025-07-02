@@ -29,36 +29,10 @@ export interface ResumeTemplate {
     section?: string;
     body?: string;
   };
-  sampleData: {
-    name: string;
-    title?: string;
-    contact: {
-      email: string;
-      phone: string;
-      location: string;
-      website?: string;
-      linkedin?: string;
-      twitter?: string;
-    };
-    sections: Array<{
-      title: string;
-      content?: string;
-      jobs?: Array<{
-        title: string;
-        company: string;
-        location: string;
-        dates: string;
-        bullets: string[];
-      }>;
-      education?: Array<{
-        degree: string;
-        institution: string;
-        location?: string;
-        dates: string;
-        gpa?: string;
-      }>;
-      categories?: Record<string, string[]>;
-    }>;
+  sampleData?: any; // Flexible sample data structure
+  layout?: {
+    main?: string[];
+    sidebar?: string[];
   };
 }
 

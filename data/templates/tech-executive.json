@@ -1,0 +1,117 @@
+{
+    "id": "senior-tech-executive",
+    "name": "Senior Tech Executive",
+    "description": "Leadership-focused template for CTOs, tech directors, and senior engineers. Conservative but modern design emphasising achievements and team management.",
+    "popularity": 3,
+    "category": "Technology",
+    "styling": {
+      "primaryColor": "#1E3A8A",
+      "secondaryColor": "#374151",
+      "fontFamily": "Georgia",
+      "spacing": "spacious",
+      "layout": "single-column-executive-summary"
+    },
+    "colorOptions": {
+      "allowUserColorOverride": true,
+      "defaultPrimaryColor": "#1E3A8A",
+      "defaultSecondaryColor": "#374151",
+      "palette": [
+        { "label": "Executive Navy", "primary": "#1E3A8A", "secondary": "#374151" },
+        { "label": "Corporate Blue", "primary": "#1D4ED8", "secondary": "#475569" },
+        { "label": "Professional Grey", "primary": "#374151", "secondary": "#6B7280" }
+      ]
+    },
+    "sampleData": {
+      "name": "Michael Rodriguez",
+      "title": "Chief Technology Officer",
+      "contact": {
+        "phone": "(07) 3456 7890",
+        "email": "michael.rodriguez@exectech.com.au",
+        "location": "Brisbane, QLD",
+        "linkedin": "linkedin.com/in/michael-rodriguez-cto",
+        "website": "michaelrodriguez.tech"
+      },
+      "sections": [
+        {
+          "title": "Executive Summary",
+          "content": "Visionary technology leader with 15+ years driving digital transformation for ASX-listed companies. Proven track record scaling engineering teams from 20 to 200+ professionals while delivering $50M+ in cost savings through cloud modernisation and process optimisation."
+        },
+        {
+          "title": "Leadership Experience",
+          "jobs": [
+            {
+              "title": "Chief Technology Officer",
+              "company": "Woolworths Group",
+              "location": "Brisbane, QLD",
+              "dates": "September 2020 – Present",
+              "bullets": [
+                "Lead technology strategy for $64B retail operation serving 28M+ customers weekly",
+                "Transformed legacy systems to cloud-native architecture, reducing operational costs by $25M annually",
+                "Built and scaled engineering organisation from 120 to 300+ professionals across 15 cross-functional teams",
+                "Spearheaded AI/ML initiatives improving supply chain efficiency and customer personalisation"
+              ]
+            },
+            {
+              "title": "Head of Engineering",
+              "company": "REA Group",
+              "location": "Melbourne, VIC",
+              "dates": "April 2017 – August 2020",
+              "bullets": [
+                "Directed product engineering for realestate.com.au serving 3M+ monthly users",
+                "Implemented DevOps culture reducing deployment time from weeks to hours",
+                "Led technical due diligence for $200M+ acquisitions and strategic partnerships",
+                "Established offshore development centres in India and Philippines"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Technical Expertise",
+          "categories": {
+            "Leadership": ["Team Building", "Strategic Planning", "Digital Transformation", "Agile/Scrum"],
+            "Architecture": ["Cloud Migration", "Microservices", "API Design", "Security"],
+            "Technologies": ["AWS", "Azure", "Kubernetes", "React", "Node.js"],
+            "Business": ["P&L Management", "Vendor Relations", "Board Reporting", "Risk Management"]
+          }
+        },
+        {
+          "title": "Key Achievements",
+          "achievements": [
+            "Reduced technology operational costs by $50M+ across multiple organisations",
+            "Successfully led 5 major digital transformation initiatives",
+            "Built high-performing engineering teams totalling 500+ professionals",
+            "Delivered 20+ enterprise-scale products serving millions of users"
+          ]
+        },
+        {
+          "title": "Education",
+          "education": [
+            {
+              "degree": "Master of Business Administration (MBA)",
+              "institution": "Australian Graduate School of Management",
+              "location": "Sydney, NSW",
+              "dates": "November 2015",
+              "gpa": "Distinction"
+            },
+            {
+              "degree": "Bachelor of Computer Science (Honours)",
+              "institution": "Queensland University of Technology",
+              "location": "Brisbane, QLD", 
+              "dates": "December 2008",
+              "gpa": "First Class Honours"
+            }
+          ]
+        },
+        {
+          "title": "Board & Advisory Roles",
+          "roles": [
+            "Technology Advisory Board - Startup Victoria (2021-Present)",
+            "Non-Executive Director - TechCorp Australia (2019-Present)"
+          ]
+        }
+      ]
+    },
+    "layout": {
+      "main": ["name", "title", "contact", "executive-summary", "leadership-experience", "technical-expertise", "key-achievements", "education", "board-advisory-roles"]
+    }
+  }

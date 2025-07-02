@@ -34,7 +34,7 @@ const IndustryDropdown: React.FC<IndustryDropdownProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="industry-selector">
       <select 
         value={selectedIndustry} 
         onChange={handleSelectChange}
@@ -74,6 +74,25 @@ const IndustryDropdown: React.FC<IndustryDropdownProps> = ({
       
       {fieldStatus === 'success' && (
         <CheckCircle className="absolute right-8 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-400 pointer-events-none" />
+      )}
+      
+      {/* Show available vs total for free users */}
+      {userTier === 'free' && (
+        <div className="industry-tier-info">
+          <small>
+            {availableIndustries.length} of {industries.length} industries available • 
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onUpgradeClick();
+              }}
+              className="inline-upgrade-link"
+            >
+              Unlock all industries
+            </button>
+          </small>
+        </div>
       )}
     </div>
   );

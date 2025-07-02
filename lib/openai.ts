@@ -192,6 +192,8 @@ export interface AIContentParams {
   userInput?: string;
   yearsExperience?: string;
   selectedIndustry?: string;
+  experienceLevel?: string;
+  experienceLevelContext?: string;
   userTier: 'free' | 'paid';
   currentUsage: number;
 }
@@ -199,7 +201,7 @@ export interface AIContentParams {
 
 
 export async function generateAIContent(params: AIContentParams): Promise<AIContentResponse> {
-  const { contentType, jobTitle, context, userInput, yearsExperience, selectedIndustry, userTier, currentUsage } = params;
+  const { contentType, jobTitle, context, userInput, yearsExperience, selectedIndustry, experienceLevel, experienceLevelContext, userTier, currentUsage } = params;
 
   // Check usage limits for free users
   const usageCheck = checkAIUsage(contentType, currentUsage, userTier);
@@ -235,6 +237,15 @@ export async function generateAIContent(params: AIContentParams): Promise<AICont
         error: 'invalid_type',
         message: 'Invalid content type requested.'
       };
+  }
+
+  // Add experience level context if provided
+  if (experienceLevel && experienceLevelContext) {
+    prompt += `\n\nExperience Level: ${experienceLevel}
+Additional context for ${experienceLevel} level:
+${experienceLevelContext}
+
+Please tailor the content appropriately for someone at the ${experienceLevel} level.`;
   }
 
   try {

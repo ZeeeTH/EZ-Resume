@@ -1,0 +1,142 @@
+{
+  "id": "tech-modern",
+  "name": "Tech Modern",
+  "description": "Modern two-column resume with bold white text on black sidebar, clean layout, and contemporary design. Perfect for tech professionals and developers.",
+  "popularity": 5,
+  "category": "Modern",
+  "styling": {
+    "primaryColor": "#FFFFFF",
+    "secondaryColor": "#CCCCCC",
+    "backgroundColor": "#000000",
+    "fontFamily": "Arial, sans-serif",
+    "spacing": "compact",
+    "layout": "two-column-sidebar-left-dark",
+    "sidebarBackground": "#000000",
+    "mainBackground": "#FFFFFF",
+    "sidebarTextColor": "#FFFFFF",
+    "mainTextColor": "#000000"
+  },
+  "colorOptions": {
+    "allowUserColorOverride": true,
+    "defaultPrimaryColor": "#FFFFFF",
+    "defaultSecondaryColor": "#CCCCCC",
+    "palette": [
+      { "label": "Classic Black & White", "primary": "#FFFFFF", "secondary": "#CCCCCC", "sidebarBg": "#000000", "mainBg": "#FFFFFF" },
+      { "label": "Dark Blue", "primary": "#FFFFFF", "secondary": "#E5E7EB", "sidebarBg": "#1E3A8A", "mainBg": "#FFFFFF" },
+      { "label": "Dark Green", "primary": "#FFFFFF", "secondary": "#E5E7EB", "sidebarBg": "#059669", "mainBg": "#FFFFFF" }
+    ]
+  },
+  "sampleData": {
+    "name": "ALFREDO TORRES",
+    "nameStyle": "bold-caps-white",
+    "title": "",
+    "contact": {
+      "phone": "123-456-7890",
+      "email": "hello@reallygreatsite.com",
+      "website": "www.reallygreatsite.com",
+      "location": "123 Anywhere St., Any City",
+      "linkedin": "",
+      "twitter": ""
+    },
+    "sections": [
+      {
+        "title": "ABOUT ME",
+        "type": "summary",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sapien lorem, faucibus at ante, et vehicula augue suscipit. Nullam a tellus ut est in semper feugiat ut rhoncus felis. Aenean vehicula arcu quis rutrum consequuntur nibue."
+      },
+      {
+        "title": "EXPERIENCE",
+        "type": "experience",
+        "jobs": [
+          {
+            "title": "Junior Python Developer",
+            "company": "Software Company",
+            "location": "",
+            "dates": "Dates: MM/YYYY - MM/YYYY",
+            "bullets": [
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              "Cras sapien lorem, faucibus at ante, et vehicula ausu semper.",
+              "Nullam a tellus ut est in rhoncus felis Aenean vehicula arcu quis rutrum consequatur nibue.",
+              "Integer posuere sit in euismod eligant. Etiam non metua sed euismod convallis auctor.",
+              "Mauris bibendum finibus augue non qulismod turpis volutpat quam. Quisque tortor lorem fusce.",
+              "Pellentesque mauris massa, mattis in consequuntur in, tempor id quam."
+            ]
+          },
+          {
+            "title": "Python Software Engineer",
+            "company": "Consulting Services",
+            "location": "",
+            "dates": "Dates: MM/YYYY - MM/YYYY",
+            "bullets": [
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              "Cras sapien lorem, faucibus at ante, et vehicula ausu semper varius vitae tellus ut est rhoncus felis.",
+              "Nullam a tellus ut est in semper feugiat ut rhoncus felis suscipit dignissim at lorem eros commodo vitae.",
+              "Integer posuere sit in euismod eligant. Etiam non metus sed euismod convallis auctor.",
+              "Mauris bibendum finibus augue non qulismod turpis volutpat quam. Quisque tortor lorem fusce ut",
+              "pellentesque mauris orare."
+            ]
+          }
+        ]
+      }
+    ],
+    "sidebar": {
+      "sections": [
+        {
+          "title": "CONTACTS",
+          "type": "contact",
+          "items": [
+            { "type": "phone", "value": "123-456-7890", "icon": "phone" },
+            { "type": "email", "value": "hello@reallygreatsite.com", "icon": "email" },
+            { "type": "website", "value": "www.reallygreatsite.com", "icon": "globe" },
+            { "type": "location", "value": "123 Anywhere St., Any City", "icon": "location" }
+          ]
+        },
+        {
+          "title": "EDUCATION",
+          "type": "education",
+          "items": [
+            {
+              "institution": "Borcelle University",
+              "degree": "Master of Degree",
+              "dates": "2013-2018",
+              "location": "123 Anywhere St., Any City"
+            },
+            {
+              "institution": "Rimberto High School",
+              "degree": "High School Diploma",
+              "dates": "2009-2013",
+              "location": "123 Anywhere St., Any City"
+            }
+          ]
+        },
+        {
+          "title": "SKILLS",
+          "type": "skills",
+          "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sapien lorem, faucibus at ante, et vehicula suscipit dignissim at lorem. Nullam a tellus ut est in semper feugiat ut rhoncus felis. Aenean vehicula arcu quis finibus lorem consectetuer libero. Commodo vitae. Integer"
+        }
+      ]
+    }
+  },
+  "layout": {
+    "type": "two-column",
+    "sidebar": {
+      "position": "left",
+      "width": "35%",
+      "background": "#000000",
+      "textColor": "#FFFFFF",
+      "sections": ["name-with-arrow", "contacts", "education", "skills"]
+    },
+    "main": {
+      "position": "right", 
+      "width": "65%",
+      "background": "#FFFFFF",
+      "textColor": "#000000",
+      "sections": ["about", "experience"]
+    },
+    "nameDisplay": {
+      "style": "bold-caps-with-arrow",
+      "arrow": "→",
+      "placement": "sidebar-top"
+    }
+  }
+}

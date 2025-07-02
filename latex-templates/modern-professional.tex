@@ -1,0 +1,160 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=15mm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{microtype}
+\usepackage{multicol}
+
+% Define modern color scheme
+\definecolor{accentcolor}{RGB}{99, 102, 241}  % Modern blue
+\definecolor{headercolor}{RGB}{31, 41, 55}    % Dark gray
+\definecolor{sectioncolor}{RGB}{75, 85, 99}   % Medium gray
+\definecolor{textcolor}{RGB}{17, 24, 39}      % Near black
+\definecolor{lightgray}{RGB}{243, 244, 246}   % Light background
+
+% Set up modern fonts
+\setmainfont{Inter}[
+  UprightFont = *-Regular,
+  BoldFont = *-SemiBold,
+  ItalicFont = *-Italic,
+  BoldItalicFont = *-SemiBoldItalic
+]
+
+% Remove page numbers
+\pagestyle{empty}
+
+% Modern section formatting with colored background
+\titleformat{\section}
+  {\large\bfseries\color{headercolor}}
+  {}
+  {0em}
+  {\colorbox{lightgray}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{\strut#1\strut}}}
+  [\vspace{8pt}]
+
+\titlespacing*{\section}{0pt}{16pt}{0pt}
+
+% Subsection for job/education entries
+\titleformat{\subsection}
+  {\bfseries\color{textcolor}}
+  {}
+  {0em}
+  {}
+
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+% Custom commands for modern styling
+\newcommand{\modernheader}[1]{%
+  \begin{center}
+    \color{headercolor}
+    {\Huge\bfseries #1}
+  \end{center}
+}
+
+\newcommand{\contactinfo}[4]{%
+  \begin{center}
+    \color{sectioncolor}
+    \href{mailto:#2}{#2} \textbullet{} #1 \ifx#3\empty\else\textbullet{} #3\fi \ifx#4\empty\else\textbullet{} \href{#4}{LinkedIn}\fi
+  \end{center}
+}
+
+\newcommand{\jobentry}[4]{%
+  \subsection{#1}
+  \textcolor{accentcolor}{\textbf{#2}} \hfill \textcolor{sectioncolor}{\textit{#3 -- #4}}
+  \vspace{2pt}
+}
+
+\newcommand{\educationentry}[3]{%
+  \subsection{#1}
+  \textcolor{sectioncolor}{\textit{#2}} \hfill \textcolor{sectioncolor}{\textit{#3}}
+  \vspace{2pt}
+}
+
+% Modern bullet points
+\renewcommand{\labelitemi}{\textcolor{accentcolor}{\small\textbullet}}
+
+% Adjust list spacing for modern look
+\setlist[itemize]{
+  leftmargin=15pt,
+  itemsep=3pt,
+  parsep=0pt,
+  topsep=6pt,
+  partopsep=0pt
+}
+
+% Hyperlink setup
+\hypersetup{
+  colorlinks=true,
+  urlcolor=accentcolor,
+  linkcolor=accentcolor,
+  filecolor=accentcolor
+}
+
+\begin{document}
+
+% Modern Header
+\modernheader{{{personalDetails.fullName}}}
+
+\vspace{8pt}
+
+% Job Title with accent color
+\ifx\{{jobTitle}}\empty\else
+\begin{center}
+{\Large\color{accentcolor}\textbf{{{jobTitle}}}}
+\end{center}
+\vspace{4pt}
+\fi
+
+% Contact Information
+\contactinfo{{{personalDetails.phone}}}{{{personalDetails.email}}}{{{personalDetails.location}}}{{{personalDetails.linkedin}}}
+
+\vspace{12pt}
+
+% Professional Summary with modern styling
+\ifx\{{professionalSummary}}\empty\else
+\section{Professional Summary}
+\color{textcolor}{{professionalSummary}}
+\vspace{8pt}
+\fi
+
+% Work Experience
+\section{Professional Experience}
+{{#workExperience}}
+\jobentry{{{jobTitle}}}{{{company}}}{{{startDate}}}{{{endDate}}}
+
+\begin{itemize}
+{{#description}}
+\item {{.}}
+{{/description}}
+\end{itemize}
+
+\vspace{8pt}
+{{/workExperience}}
+
+% Education
+\section{Education}
+{{#education}}
+\educationentry{{{degree}}}{{{institution}}}{{{graduationDate}}}
+\vspace{8pt}
+{{/education}}
+
+% Skills in two columns for modern layout
+\section{Core Competencies}
+\begin{multicols}{2}
+\begin{itemize}[itemsep=2pt]
+{{#skillsList}}
+\item {{.}}
+{{/skillsList}}
+\end{itemize}
+\end{multicols}
+
+% Achievements (if provided)
+\ifx\{{achievements}}\empty\else
+\section{Key Achievements}
+\color{textcolor}{{achievements}}
+\fi
+
+\end{document} 

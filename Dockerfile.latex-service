@@ -1,0 +1,60 @@
+# Dedicated LaTeX compilation microservice
+FROM alpine:3.18
+
+# Install LaTeX and Node.js
+RUN apk update && apk add --no-cache \
+    nodejs \
+    npm \
+    texlive \
+    texlive-latex-extra \
+    texlive-fonts-extra \
+    texlive-xetex \
+    texlive-luatex \
+    font-noto \
+    font-noto-cjk \
+    fontconfig \
+    curl \
+    && fc-cache -fv
+
+# Install additional LaTeX packages
+RUN tlmgr update --self \
+    && tlmgr install \
+    moderncv \
+    enumitem \
+    titlesec \
+    xcolor \
+    hyperref \
+    microtype \
+    multicol \
+    tikz \
+    geometry \
+    fontspec
+
+# Create app directory
+WORKDIR /app
+
+# Copy and install dependencies for the service
+COPY latex-service/package*.json ./
+RUN npm ci --only=production
+
+# Copy service code
+COPY latex-service/ ./
+
+# Create directories
+RUN mkdir -p templates output temp
+
+# Set user for security
+RUN addgroup -g 1001 -S latex && \
+    adduser -S latex -u 1001 -G latex
+RUN chown -R latex:latex /app
+USER latex
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Start the service
+CMD ["node", "server.js"] 

@@ -1,6 +1,12 @@
 import modernTemplate from './modern.json';
 import classicTemplate from './classic.json';
 import structuredTemplate from './structured.json';
+import techModernTemplate from './tech-modern.json';
+import developerProTemplate from './developer-pro.json';
+import seniorTechExecutiveTemplate from './tech-executive.json';
+import medicalProfessionalTemplate from './medical-professional.json';
+import healthcareModernTemplate from './healthcare-modern.json';
+import alliedHealthTemplate from './allied-health-specialist.json';
 
 export interface ResumeTemplate {
   id: string;
@@ -88,84 +94,80 @@ export const templates: ResumeTemplate[] = [
 
   // Technology Templates
   {
-    ...modernTemplate,
-    id: 'tech-modern',
-    name: 'Tech Modern',
-    description: 'Clean, minimal design with prominent technical skills section. Perfect for developers and software engineers.',
+    ...techModernTemplate,
     industries: ['technology'],
     tier: 'premium',
     isUniversal: false,
-    category: 'Technology',
     styling: {
-      ...modernTemplate.styling,
-      spacing: modernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
-      layout: modernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+      ...techModernTemplate.styling,
+      spacing: techModernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: techModernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
       header: 'Inter, Arial, sans-serif',
       section: 'Inter, Arial, sans-serif',
       body: 'Inter, Arial, sans-serif',
     },
-  },
+  } as ResumeTemplate,
   {
-    ...structuredTemplate,
-    id: 'developer-pro',
-    name: 'Developer Pro',
-    description: 'Two-column layout with skills sidebar and project showcase. Ideal for senior developers and tech leads.',
+    ...developerProTemplate,
     industries: ['technology'],
     tier: 'premium',
     isUniversal: false,
-    category: 'Technology',
     styling: {
-      ...structuredTemplate.styling,
-      spacing: structuredTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
-      layout: structuredTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+      ...developerProTemplate.styling,
+      spacing: developerProTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: developerProTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
       header: 'Roboto, Arial, sans-serif',
       section: 'Roboto, Arial, sans-serif',
       body: 'Source Code Pro, monospace',
     },
-  },
+  } as ResumeTemplate,
+  {
+    ...seniorTechExecutiveTemplate,
+    industries: ['technology'],
+    tier: 'premium',
+    isUniversal: false,
+    styling: {
+      ...seniorTechExecutiveTemplate.styling,
+      spacing: seniorTechExecutiveTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: seniorTechExecutiveTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+    },
+    fonts: {
+      header: 'Georgia, serif',
+      section: 'Lato, Arial, sans-serif',
+      body: 'Lato, Arial, sans-serif',
+    },
+  } as ResumeTemplate,
 
   // Healthcare Templates
   {
-    ...classicTemplate,
-    id: 'medical-professional',
-    name: 'Medical Professional',
-    description: 'Traditional, certification-focused layout perfect for doctors, nurses, and healthcare professionals.',
+    ...medicalProfessionalTemplate,
     industries: ['healthcare'],
     tier: 'premium',
     isUniversal: false,
-    category: 'Healthcare',
     styling: {
-      ...classicTemplate.styling,
-      primaryColor: '#1E40AF',
-      secondaryColor: '#475569',
-      spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
-      layout: classicTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+      ...medicalProfessionalTemplate.styling,
+      spacing: medicalProfessionalTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: medicalProfessionalTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
       header: 'Times New Roman, serif',
       section: 'Lato, Arial, sans-serif',
       body: 'Lato, Arial, sans-serif',
     },
-  },
+  } as ResumeTemplate,
   {
-    ...modernTemplate,
-    id: 'healthcare-modern',
-    name: 'Healthcare Modern',
-    description: 'Clean but conservative design with clinical experience emphasis. Perfect for modern healthcare roles.',
+    ...healthcareModernTemplate,
     industries: ['healthcare'],
     tier: 'premium',
     isUniversal: false,
-    category: 'Healthcare',
     styling: {
-      ...modernTemplate.styling,
-      primaryColor: '#059669',
-      secondaryColor: '#047857',
-      spacing: modernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
-      layout: modernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+      ...healthcareModernTemplate.styling,
+      spacing: healthcareModernTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: healthcareModernTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
       header: 'Merriweather, Georgia, serif',
@@ -173,30 +175,22 @@ export const templates: ResumeTemplate[] = [
       body: 'Lato, Arial, sans-serif',
     },
   },
-
-  // Finance Templates
   {
-    ...classicTemplate,
-    id: 'finance-classic',
-    name: 'Finance Classic',
-    description: 'Ultra-professional, traditional banking style. Perfect for investment banking and financial services.',
-    industries: ['finance'],
+    ...alliedHealthTemplate,
+    industries: ['healthcare'],
     tier: 'premium',
     isUniversal: false,
-    category: 'Finance',
     styling: {
-      ...classicTemplate.styling,
-      primaryColor: '#1F2937',
-      secondaryColor: '#4B5563',
-      spacing: classicTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
-      layout: classicTemplate.styling.layout as 'modern' | 'classic' | 'structured',
+      ...alliedHealthTemplate.styling,
+      spacing: alliedHealthTemplate.styling.spacing as 'compact' | 'standard' | 'spacious',
+      layout: alliedHealthTemplate.styling.layout as 'modern' | 'classic' | 'structured',
     },
     fonts: {
-      header: 'Times New Roman, serif',
-      section: 'Arial, sans-serif',
-      body: 'Arial, sans-serif',
+      header: 'Lato, Arial, sans-serif',
+      section: 'Lato, Arial, sans-serif',
+      body: 'Lato, Arial, sans-serif',
     },
-  },
+  } as ResumeTemplate,
   {
     ...structuredTemplate,
     id: 'investment-pro',

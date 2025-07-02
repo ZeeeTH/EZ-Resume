@@ -1,0 +1,110 @@
+{
+    "id": "healthcare-modern",
+    "name": "Healthcare Modern",
+    "description": "Clean but conservative design for nurses and allied health professionals. Green accents with focus on patient care and clinical outcomes.",
+    "popularity": 4,
+    "category": "Healthcare",
+    "styling": {
+      "primaryColor": "#059669",
+      "secondaryColor": "#374151",
+      "fontFamily": "Open Sans",
+      "spacing": "balanced",
+      "layout": "single-column-competencies-focus"
+    },
+    "colorOptions": {
+      "allowUserColorOverride": true,
+      "defaultPrimaryColor": "#059669",
+      "defaultSecondaryColor": "#374151",
+      "palette": [
+        { "label": "Healthcare Green", "primary": "#059669", "secondary": "#374151" },
+        { "label": "Medical Teal", "primary": "#0F766E", "secondary": "#475569" },
+        { "label": "Clinical Blue", "primary": "#0EA5E9", "secondary": "#64748B" }
+      ]
+    },
+    "sampleData": {
+      "name": "Rebecca Johnson",
+      "title": "Registered Nurse - Critical Care",
+      "contact": {
+        "phone": "(02) 4567 8901",
+        "email": "rebecca.johnson@healthmail.com.au",
+        "location": "Newcastle, NSW",
+        "linkedin": "linkedin.com/in/rebecca-johnson-rn"
+      },
+      "sections": [
+        {
+          "title": "Professional Summary",
+          "content": "Dedicated registered nurse with 8+ years critical care experience in ICU and emergency departments. AHPRA registered with advanced certifications in critical care nursing, trauma response, and patient advocacy. Committed to evidence-based practice and delivering compassionate patient-centred care."
+        },
+        {
+          "title": "Clinical Experience",
+          "jobs": [
+            {
+              "title": "Senior Registered Nurse - ICU",
+              "company": "John Hunter Hospital",
+              "location": "Newcastle, NSW",
+              "dates": "June 2019 – Present",
+              "bullets": [
+                "Provide direct nursing care for critically ill patients in 32-bed Level 6 ICU",
+                "Mentor new graduate nurses and coordinate clinical placements for nursing students",
+                "Lead quality improvement initiatives reducing catheter-associated infections by 30%",
+                "Participate in multidisciplinary rounds and contribute to treatment planning decisions"
+              ]
+            },
+            {
+              "title": "Registered Nurse - Emergency Department",
+              "company": "Royal North Shore Hospital",
+              "location": "Sydney, NSW",
+              "dates": "March 2016 – May 2019",
+              "bullets": [
+                "Triaged and managed acute presentations in high-volume metropolitan ED",
+                "Administered emergency medications and assisted with life-saving procedures",
+                "Provided trauma nursing care and supported families during crisis situations",
+                "Maintained 95%+ patient satisfaction scores through compassionate care delivery"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Education",
+          "education": [
+            {
+              "degree": "Bachelor of Nursing",
+              "institution": "University of Newcastle",
+              "location": "Newcastle, NSW",
+              "dates": "December 2015",
+              "gpa": "Distinction Average"
+            }
+          ]
+        },
+        {
+          "title": "Certifications",
+          "certifications": [
+            "AHPRA Nursing Registration - NMW0001234567 (Current)",
+            "Graduate Certificate in Critical Care Nursing - University of Technology Sydney",
+            "Advanced Life Support (ALS) Provider",
+            "Trauma Nursing Core Course (TNCC) Certification"
+          ]
+        },
+        {
+          "title": "Core Competencies",
+          "categories": {
+            "Clinical Skills": ["Critical Care Nursing", "Emergency Medicine", "Medication Administration", "Wound Care"],
+            "Technical": ["Electronic Medical Records", "Cardiac Monitoring", "Ventilator Management", "IV Therapy"],
+            "Interpersonal": ["Patient Advocacy", "Family Communication", "Multidisciplinary Collaboration", "Cultural Sensitivity"],
+            "Leadership": ["Mentoring", "Quality Improvement", "Staff Coordination", "Policy Development"]
+          }
+        },
+        {
+          "title": "Professional Development",
+          "development": [
+            "Australian College of Critical Care Nurses Annual Conference (2023, 2022, 2021)",
+            "Sepsis Recognition and Management Workshop - NSW Health (2023)",
+            "Mental Health First Aid Training - Beyond Blue (2022)"
+          ]
+        }
+      ]
+    },
+    "layout": {
+      "main": ["name", "title", "contact", "professional-summary", "clinical-experience", "education", "certifications", "core-competencies", "professional-development"]
+    }
+  }

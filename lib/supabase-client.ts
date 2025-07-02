@@ -45,6 +45,7 @@ export interface UserProfile {
   email: string | null;
   tier: 'free' | 'paid';
   selected_industry: string | null;
+  experience_level: string | null;
   ai_usage: {
     bulletPoints: number;
     summary: number;

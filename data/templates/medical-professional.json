@@ -1,0 +1,123 @@
+{
+    "id": "medical-professional",
+    "name": "Medical Professional",
+    "description": "Traditional, conservative design suitable for doctors and medical specialists. Navy blue accents with certification and education prominence.",
+    "popularity": 5,
+    "category": "Healthcare",
+    "styling": {
+      "primaryColor": "#1E3A8A",
+      "secondaryColor": "#374151",
+      "fontFamily": "Times New Roman",
+      "spacing": "spacious",
+      "layout": "single-column-education-prominent"
+    },
+    "colorOptions": {
+      "allowUserColorOverride": true,
+      "defaultPrimaryColor": "#1E3A8A",
+      "defaultSecondaryColor": "#374151",
+      "palette": [
+        { "label": "Medical Navy", "primary": "#1E3A8A", "secondary": "#374151" },
+        { "label": "Professional Blue", "primary": "#1D4ED8", "secondary": "#475569" },
+        { "label": "Clinical Grey", "primary": "#374151", "secondary": "#6B7280" }
+      ]
+    },
+    "sampleData": {
+      "name": "Dr. Emma Patel",
+      "title": "Consultant Cardiologist",
+      "contact": {
+        "phone": "(08) 6234 5678",
+        "email": "dr.emma.patel@heartspecialists.com.au",
+        "location": "Perth, WA",
+        "linkedin": "linkedin.com/in/dr-emma-patel-cardiologist"
+      },
+      "sections": [
+        {
+          "title": "Professional Summary",
+          "content": "Board-certified cardiologist with 12+ years clinical experience in interventional cardiology and cardiac catheterisation. AHPRA registered specialist with extensive experience in complex coronary interventions and structural heart disease management across major Australian teaching hospitals."
+        },
+        {
+          "title": "Medical Experience",
+          "jobs": [
+            {
+              "title": "Consultant Cardiologist",
+              "company": "Royal Perth Hospital",
+              "location": "Perth, WA",
+              "dates": "February 2018 – Present",
+              "bullets": [
+                "Perform 300+ cardiac catheterisations annually with 98% procedural success rate",
+                "Lead multidisciplinary heart team managing complex structural heart disease cases",
+                "Supervise cardiology registrars and fellows in interventional procedures",
+                "Chair hospital cardiac catheterisation laboratory quality improvement committee"
+              ]
+            },
+            {
+              "title": "Senior Registrar in Cardiology",
+              "company": "St Vincent's Hospital Melbourne",
+              "location": "Melbourne, VIC",
+              "dates": "March 2015 – January 2018",
+              "bullets": [
+                "Completed advanced training in interventional cardiology and cardiac imaging",
+                "Managed acute coronary syndrome patients in coronary care unit",
+                "Participated in 24/7 primary PCI roster with door-to-balloon times <90 minutes",
+                "Conducted clinical research in coronary artery disease outcomes"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Education & Training",
+          "education": [
+            {
+              "degree": "Fellowship in Interventional Cardiology",
+              "institution": "Royal Australasian College of Physicians",
+              "location": "Sydney, NSW",
+              "dates": "December 2017"
+            },
+            {
+              "degree": "Doctor of Medicine (MD)",
+              "institution": "University of Western Australia",
+              "location": "Perth, WA",
+              "dates": "December 2011",
+              "gpa": "High Distinction"
+            },
+            {
+              "degree": "Bachelor of Medical Science (Honours)",
+              "institution": "University of Western Australia", 
+              "location": "Perth, WA",
+              "dates": "December 2008",
+              "gpa": "First Class Honours"
+            }
+          ]
+        },
+        {
+          "title": "Certifications & Licences",
+          "certifications": [
+            "AHPRA Medical Registration - MED0001234567 (Current)",
+            "Fellowship of Royal Australasian College of Physicians (FRACP)",
+            "Advanced Life Support (ALS) Certification",
+            "Radiation Safety Licence - Cardiac Catheterisation"
+          ]
+        },
+        {
+          "title": "Research & Publications",
+          "publications": [
+            "Primary PCI Outcomes in Regional Australia - Journal of Interventional Cardiology (2023)",
+            "Drug-Eluting Stent Performance in Diabetic Patients - Heart, Lung and Circulation (2022)",
+            "Co-author: 15+ peer-reviewed publications in interventional cardiology"
+          ]
+        },
+        {
+          "title": "Professional Memberships",
+          "memberships": [
+            "Cardiac Society of Australia and New Zealand (CSANZ)",
+            "Australian and New Zealand Society of Cardiac and Thoracic Surgeons",
+            "Royal Australasian College of Physicians",
+            "American College of Cardiology (International Member)"
+          ]
+        }
+      ]
+    },
+    "layout": {
+      "main": ["name", "title", "contact", "professional-summary", "medical-experience", "education-training", "certifications-licences", "research-publications", "professional-memberships"]
+    }
+  }

@@ -86,6 +86,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           email: user?.email || null,
           tier: 'free' as const,
           selected_industry: null,
+          experience_level: null,
           ai_usage: { bulletPoints: 0, summary: 0, skills: 0 },
           usage_reset_date: new Date().toISOString().split('T')[0],
           paid_at: null,

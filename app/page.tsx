@@ -1,7 +1,7 @@
 'use client'
 // Vercel rebuild cache buster - local fix successful, forcing clean deploy
 
-import React from 'react'
+import React, { useState } from 'react'
 import { CheckCircle, Zap, Users } from 'lucide-react'
 import ContactModal from './ContactModal'
 import { useContactModal } from './ContactModalContext'
@@ -9,9 +9,12 @@ import ResumeForm from './components/resumeForm'
 import Pricing from './components/Pricing'
 import FAQ from './components/FAQ'
 import Footer from './components/footer'
+import TopNavigation from './components/TopNavigation'
+import UpgradeModal from './components/IndustrySelector/UpgradeModal'
 
 export default function Home() {
   const { open, closeModal, openModal } = useContactModal();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
@@ -19,6 +22,8 @@ export default function Home() {
       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5"></div>
       
       <div className="relative z-10">
+        {/* Top Navigation */}
+        <TopNavigation onUpgradeClick={() => setShowUpgradeModal(true)} />
         {/* Hero Section */}
         <div className="container mx-auto px-4 pt-8 md:pt-12 pb-0 md:pb-0 select-none">
           <div className="text-center mb-8 md:mb-12">
@@ -70,6 +75,15 @@ export default function Home() {
 
       {/* Contact Modal */}
       <ContactModal open={open} onClose={closeModal} />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={() => {}} // Handle upgrade logic here if needed
+        trigger="general"
+        context={{}}
+      />
     </div>
   );
 } 

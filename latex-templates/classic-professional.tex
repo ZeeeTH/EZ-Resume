@@ -1,0 +1,163 @@
+\documentclass[11pt,a4paper,sans]{moderncv}
+\usepackage[scale=0.75]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+% Define colors - matching the Classic HTML template
+\definecolor{primarycolor}{RGB}{31, 128, 114}  % #1F8072
+\definecolor{headercolor}{RGB}{31, 128, 114}
+\definecolor{sectioncolor}{RGB}{102, 102, 102}  % #666
+\definecolor{textcolor}{RGB}{51, 51, 51}  % #333
+
+% Set up fonts
+\setmainfont{Lato}[
+  UprightFont = *-Regular,
+  BoldFont = *-Bold,
+  ItalicFont = *-Italic,
+  BoldItalicFont = *-BoldItalic
+]
+
+\newfontfamily\headerfont{Merriweather}[
+  UprightFont = *-Regular,
+  BoldFont = *-Bold,
+  ItalicFont = *-Italic,
+  BoldItalicFont = *-BoldItalic
+]
+
+% Configure page margins for A4
+\geometry{
+  a4paper,
+  top=12mm,
+  bottom=12mm,
+  left=12mm,
+  right=12mm
+}
+
+% Remove page numbers
+\pagestyle{empty}
+
+% Custom section formatting
+\titleformat{\section}
+  {\headerfont\large\bfseries\color{primarycolor}\uppercase}
+  {}
+  {0em}
+  {}
+  [\vspace{2pt}\color{primarycolor}\titlerule\vspace{8pt}]
+
+\titlespacing*{\section}{0pt}{18pt}{4pt}
+
+% Custom subsection for job titles
+\titleformat{\subsection}
+  {\bfseries\color{textcolor}}
+  {}
+  {0em}
+  {}
+
+\titlespacing*{\subsection}{0pt}{8pt}{2pt}
+
+% Define custom commands for consistent formatting
+\newcommand{\jobheader}[4]{%
+  \subsection{#1}
+  \textcolor{primarycolor}{\textbf{#2}} \hfill \textcolor{sectioncolor}{\textit{#3 -- #4}}\\[2pt]
+}
+
+\newcommand{\educationheader}[3]{%
+  \subsection{#1}
+  \textcolor{sectioncolor}{\textit{#2}} \hfill \textcolor{sectioncolor}{\textit{#3}}\\[2pt]
+}
+
+% Custom bullet point style
+\renewcommand{\labelitemi}{\textcolor{primarycolor}{\textbullet}}
+
+% Adjust list spacing
+\setlist[itemize]{
+  leftmargin=12pt,
+  itemsep=2pt,
+  parsep=0pt,
+  topsep=4pt,
+  partopsep=0pt
+}
+
+% Hyperlink setup
+\hypersetup{
+  colorlinks=true,
+  urlcolor=primarycolor,
+  linkcolor=primarycolor
+}
+
+\begin{document}
+
+% Header Section
+\begin{center}
+{\headerfont\Huge\bfseries\color{headercolor}\uppercase{{{personalDetails.fullName}}}}
+
+\vspace{4pt}
+
+% Job Title
+\ifx\{{jobTitle}}\empty\else
+{\headerfont\Large\color{sectioncolor}\uppercase{{{jobTitle}}}}
+\vspace{4pt}
+\fi
+
+% Contact Information
+{\color{sectioncolor}\small
+{{personalDetails.phone}}\ifx\{{personalDetails.phone}}\empty\else\quad|\quad\fi%
+\href{mailto:{{personalDetails.email}}}{{{personalDetails.email}}}\ifx\{{personalDetails.location}}\empty\else\quad|\quad{{personalDetails.location}}\fi%
+\ifx\{{personalDetails.linkedin}}\empty\else\quad|\quad\href{{{personalDetails.linkedin}}}{LinkedIn}\fi
+}
+
+\vspace{6pt}
+% Contact separator line
+{\color{primarycolor}\rule{\textwidth}{2pt}}
+
+\end{center}
+
+\vspace{8pt}
+
+% Professional Summary
+\ifx\{{professionalSummary}}\empty\else
+\section{Professional Summary}
+{{professionalSummary}}
+\vspace{6pt}
+\fi
+
+% Work Experience
+\section{Professional Experience}
+{{#workExperience}}
+\jobheader{{{jobTitle}}}{{{company}}}{{{startDate}}}{{{endDate}}}
+
+\begin{itemize}[itemsep=3pt]
+{{#description}}
+\item {{.}}
+{{/description}}
+\end{itemize}
+
+\vspace{6pt}
+{{/workExperience}}
+
+% Education
+\section{Education}
+{{#education}}
+\educationheader{{{degree}}}{{{institution}}}{{{graduationDate}}}
+\vspace{6pt}
+{{/education}}
+
+% Skills
+\section{Key Skills}
+\begin{itemize}[itemsep=1pt, columns=2]
+{{#skillsList}}
+\item {{.}}
+{{/skillsList}}
+\end{itemize}
+
+% Achievements (if provided)
+\ifx\{{achievements}}\empty\else
+\section{Key Achievements}
+{{achievements}}
+\fi
+
+\end{document} 

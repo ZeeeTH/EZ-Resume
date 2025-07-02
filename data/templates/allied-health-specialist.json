@@ -1,0 +1,118 @@
+{
+    "id": "allied-health-specialist",
+    "name": "Allied Health Specialist", 
+    "description": "Approachable but professional design for therapists, technicians, and healthcare support staff. Teal accents emphasising skills and patient interaction.",
+    "popularity": 4,
+    "category": "Healthcare",
+    "styling": {
+      "primaryColor": "#0F766E",
+      "secondaryColor": "#475569",
+      "fontFamily": "Inter",
+      "spacing": "balanced",
+      "layout": "single-column-skills-emphasis"
+    },
+    "colorOptions": {
+      "allowUserColorOverride": true,
+      "defaultPrimaryColor": "#0F766E",
+      "defaultSecondaryColor": "#475569",
+      "palette": [
+        { "label": "Therapy Teal", "primary": "#0F766E", "secondary": "#475569" },
+        { "label": "Wellness Green", "primary": "#059669", "secondary": "#374151" },
+        { "label": "Care Blue", "primary": "#0284C7", "secondary": "#64748B" }
+      ]
+    },
+    "sampleData": {
+      "name": "David Kim",
+      "title": "Senior Physiotherapist",
+      "contact": {
+        "phone": "(03) 5678 9012",
+        "email": "david.kim@physiohealth.com.au",
+        "location": "Geelong, VIC",
+        "linkedin": "linkedin.com/in/david-kim-physiotherapist"
+      },
+      "sections": [
+        {
+          "title": "Professional Summary",
+          "content": "Experienced physiotherapist with 10+ years providing evidence-based treatment across musculoskeletal, sports, and neurological conditions. AHPRA registered with specialisations in manual therapy and exercise rehabilitation. Passionate about empowering patients to achieve optimal movement and function."
+        },
+        {
+          "title": "Clinical Experience",
+          "jobs": [
+            {
+              "title": "Senior Physiotherapist",
+              "company": "Barwon Health - University Hospital Geelong",
+              "location": "Geelong, VIC",
+              "dates": "January 2019 – Present",
+              "bullets": [
+                "Provide comprehensive physiotherapy assessment and treatment across acute and rehabilitation wards",
+                "Specialise in post-surgical rehabilitation and discharge planning for complex cases",
+                "Lead student mentoring programme for physiotherapy clinical placements",
+                "Achieve 92% patient satisfaction scores and 85% functional improvement outcomes"
+              ]
+            },
+            {
+              "title": "Physiotherapist - Sports Medicine",
+              "company": "Melbourne Sports Medicine Centre",
+              "location": "Melbourne, VIC",
+              "dates": "February 2016 – December 2018",
+              "bullets": [
+                "Treated elite and recreational athletes across multiple sports disciplines",
+                "Developed injury prevention programmes reducing re-injury rates by 40%",
+                "Provided pitch-side medical support for VFL and local sporting competitions",
+                "Collaborated with sports physicians, exercise physiologists, and massage therapists"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Specialised Skills",
+          "categories": {
+            "Clinical Techniques": ["Manual Therapy", "Dry Needling", "Exercise Prescription", "Electrotherapy"],
+            "Conditions Treated": ["Musculoskeletal Injuries", "Sports Injuries", "Neurological Conditions", "Post-Surgical Rehabilitation"],
+            "Assessment Tools": ["Movement Screening", "Functional Testing", "Pain Assessment", "Outcome Measures"],
+            "Technology": ["Exercise Prescription Software", "Telehealth Platforms", "Electronic Medical Records"]
+          }
+        },
+        {
+          "title": "Education",
+          "education": [
+            {
+              "degree": "Master of Physiotherapy",
+              "institution": "La Trobe University",
+              "location": "Melbourne, VIC",
+              "dates": "December 2013",
+              "gpa": "High Distinction"
+            },
+            {
+              "degree": "Bachelor of Exercise and Sport Science",
+              "institution": "Deakin University",
+              "location": "Geelong, VIC",
+              "dates": "November 2011",
+              "gpa": "Distinction"
+            }
+          ]
+        },
+        {
+          "title": "Certifications",
+          "certifications": [
+            "AHPRA Physiotherapy Registration - PHY0001234567 (Current)",
+            "Graduate Certificate in Sports Physiotherapy - University of Melbourne",
+            "Dry Needling Certification - Australian Physiotherapy Association",
+            "Manual Therapy Level 3 - Manipulative Physiotherapists Association"
+          ]
+        },
+        {
+          "title": "Continuing Education",
+          "education": [
+            "Australian Physiotherapy Association National Conference (2023, 2022)",
+            "Sports Medicine Australia Annual Conference (2023)",
+            "Movement Assessment Masterclass - Gray Institute (2022)",
+            "Telehealth Best Practice Workshop - Allied Health Professions Australia (2021)"
+          ]
+        }
+      ]
+    },
+    "layout": {
+      "main": ["name", "title", "contact", "professional-summary", "clinical-experience", "specialised-skills", "education", "certifications", "continuing-education"]
+    }
+  }

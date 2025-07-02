@@ -2,22 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Link from 'next/link';
-import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown, User } from 'lucide-react';
+import { CheckCircle, Loader2, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown, FileText } from 'lucide-react';
 import { ResumeTemplate } from '../../types/templates';
 import { templateMetadata, templates } from '../../data/templates';
 import TemplatePreview from './templatePreview';
+import PDFGenerationToggle from './PDFGenerationToggle';
 // import PdfPreview from './pdfPreview';
 // import MyResumePreview from './MyResumePreview';
 import { formSchema, workExperienceSchema, educationSchema, FormData, WorkExperience, Education } from '../../types';
 import IndustryDropdown from './IndustrySelector/IndustryDropdown';
+import ExperienceLevelSelect, { experienceLevelContexts } from './IndustrySelector/ExperienceLevelSelect';
 import UpgradeModal from './IndustrySelector/UpgradeModal';
 import TemplateCard from './IndustrySelector/TemplateCard';
 import { getTemplatesForUser, getLockedTemplatesForIndustry, hasPremiumTemplates } from '../../data/templates';
 import AIGenerateButton from './AIGenerateButton';
 import SkillsSuggestions from './SkillsSuggestions';
-import AuthModal from './AuthModal';
-import UserMenu from './UserMenu';
 import { AIContentResponse } from '../../lib/ai-utils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAIUsage } from '../../hooks/useAIUsage';
@@ -60,16 +59,14 @@ export default function ResumeForm() {
 
   // Industry selector state
   const [selectedIndustry, setSelectedIndustry] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // AI generation states
   const [aiLoading, setAiLoading] = useState({
-    skills: false,
     summary: false,
     bulletPoint: false
   });
-  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
   const [aiError, setAiError] = useState<string>('');
 
   // Form setup
@@ -279,6 +276,13 @@ export default function ResumeForm() {
     }
   }, [profile, selectedIndustry, setValue]);
 
+  // Load user's saved experience level preference
+  useEffect(() => {
+    if (profile?.experience_level && !experienceLevel) {
+      setExperienceLevel(profile.experience_level);
+    }
+  }, [profile, experienceLevel]);
+
   // Ensure classic template is selected by default
   useEffect(() => {
     if (!selectedTemplate || selectedTemplate === '') {
@@ -305,6 +309,15 @@ export default function ResumeForm() {
     }
   };
 
+  const handleExperienceLevelSelect = async (level: string) => {
+    setExperienceLevel(level);
+    
+    // Save to user profile if authenticated
+    if (user && profile) {
+      await updateProfile({ experience_level: level });
+    }
+  };
+
   const handleUpgradeClick = () => {
     setShowUpgradeModal(true);
   };
@@ -323,7 +336,7 @@ export default function ResumeForm() {
   const generateAIContent = async (contentType: 'skills' | 'summary' | 'bulletPoints', context?: string, userInput?: string) => {
     // Require authentication
     if (!user) {
-      setShowAuthModal(true);
+      // User will see sign-in button in top navigation
       return null;
     }
 
@@ -351,6 +364,8 @@ export default function ResumeForm() {
           userInput,
           yearsExperience: '3-5', // Could be dynamic based on work experience
           selectedIndustry,
+          experienceLevel,
+          experienceLevelContext: experienceLevel ? experienceLevelContexts[experienceLevel as keyof typeof experienceLevelContexts] : '',
           userTier: tier,
           currentUsage: getCurrentUsage(contentType)
         }),
@@ -374,14 +389,6 @@ export default function ResumeForm() {
       return null;
     } finally {
       setAiLoading(prev => ({ ...prev, [loadingKey]: false }));
-    }
-  };
-
-  const generateSkills = async () => {
-    const content = await generateAIContent('skills');
-    if (content) {
-      const skillsArray = content.split(',').map(skill => skill.trim());
-      setSuggestedSkills(skillsArray);
     }
   };
 
@@ -419,10 +426,6 @@ export default function ResumeForm() {
     }
   };
 
-  const clearSkillsSuggestions = () => {
-    setSuggestedSkills([]);
-  };
-
   // Lock scroll when preview modals are open
   useEffect(() => {
     if (showTemplatePreview || showMyResumePreview) {
@@ -442,42 +445,7 @@ export default function ResumeForm() {
         <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
           {!isSuccess ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Authentication Header */}
-              <div className="flex items-center justify-between mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">EZ</span>
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-white">Resume Builder</h1>
-                    <p className="text-xs text-gray-400">Create your professional resume with AI assistance</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  {user ? (
-                    <>
-                      <Link
-                        href="/dashboard"
-                        className="hidden sm:flex items-center space-x-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                      <UserMenu onUpgradeClick={() => setShowUpgradeModal(true)} />
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
-                    >
-                      <User className="h-4 w-4" />
-                      <span>Sign In</span>
-                    </button>
-                  )}
-                </div>
-              </div>
+
 
               {/* Progress Indicator */}
               <div className="mb-6">
@@ -629,6 +597,23 @@ export default function ResumeForm() {
                 </div>
               </div>
 
+              {/* Experience Level Selection */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">What's your experience level?</h2>
+                <div>
+                  <ExperienceLevelSelect
+                    selectedLevel={experienceLevel}
+                    onLevelSelect={handleExperienceLevelSelect}
+                    selectedIndustry={selectedIndustry}
+                    fieldStatus={experienceLevel ? 'success' : null}
+                    onUpgradeClick={handleUpgradeClick}
+                  />
+                  <p className="text-xs text-gray-400 mt-2">
+                    Optional: Your experience level helps us tailor AI content and guidance specifically for your career stage.
+                  </p>
+                </div>
+              </div>
+
               {/* Personal Summary Section */}
               <div className="mb-10">
                 <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">Professional Summary</h2>
@@ -649,7 +634,6 @@ export default function ResumeForm() {
                       loading={aiLoading.summary}
                       selectedIndustry={selectedIndustry}
                       onUpgradeClick={handleUpgradeClick}
-                      onAuthRequired={() => setShowAuthModal(true)}
                     />
                   </div>
 
@@ -765,7 +749,6 @@ export default function ResumeForm() {
                            loading={aiLoading.bulletPoint}
                            selectedIndustry={selectedIndustry}
                            onUpgradeClick={handleUpgradeClick}
-                           onAuthRequired={() => setShowAuthModal(true)}
                          />
                          <p className="text-xs text-gray-400 mt-1">
                            AI will add a professional bullet point to your existing description
@@ -900,24 +883,13 @@ export default function ResumeForm() {
                     </p>
                   )}
 
-                  {/* AI Generate Button for Skills */}
-                  <div className="mt-3">
-                    <AIGenerateButton
-                      contentType="skills"
-                      onGenerate={generateSkills}
-                      loading={aiLoading.skills}
-                      selectedIndustry={selectedIndustry}
-                      onUpgradeClick={handleUpgradeClick}
-                      onAuthRequired={() => setShowAuthModal(true)}
-                    />
-                  </div>
-
-                  {/* Skills Suggestions */}
+                  {/* Industry-Specific Skills Suggestions */}
                   <SkillsSuggestions
-                    suggestedSkills={suggestedSkills}
-                    onAddSkill={addSkillFromSuggestion}
-                    onClearSuggestions={clearSkillsSuggestions}
                     selectedIndustry={selectedIndustry}
+                    experienceLevel={experienceLevel}
+                    onAddSkill={addSkillFromSuggestion}
+                    currentSkills={watchedFields.skills || ''}
+                    onUpgradeClick={handleUpgradeClick}
                   />
 
                   <p className="text-xs text-gray-400 mt-2">
@@ -1025,7 +997,7 @@ export default function ResumeForm() {
                 ) : (
                   /* Industry selected - Show all templates (available + locked) in same row */
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
-                    {/* Available templates (Classic) */}
+                    {/* Available templates - includes Classic for all users, plus premium templates for paid users */}
                     {getTemplatesForUser(selectedIndustry, tier).map((template) => (
                       <TemplateCard
                         key={template.id}
@@ -1044,7 +1016,7 @@ export default function ResumeForm() {
                       />
                     ))}
                     
-                    {/* Locked premium templates (for free users) in same row */}
+                    {/* Locked premium templates (for free users only) */}
                     {tier === 'free' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
                       <TemplateCard
                         key={template.id}
@@ -1052,25 +1024,6 @@ export default function ResumeForm() {
                         isSelected={false}
                         onClick={handleTemplateUpgradeClick}
                         isLocked={true}
-                      />
-                    ))}
-                    
-                    {/* Premium templates (for paid users) in same row */}
-                    {tier === 'paid' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
-                      <TemplateCard
-                        key={template.id}
-                        template={template}
-                        isSelected={selectedTemplate === template.id}
-                        onClick={() => {
-                          setSelectedTemplate(template.id);
-                          setValue('template', template.id, { shouldValidate: true, shouldDirty: true });
-                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: 0 }));
-                        }}
-                        selectedColorVariant={selectedColorVariants[template.id] ?? 0}
-                        onColorSelect={(colorIndex) => {
-                          setSelectedColorVariants(prev => ({ ...prev, [template.id]: colorIndex }));
-                        }}
-                        onPreview={() => handleTemplatePreview(template)}
                       />
                     ))}
                   </div>
@@ -1120,22 +1073,39 @@ export default function ResumeForm() {
                 </div>
               )}
 
-              {/* Preview My Resume Button */}
-              {formProgress >= 75 && (
-                <div className="text-center mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowMyResumePreview(true)}
-                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 flex items-center justify-center space-x-2 mx-auto"
+              {/* LaTeX PDF Generation Section */}
+              {formProgress >= 50 && (
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold text-white mb-4 text-center">📄 Generate Your Professional Resume</h3>
+                  <PDFGenerationToggle
+                    formData={watchedFields}
+                    selectedTemplate={selectedTemplate}
+                    userId={user?.id}
+                    onError={(error) => setError(error)}
+                    onSuccess={(message) => {
+                      // Optional: Show success message
+                      console.log(message);
+                    }}
                   >
-                    <FileText className="h-5 w-5" />
-                    <span>📋 Preview My Resume (A4 PDF Format)</span>
-                  </button>
-                  <p className="text-xs text-gray-400 mt-2">
-                    See exactly how your PDF will look with your data
-                  </p>
-                </div>
-              )}
+                    {/* Legacy HTML Preview Component */}
+                    {formProgress >= 75 && (
+                      <div className="text-center mb-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowMyResumePreview(true)}
+                          className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 flex items-center justify-center space-x-2 mx-auto"
+                        >
+                          <FileText className="h-5 w-5" />
+                          <span>📋 Preview My Resume (Basic HTML)</span>
+                        </button>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Basic preview of your resume data
+                        </p>
+                      </div>
+                                         )}
+                   </PDFGenerationToggle>
+                 </div>
+               )}
 
               {/* Submit Button */}
               <div className="text-center mb-2">
@@ -1152,193 +1122,10 @@ export default function ResumeForm() {
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} - ${coverLetterChecked ? '0.80 AUD' : '14.99 AUD'}</span>
+                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'}</span>
                     </>
                   )}
                 </button>
-                {/* Bypass Payment Buttons (Test Only) */}
-                <div className="flex flex-col md:flex-row gap-2 mt-3">
-                  <button
-                    type="button"
-                    disabled={isGenerating}
-                    className="w-full bg-yellow-500/90 hover:bg-yellow-600 text-black font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg border-2 border-yellow-700"
-                    onClick={async () => {
-                      setIsGenerating(true);
-                      setError('');
-                      try {
-                        const sample = require('../../data/templates/classic.json').sampleData;
-                        const selectedTemplateData = templateMetadata.find(t => t.id === 'classic');
-                        const apiData = {
-                          name: sample.name,
-                          email: 'zetheryy@gmail.com',
-                          phone: sample.contact.phone,
-                          jobTitle: sample.title,
-                          location: sample.contact.location,
-                          personalSummary: sample.sections.find((s: any) => s.title === 'Summary')?.content || '',
-                          skills: Object.values(sample.sections.find((s: any) => s.title === 'Skills')?.categories || {}).flat().join(', '),
-                          achievements: '',
-                          coverLetter: false,
-                          template: 'classic',
-                          ...(selectedTemplateData?.colorOptions && {
-                            colorVariant: selectedColorVariants['classic'] ?? 0,
-                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['classic'] ?? 0]
-                          }),
-                          workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
-                            title: job.title,
-                            company: job.company,
-                            startMonth: job.dates.split(' ')[0],
-                            startYear: job.dates.split(' ')[1],
-                            endMonth: job.dates.split('–')[1]?.trim().split(' ')[0] || '',
-                            endYear: job.dates.split('–')[1]?.trim().split(' ')[1] || '',
-                            description: job.bullets.join(' '),
-                          })),
-                          education: (sample.sections.find((s: any) => s.title === 'Education')?.education || []).map((edu: any) => ({
-                            degree: edu.degree,
-                            school: edu.institution,
-                            startMonth: '',
-                            startYear: '',
-                            endMonth: '',
-                            endYear: edu.dates,
-                          })),
-                        };
-                        const response = await fetch('/api/generate', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(apiData)
-                        });
-                        if (!response.ok) throw new Error('Failed to generate resume');
-                        setIsSuccess(true);
-                      } catch (err) {
-                        setError('Failed to generate resume. Please try again.');
-                      } finally {
-                        setIsGenerating(false);
-                      }
-                    }}
-                  >
-                    <Sparkles className="h-6 w-6 mr-2" />
-                    Bypass (Classic)
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isGenerating}
-                    className="w-full bg-yellow-500/90 hover:bg-yellow-600 text-black font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg border-2 border-yellow-700"
-                    onClick={async () => {
-                      setIsGenerating(true);
-                      setError('');
-                      try {
-                        const sample = require('../../data/templates/modern.json').sampleData;
-                        const selectedTemplateData = templateMetadata.find(t => t.id === 'modern');
-                        const apiData = {
-                          name: sample.name,
-                          email: 'zetheryy@gmail.com',
-                          phone: sample.contact.phone,
-                          jobTitle: sample.title,
-                          location: sample.contact.location,
-                          personalSummary: sample.sections.find((s: any) => s.title === 'Summary')?.content || '',
-                          skills: Object.values(sample.sections.find((s: any) => s.title === 'Skills')?.categories || {}).flat().join(', '),
-                          achievements: '',
-                          coverLetter: false,
-                          template: 'modern',
-                          ...(selectedTemplateData?.colorOptions && {
-                            colorVariant: selectedColorVariants['modern'] ?? 0,
-                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['modern'] ?? 0]
-                          }),
-                          workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
-                            title: job.title,
-                            company: job.company,
-                            startMonth: job.dates.split(' ')[0],
-                            startYear: job.dates.split(' ')[1],
-                            endMonth: job.dates.split('–')[1]?.trim().split(' ')[0] || '',
-                            endYear: job.dates.split('–')[1]?.trim().split(' ')[1] || '',
-                            description: job.bullets.join(' '),
-                          })),
-                          education: (sample.sections.find((s: any) => s.title === 'Education')?.education || []).map((edu: any) => ({
-                            degree: edu.degree,
-                            school: edu.institution,
-                            startMonth: '',
-                            startYear: '',
-                            endMonth: '',
-                            endYear: edu.dates,
-                          })),
-                        };
-                        const response = await fetch('/api/generate', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(apiData)
-                        });
-                        if (!response.ok) throw new Error('Failed to generate resume');
-                        setIsSuccess(true);
-                      } catch (err) {
-                        setError('Failed to generate resume. Please try again.');
-                      } finally {
-                        setIsGenerating(false);
-                      }
-                    }}
-                  >
-                    <Sparkles className="h-6 w-6 mr-2" />
-                    Bypass (Modern)
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isGenerating}
-                    className="w-full bg-yellow-500/90 hover:bg-yellow-600 text-black font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 text-lg shadow-lg border-2 border-yellow-700"
-                    onClick={async () => {
-                      setIsGenerating(true);
-                      setError('');
-                      try {
-                        const sample = require('../../data/templates/structured.json').sampleData;
-                        const selectedTemplateData = templateMetadata.find(t => t.id === 'structured');
-                        const apiData = {
-                          name: sample.name,
-                          email: 'zetheryy@gmail.com',
-                          phone: sample.contact.phone,
-                          jobTitle: sample.title,
-                          location: sample.contact.location,
-                          personalSummary: sample.sections.find((s: any) => s.title === 'Summary')?.content || '',
-                          skills: Object.values(sample.sections.find((s: any) => s.title === 'Skills')?.categories || {}).flat().join(', '),
-                          achievements: '',
-                          coverLetter: false,
-                          template: 'structured',
-                          ...(selectedTemplateData?.colorOptions && {
-                            colorVariant: selectedColorVariants['structured'] ?? 0,
-                            selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants['structured'] ?? 0]
-                          }),
-                          workExperience: (sample.sections.find((s: any) => s.title === 'Professional Experience')?.jobs || []).map((job: any) => ({
-                            title: job.title,
-                            company: job.company,
-                            startMonth: job.dates.split(' ')[0],
-                            startYear: job.dates.split(' ')[1],
-                            endMonth: job.dates.split('–')[1]?.trim().split(' ')[0] || '',
-                            endYear: job.dates.split('–')[1]?.trim().split(' ')[1] || '',
-                            description: job.bullets.join(' '),
-                          })),
-                          education: (sample.sections.find((s: any) => s.title === 'Education')?.education || []).map((edu: any) => ({
-                            degree: edu.degree,
-                            school: edu.institution,
-                            startMonth: '',
-                            startYear: '',
-                            endMonth: '',
-                            endYear: edu.dates,
-                          })),
-                        };
-                        const response = await fetch('/api/generate', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(apiData)
-                        });
-                        if (!response.ok) throw new Error('Failed to generate resume');
-                        setIsSuccess(true);
-                      } catch (err) {
-                        setError('Failed to generate resume. Please try again.');
-                      } finally {
-                        setIsGenerating(false);
-                      }
-                    }}
-                  >
-                    <Sparkles className="h-6 w-6 mr-2" />
-                    Bypass (Structured)
-                  </button>
-                </div>
               </div>
             </form>
           ) : (
@@ -1462,15 +1249,14 @@ export default function ResumeForm() {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         onUpgrade={handleUpgrade}
-        selectedIndustry={selectedIndustry}
+        trigger="general"
+        context={{
+          industry: selectedIndustry,
+          experienceLevel: experienceLevel
+        }}
       />
 
-      {/* Authentication Modal */}
-      <AuthModal 
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        defaultMode="signup"
-      />
+
     </>
   );
 }

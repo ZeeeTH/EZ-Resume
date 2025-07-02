@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { supabase } from '@/lib/supabase'
+import { LaTeXTemplateProcessor } from '../../../lib/latex-template-processor'
 
 // Email transporter configuration
 const createTransporter = () => {
@@ -20,43 +21,31 @@ const createTransporter = () => {
   return nodemailer.createTransport(primaryConfig)
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    console.log('Test API called - checking Supabase connection...')
+    console.log('Testing LaTeX system...')
     
-    // Test environment variables
-    console.log('SUPABASE_URL exists:', !!process.env.SUPABASE_URL)
-    console.log('SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+    // Test 1: Create processor
+    const processor = new LaTeXTemplateProcessor()
+    console.log('✓ LaTeX processor created')
     
-    // Test database connection
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .limit(1);
+    // Test 2: Get available templates
+    const templates = processor.getAvailableTemplates()
+    console.log('✓ Templates found:', templates)
     
-    if (error) {
-      console.error('Supabase test failed:', error)
-      return NextResponse.json({
-        success: false,
-        error: 'Supabase connection failed',
-        details: error
-      }, { status: 500 })
-    }
-    
-    console.log('Supabase test successful, data:', data)
-
-  return NextResponse.json({
-    success: true,
-      message: 'Supabase connection working',
-      data: data
+    return NextResponse.json({
+      success: true,
+      message: 'LaTeX system is working',
+      templates,
+      platform: process.platform
     })
     
   } catch (error) {
-    console.error('Test API error:', error)
+    console.error('LaTeX test failed:', error)
     return NextResponse.json({
       success: false,
-      error: 'Test failed',
-      details: error
+      error: (error as Error).message,
+      platform: process.platform
     }, { status: 500 })
   }
 }
