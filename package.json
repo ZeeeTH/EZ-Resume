@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "security:test": "node scripts/test-security.js",
+    "security:test:prod": "node scripts/test-security.js https://ez-resume.xyz"
   },
   "dependencies": {
     "@hookform/resolvers": "5.1.1",

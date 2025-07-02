@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabase-client'
 import { useAuth } from '../../../contexts/AuthContext'
+import LaTeXViewer from '../../components/Dashboard/LaTeXViewer'
 import { 
   Plus, 
   Search, 
@@ -38,6 +39,10 @@ const ResumesPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'favorites' | 'recent'>('all')
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'title'>('updated')
+  
+  // LaTeX Viewer state
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [selectedResume, setSelectedResume] = useState<Resume | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -123,6 +128,11 @@ const ResumesPage = () => {
     // For now, we'll just show an alert
     alert(`Downloading ${resume.title}...`)
     // TODO: Implement PDF download functionality
+  }
+
+  const viewResume = (resume: Resume) => {
+    setSelectedResume(resume)
+    setViewerOpen(true)
   }
 
   const filteredResumes = resumes.filter(resume =>
@@ -290,13 +300,13 @@ const ResumesPage = () => {
                     <Download className="h-5 w-5" />
                   </button>
                   
-                  <Link
-                    href={`/dashboard/resumes/${resume.id}`}
+                  <button
+                    onClick={() => viewResume(resume)}
                     className="p-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors"
-                    title="View Details"
+                    title="View LaTeX Preview"
                   >
                     <Eye className="h-5 w-5" />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -394,6 +404,22 @@ const ResumesPage = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* LaTeX Viewer Modal */}
+      {selectedResume && (
+        <LaTeXViewer
+          isOpen={viewerOpen}
+          onClose={() => {
+            setViewerOpen(false)
+            setSelectedResume(null)
+          }}
+          title={selectedResume.title}
+          formData={selectedResume.content || {}}
+          templateName={selectedResume.template_id}
+          userId={user?.id}
+          type="resume"
+        />
       )}
     </div>
   )

@@ -6,7 +6,7 @@ import { CheckCircle, Loader2, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, 
 import { ResumeTemplate } from '../../types/templates';
 import { templateMetadata, templates } from '../../data/templates';
 import TemplatePreview from './templatePreview';
-import PDFGenerationToggle from './PDFGenerationToggle';
+
 // import PdfPreview from './pdfPreview';
 // import MyResumePreview from './MyResumePreview';
 import { formSchema, workExperienceSchema, educationSchema, FormData, WorkExperience, Education } from '../../types';
@@ -1029,15 +1029,7 @@ export default function ResumeForm() {
                   </div>
                 )}
 
-                {/* Industry Selection Prompt - Only show when no industry selected and classic is centered */}
-                {!selectedIndustry && (
-                  <div className="text-center py-6 bg-white/5 rounded-lg border border-white/10 mt-6">
-                    <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">
-                      Select your industry above to unlock premium templates designed for your field
-                    </p>
-                  </div>
-                )}
+
               </div>
 
               {/* Privacy Statement */}
@@ -1073,39 +1065,7 @@ export default function ResumeForm() {
                 </div>
               )}
 
-              {/* LaTeX PDF Generation Section */}
-              {formProgress >= 50 && (
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-white mb-4 text-center">📄 Generate Your Professional Resume</h3>
-                  <PDFGenerationToggle
-                    formData={watchedFields}
-                    selectedTemplate={selectedTemplate}
-                    userId={user?.id}
-                    onError={(error) => setError(error)}
-                    onSuccess={(message) => {
-                      // Optional: Show success message
-                      console.log(message);
-                    }}
-                  >
-                    {/* Legacy HTML Preview Component */}
-                    {formProgress >= 75 && (
-                      <div className="text-center mb-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowMyResumePreview(true)}
-                          className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 font-semibold py-3 px-6 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-500/50 flex items-center justify-center space-x-2 mx-auto"
-                        >
-                          <FileText className="h-5 w-5" />
-                          <span>📋 Preview My Resume (Basic HTML)</span>
-                        </button>
-                        <p className="text-xs text-gray-400 mt-2">
-                          Basic preview of your resume data
-                        </p>
-                      </div>
-                                         )}
-                   </PDFGenerationToggle>
-                 </div>
-               )}
+
 
               {/* Submit Button */}
               <div className="text-center mb-2">
