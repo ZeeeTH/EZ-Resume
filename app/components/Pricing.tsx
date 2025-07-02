@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react';
 
 export default function Pricing() {
+
   return (
     <div className="max-w-4xl mx-auto mt-12 mb-12 select-none">
       <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
@@ -10,43 +11,48 @@ export default function Pricing() {
             Simple, Transparent Pricing
           </h3>
           <p className="text-gray-300 text-lg">
-            No hidden fees, no subscriptions - just great results
+            Pay once, use forever - No subscriptions, no recurring fees
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Resume Only */}
+        
+        {/* Free Plan */}
+                  {/* Free Plan */}
           <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
             <div className="text-center mb-4">
-              <h4 className="text-xl font-bold text-white mb-2">Resume Only</h4>
+              <h4 className="text-xl font-bold text-white mb-2">Free Plan</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-blue-400">$14.99 AUD</span>
-                <span className="text-lg text-gray-400 line-through">$29.99</span>
+                <span className="text-3xl font-bold text-blue-400">$0</span>
               </div>
-              <p className="text-gray-400 text-sm">One-time payment</p>
-              <p className="text-green-400 text-sm font-medium">Save $14.00!</p>
+              <p className="text-gray-400 text-sm">Perfect for testing our quality</p>
             </div>
+            
             <ul className="space-y-2 text-sm text-gray-300 mb-6">
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                Professional resume design
+                1 Resume Creation
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                ATS-optimized formatting
+                Classic Professional Template
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                AI-enhanced content
+                3 Industry Options (Tech, Healthcare, Finance)
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                PDF download
+                3 AI Bullet Points + 1 Summary + 1 Skills
+              </li>
+              <li className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                PDF Download (with small watermark)
               </li>
             </ul>
           </div>
 
-          {/* Resume + Cover Letter */}
+                  {/* Professional Plan */}
           <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/10 rounded-xl p-6 border border-purple-500/30 relative">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -54,34 +60,49 @@ export default function Pricing() {
               </span>
             </div>
             <div className="text-center mb-4">
-              <h4 className="text-xl font-bold text-white mb-2">Resume + Cover Letter</h4>
+              <h4 className="text-xl font-bold text-white mb-2">Professional Plan</h4>
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-3xl font-bold text-purple-400">$0.80 AUD</span>
-                <span className="text-lg text-gray-400 line-through">$49.99</span>
+                <span className="text-3xl font-bold text-purple-400">$49 AUD</span>
               </div>
-              <p className="text-gray-400 text-sm">One-time payment</p>
-              <p className="text-green-400 text-sm font-medium">Save $25.00!</p>
+              <p className="text-gray-400 text-sm">One-time payment - Lifetime access</p>
+              <p className="text-green-400 text-sm font-medium">Save $311+ vs competitors!</p>
             </div>
             <ul className="space-y-2 text-sm text-gray-300 mb-6">
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                Everything in Resume Only
+                Unlimited Resume & Cover Letter Creation
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                Personalized cover letter
+                All 9 Industries + 25+ Premium Templates
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                Target company optimization
+                Unlimited AI Assistance (Bullet Points, Summaries, Skills)
               </li>
               <li className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
-                Both PDF downloads
+                Industry-Specific AI Prompts & Content
+              </li>
+              <li className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                Professional Cover Letter Generator
+              </li>
+              <li className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                Clean PDF Downloads (No Watermarks)
+              </li>
+              <li className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                All Future Template Updates Included
+              </li>
+              <li className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                Priority Customer Support
               </li>
             </ul>
           </div>
-        </div>
+              </div>
         
         {/* Pricing Note */}
         <div className="text-center mt-4 pt-2 border-t border-white/10">
