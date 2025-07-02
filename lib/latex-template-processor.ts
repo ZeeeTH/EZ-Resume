@@ -141,17 +141,15 @@ export class LaTeXTemplateProcessor {
           `${job.endMonth} ${job.endYear}` : 
           job.endYear || 'Present';
 
-        // Split description into bullet points if it's a single string
+        // Split description into bullet points
         let description: string[] = [];
-        if (typeof job.description === 'string') {
+        if (job.description) {
           // Split by common delimiters and clean up
           description = job.description
             .split(/[•\n\r]|(?:\d+\.\s)/)
             .map(item => item.trim())
             .filter(item => item.length > 0)
             .map(item => this.compiler.escapeLatex(item));
-        } else if (Array.isArray(job.description)) {
-          description = job.description.map(item => this.compiler.escapeLatex(item));
         }
 
         return {
