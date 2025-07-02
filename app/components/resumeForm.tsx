@@ -13,6 +13,9 @@ import IndustryDropdown from './IndustrySelector/IndustryDropdown';
 import UpgradeModal from './IndustrySelector/UpgradeModal';
 import TemplateCard from './IndustrySelector/TemplateCard';
 import { getTemplatesForUser, getLockedTemplatesForIndustry, hasPremiumTemplates } from '../../data/templates';
+import AIGenerateButton from './AIGenerateButton';
+import SkillsSuggestions from './SkillsSuggestions';
+import { AIContentResponse } from '../../lib/ai-utils';
 
 // Helper arrays for months and years
 const months = [
@@ -50,6 +53,22 @@ export default function ResumeForm() {
   const [selectedIndustry, setSelectedIndustry] = useState('');
   const [userTier, setUserTier] = useState<'free' | 'paid'>('free'); // This would come from your auth/subscription system
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // AI usage tracking state
+  const [aiUsage, setAiUsage] = useState({
+    bulletPoints: 0,
+    summary: 0,
+    skills: 0
+  });
+
+  // AI generation states
+  const [aiLoading, setAiLoading] = useState({
+    skills: false,
+    summary: false,
+    bulletPoint: false
+  });
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [aiError, setAiError] = useState<string>('');
 
   // Form setup
   const { control, ...formMethods } = useForm<FormData>({
@@ -285,6 +304,103 @@ export default function ResumeForm() {
     setShowUpgradeModal(false);
   };
 
+  // AI Generation Functions
+  const generateAIContent = async (contentType: 'skills' | 'summary' | 'bulletPoints', context?: string, userInput?: string) => {
+    setAiError('');
+    const loadingKey = contentType === 'bulletPoints' ? 'bulletPoint' : contentType;
+    setAiLoading(prev => ({ ...prev, [loadingKey]: true }));
+
+    try {
+      const response = await fetch('/api/generate-ai-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contentType,
+          jobTitle: watchedFields.jobTitle || 'Professional',
+          context,
+          userInput,
+          yearsExperience: '3-5', // Could be dynamic based on work experience
+          selectedIndustry,
+          userTier,
+          currentUsage: aiUsage[contentType]
+        }),
+      });
+
+      const result: AIContentResponse = await response.json();
+
+      if (result.success && result.content) {
+        // Update usage tracking for free users
+        if (userTier === 'free') {
+          setAiUsage(prev => ({
+            ...prev,
+            [contentType]: prev[contentType] + 1
+          }));
+        }
+
+        return result.content;
+      } else if (result.upgradePrompt) {
+        setShowUpgradeModal(true);
+        return null;
+      } else {
+        setAiError(result.message || 'AI generation failed');
+        return null;
+      }
+    } catch (error) {
+      setAiError('Network error. Please try again.');
+      return null;
+    } finally {
+      setAiLoading(prev => ({ ...prev, [loadingKey]: false }));
+    }
+  };
+
+  const generateSkills = async () => {
+    const content = await generateAIContent('skills');
+    if (content) {
+      const skillsArray = content.split(',').map(skill => skill.trim());
+      setSuggestedSkills(skillsArray);
+    }
+  };
+
+  const generateSummary = async () => {
+    const content = await generateAIContent('summary');
+    if (content) {
+      setValue('personalSummary', content);
+      trigger('personalSummary');
+    }
+  };
+
+  const generateBulletPoint = async (jobIndex: number, currentDescription: string) => {
+    const job = watchedFields.workExperience?.[jobIndex];
+    if (!job) return;
+
+    const context = `Job Title: ${job.title}, Company: ${job.company}`;
+    const content = await generateAIContent('bulletPoints', context, currentDescription);
+    
+    if (content) {
+      const currentDesc = job.description || '';
+      const newDescription = currentDesc ? `${currentDesc}\n• ${content}` : `• ${content}`;
+      setValue(`workExperience.${jobIndex}.description`, newDescription);
+      trigger(`workExperience.${jobIndex}.description`);
+    }
+  };
+
+  const addSkillFromSuggestion = (skill: string) => {
+    const currentSkills = watchedFields.skills || '';
+    const skillsArray = currentSkills.split(',').map(s => s.trim()).filter(s => s);
+    
+    if (!skillsArray.includes(skill)) {
+      const newSkills = skillsArray.length > 0 ? `${currentSkills}, ${skill}` : skill;
+      setValue('skills', newSkills);
+      trigger('skills');
+    }
+  };
+
+  const clearSkillsSuggestions = () => {
+    setSuggestedSkills([]);
+  };
+
   // Lock scroll when preview modals are open
   useEffect(() => {
     if (showTemplatePreview || showMyResumePreview) {
@@ -465,6 +581,20 @@ export default function ResumeForm() {
                     className={`w-full px-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${getFieldStatus('personalSummary') === 'success' ? 'border-green-400' : 'border-white/20'}`}
                     placeholder="Write a compelling professional summary that highlights your key strengths, experience, and career objectives. This should be 2-4 sentences that capture your professional identity and value proposition."
                   />
+                  
+                  {/* AI Generate Button for Summary */}
+                  <div className="mt-3">
+                    <AIGenerateButton
+                      contentType="summary"
+                      onGenerate={generateSummary}
+                      loading={aiLoading.summary}
+                      userTier={userTier}
+                      currentUsage={aiUsage.summary}
+                      selectedIndustry={selectedIndustry}
+                      onUpgradeClick={handleUpgradeClick}
+                    />
+                  </div>
+
                   <p className="text-xs text-gray-400 mt-2">
                     Optional: A well-crafted summary can make your resume stand out and give recruiters a quick overview of your professional profile.
                   </p>
@@ -568,6 +698,22 @@ export default function ResumeForm() {
                         className={`w-full bg-white/10 text-white rounded-lg px-4 py-3 placeholder-gray-400 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getFieldStatus(`workExperience.${idx}.description`) === 'success' ? 'border-green-400' : 'border-white/20'}`}
                         placeholder="Describe your responsibilities and achievements..."
                       />
+                      
+                      {/* AI Generate Button for Bullet Points */}
+                      <div className="mt-3">
+                        <AIGenerateButton
+                          contentType="bulletPoints"
+                          onGenerate={() => generateBulletPoint(idx, watchedFields.workExperience?.[idx]?.description || '')}
+                          loading={aiLoading.bulletPoint}
+                          userTier={userTier}
+                          currentUsage={aiUsage.bulletPoints}
+                          selectedIndustry={selectedIndustry}
+                          onUpgradeClick={handleUpgradeClick}
+                        />
+                        <p className="text-xs text-gray-400 mt-1">
+                          AI will add a professional bullet point to your existing description
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -696,6 +842,28 @@ export default function ResumeForm() {
                       {errors.skills.message}
                     </p>
                   )}
+
+                  {/* AI Generate Button for Skills */}
+                  <div className="mt-3">
+                    <AIGenerateButton
+                      contentType="skills"
+                      onGenerate={generateSkills}
+                      loading={aiLoading.skills}
+                      userTier={userTier}
+                      currentUsage={aiUsage.skills}
+                      selectedIndustry={selectedIndustry}
+                      onUpgradeClick={handleUpgradeClick}
+                    />
+                  </div>
+
+                  {/* Skills Suggestions */}
+                  <SkillsSuggestions
+                    suggestedSkills={suggestedSkills}
+                    onAddSkill={addSkillFromSuggestion}
+                    onClearSuggestions={clearSkillsSuggestions}
+                    selectedIndustry={selectedIndustry}
+                  />
+
                   <p className="text-xs text-gray-400 mt-2">
                     List your key technical skills, tools, and competencies that are relevant to your target position.
                   </p>
@@ -877,6 +1045,21 @@ export default function ResumeForm() {
                   <p className="text-red-400 text-sm flex items-center">
                     <span className="mr-2">⚠</span>
                     {error}
+                  </p>
+                </div>
+              )}
+
+              {aiError && (
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg mb-4">
+                  <p className="text-red-400 text-sm flex items-center">
+                    <span className="mr-2">🤖</span>
+                    AI Error: {aiError}
+                    <button
+                      onClick={() => setAiError('')}
+                      className="ml-auto text-red-300 hover:text-red-200"
+                    >
+                      ×
+                    </button>
                   </p>
                 </div>
               )}
