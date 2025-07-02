@@ -10,6 +10,8 @@ import TemplatePreview from './templatePreview';
 // import PdfPreview from './pdfPreview';
 // import MyResumePreview from './MyResumePreview';
 import { formSchema, workExperienceSchema, educationSchema, FormData, WorkExperience, Education } from '../../types';
+import IndustryDropdown from './IndustrySelector/IndustryDropdown';
+import UpgradeModal from './IndustrySelector/UpgradeModal';
 
 // Helper arrays for months and years
 const months = [
@@ -42,6 +44,11 @@ export default function ResumeForm() {
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null);
   const [showMyResumePreview, setShowMyResumePreview] = useState(false);
+  
+  // Industry selector state
+  const [selectedIndustry, setSelectedIndustry] = useState('');
+  const [userTier, setUserTier] = useState<'free' | 'paid'>('free'); // This would come from your auth/subscription system
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Form setup
   const { control, ...formMethods } = useForm<FormData>({
@@ -51,6 +58,7 @@ export default function ResumeForm() {
       template: 'classic',
       personalSummary: '',
       jobTitle: '',
+      industry: '',
       company: '',
       workExperience: [
         { title: '', company: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' }
@@ -233,6 +241,31 @@ export default function ResumeForm() {
     setShowTemplatePreview(true);
   };
 
+  // Sync industry selection with form
+  useEffect(() => {
+    const currentIndustry = watchedFields.industry;
+    if (currentIndustry !== selectedIndustry) {
+      setSelectedIndustry(currentIndustry || '');
+    }
+  }, [watchedFields.industry]);
+
+  // Industry selector handlers
+  const handleIndustrySelect = (industryId: string) => {
+    setSelectedIndustry(industryId);
+    setValue('industry', industryId);
+    trigger('industry'); // Trigger validation for the field
+  };
+
+  const handleUpgradeClick = () => {
+    setShowUpgradeModal(true);
+  };
+
+  const handleUpgrade = () => {
+    // This would integrate with your payment system
+    console.log('Upgrade clicked - integrate with payment system');
+    setShowUpgradeModal(false);
+  };
+
   // Lock scroll when preview modals are open
   useEffect(() => {
     if (showTemplatePreview || showMyResumePreview) {
@@ -380,6 +413,24 @@ export default function ResumeForm() {
                   )}
                   <p className="text-xs text-gray-400 mt-2">
                     Optional: This will appear under your name at the top of your resume. Leave blank if you prefer not to include it.
+                  </p>
+                </div>
+              </div>
+
+              {/* Industry Selection */}
+              <input type="hidden" {...register('industry')} />
+              <div className="mb-10">
+                <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">What industry are you in?</h2>
+                <div>
+                  <IndustryDropdown
+                    userTier={userTier}
+                    onIndustrySelect={handleIndustrySelect}
+                    selectedIndustry={selectedIndustry}
+                    onUpgradeClick={handleUpgradeClick}
+                    fieldStatus={getFieldStatus('industry')}
+                  />
+                  <p className="text-xs text-gray-400 mt-2">
+                    Optional: Selecting your industry helps us optimize your resume with industry-specific keywords and formatting.
                   </p>
                 </div>
               </div>
@@ -1128,6 +1179,13 @@ export default function ResumeForm() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={handleUpgrade}
+      />
     </>
   );
 }

@@ -94,6 +94,7 @@ export const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().optional(),
   jobTitle: z.string().optional(),
+  industry: z.string().optional(),
   company: z.string().optional(),
   skills: z.string().min(2, 'Please provide at least 2 characters of skills'),
   achievements: z.string().min(2, 'Please provide at least 2 characters of achievements'),
