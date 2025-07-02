@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import Link from 'next/link';
 import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown, User } from 'lucide-react';
 import { ResumeTemplate } from '../../types/templates';
 import { templateMetadata, templates } from '../../data/templates';
@@ -455,7 +456,16 @@ export default function ResumeForm() {
                 
                 <div className="flex items-center space-x-4">
                   {user ? (
-                    <UserMenu onUpgradeClick={() => setShowUpgradeModal(true)} />
+                    <>
+                      <Link
+                        href="/dashboard"
+                        className="hidden sm:flex items-center space-x-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                      <UserMenu onUpgradeClick={() => setShowUpgradeModal(true)} />
+                    </>
                   ) : (
                     <button
                       type="button"

@@ -42,13 +42,50 @@ CREATE TABLE profiles (
 );
 ```
 
-### 2. Set Up Row Level Security (RLS)
+### 2. Create the Resumes Table
 
 ```sql
--- Enable RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+-- Create resumes table
+CREATE TABLE resumes (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  title text NOT NULL,
+  industry text,
+  template_id text NOT NULL,
+  job_title text,
+  content jsonb NOT NULL,
+  is_favorite boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+```
 
--- Create policies
+### 3. Create the Cover Letters Table
+
+```sql
+-- Create cover_letters table
+CREATE TABLE cover_letters (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  resume_id uuid REFERENCES resumes(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  company_name text,
+  job_title text,
+  content jsonb NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+```
+
+### 4. Set Up Row Level Security (RLS)
+
+```sql
+-- Enable RLS on all tables
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cover_letters ENABLE ROW LEVEL SECURITY;
+
+-- Profiles policies
 CREATE POLICY "Users can view own profile" 
   ON profiles FOR SELECT 
   USING (auth.uid() = id);
@@ -60,9 +97,43 @@ CREATE POLICY "Users can update own profile"
 CREATE POLICY "Users can insert own profile" 
   ON profiles FOR INSERT 
   WITH CHECK (auth.uid() = id);
+
+-- Resumes policies
+CREATE POLICY "Users can view own resumes" 
+  ON resumes FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own resumes" 
+  ON resumes FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own resumes" 
+  ON resumes FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own resumes" 
+  ON resumes FOR DELETE 
+  USING (auth.uid() = user_id);
+
+-- Cover letters policies
+CREATE POLICY "Users can view own cover letters" 
+  ON cover_letters FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own cover letters" 
+  ON cover_letters FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own cover letters" 
+  ON cover_letters FOR UPDATE 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own cover letters" 
+  ON cover_letters FOR DELETE 
+  USING (auth.uid() = user_id);
 ```
 
-### 3. Create Profile Auto-Creation Function
+### 5. Create Profile Auto-Creation Function
 
 ```sql
 -- Function to handle new user profile creation
@@ -143,9 +214,22 @@ SELECT * FROM profiles;
 - Track subscription tier
 - Save industry selection
 
+✅ **Dashboard System**
+- Professional user dashboard
+- Resume management and storage
+- Cover letter management
+- Account settings and preferences
+
+✅ **Resume Storage**
+- Save and organize resumes
+- Favorites and filtering
+- Template and industry tracking
+- Update history
+
 ✅ **Row Level Security**
 - Users can only access their own data
 - Secure database policies
+- Multi-table data protection
 
 ## Troubleshooting
 
