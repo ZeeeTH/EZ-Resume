@@ -33,6 +33,7 @@ export interface ResumeTemplate {
   layout?: {
     main?: string[];
     sidebar?: string[];
+    type?: 'single-column' | 'two-column';
   };
 }
 
