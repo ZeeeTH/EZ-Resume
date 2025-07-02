@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown } from 'lucide-react';
+import { CheckCircle, Loader2, FileText, Mail, Sparkles, Star, Zap, Palette, ShieldCheck, Shield, Crown, User } from 'lucide-react';
 import { ResumeTemplate } from '../../types/templates';
 import { templateMetadata, templates } from '../../data/templates';
 import TemplatePreview from './templatePreview';
@@ -15,7 +15,11 @@ import TemplateCard from './IndustrySelector/TemplateCard';
 import { getTemplatesForUser, getLockedTemplatesForIndustry, hasPremiumTemplates } from '../../data/templates';
 import AIGenerateButton from './AIGenerateButton';
 import SkillsSuggestions from './SkillsSuggestions';
+import AuthModal from './AuthModal';
+import UserMenu from './UserMenu';
 import { AIContentResponse } from '../../lib/ai-utils';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAIUsage } from '../../hooks/useAIUsage';
 
 // Helper arrays for months and years
 const months = [
@@ -49,17 +53,14 @@ export default function ResumeForm() {
   const [previewTemplate, setPreviewTemplate] = useState<ResumeTemplate | null>(null);
   const [showMyResumePreview, setShowMyResumePreview] = useState(false);
   
+  // Authentication
+  const { user, profile, updateProfile } = useAuth()
+  const { checkUsageLimit, incrementUsage, tier, getCurrentUsage } = useAIUsage()
+
   // Industry selector state
   const [selectedIndustry, setSelectedIndustry] = useState('');
-  const [userTier, setUserTier] = useState<'free' | 'paid'>('free'); // This would come from your auth/subscription system
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-
-  // AI usage tracking state
-  const [aiUsage, setAiUsage] = useState({
-    bulletPoints: 0,
-    summary: 0,
-    skills: 0
-  });
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // AI generation states
   const [aiLoading, setAiLoading] = useState({
@@ -261,13 +262,21 @@ export default function ResumeForm() {
     setShowTemplatePreview(true);
   };
 
-  // Sync industry selection with form
+  // Sync industry selection with form and profile
   useEffect(() => {
     const currentIndustry = watchedFields.industry;
     if (currentIndustry !== selectedIndustry) {
       setSelectedIndustry(currentIndustry || '');
     }
   }, [watchedFields.industry]);
+
+  // Load user's saved industry preference
+  useEffect(() => {
+    if (profile?.selected_industry && !selectedIndustry) {
+      setSelectedIndustry(profile.selected_industry);
+      setValue('industry', profile.selected_industry);
+    }
+  }, [profile, selectedIndustry, setValue]);
 
   // Ensure classic template is selected by default
   useEffect(() => {
@@ -278,10 +287,15 @@ export default function ResumeForm() {
   }, [selectedTemplate, setValue]);
 
   // Industry selector handlers
-  const handleIndustrySelect = (industryId: string) => {
+  const handleIndustrySelect = async (industryId: string) => {
     setSelectedIndustry(industryId);
     setValue('industry', industryId);
     trigger('industry'); // Trigger validation for the field
+    
+    // Save to user profile if authenticated
+    if (user && profile) {
+      await updateProfile({ selected_industry: industryId });
+    }
     
     // Keep classic template selected when industry changes
     if (selectedTemplate === '') {
@@ -306,6 +320,19 @@ export default function ResumeForm() {
 
   // AI Generation Functions
   const generateAIContent = async (contentType: 'skills' | 'summary' | 'bulletPoints', context?: string, userInput?: string) => {
+    // Require authentication
+    if (!user) {
+      setShowAuthModal(true);
+      return null;
+    }
+
+    // Check usage limits
+    const usageCheck = checkUsageLimit(contentType);
+    if (!usageCheck.allowed) {
+      setShowUpgradeModal(true);
+      return null;
+    }
+
     setAiError('');
     const loadingKey = contentType === 'bulletPoints' ? 'bulletPoint' : contentType;
     setAiLoading(prev => ({ ...prev, [loadingKey]: true }));
@@ -323,8 +350,8 @@ export default function ResumeForm() {
           userInput,
           yearsExperience: '3-5', // Could be dynamic based on work experience
           selectedIndustry,
-          userTier,
-          currentUsage: aiUsage[contentType]
+          userTier: tier,
+          currentUsage: getCurrentUsage(contentType)
         }),
       });
 
@@ -332,13 +359,7 @@ export default function ResumeForm() {
 
       if (result.success && result.content) {
         // Update usage tracking for free users
-        if (userTier === 'free') {
-          setAiUsage(prev => ({
-            ...prev,
-            [contentType]: prev[contentType] + 1
-          }));
-        }
-
+        await incrementUsage(contentType);
         return result.content;
       } else if (result.upgradePrompt) {
         setShowUpgradeModal(true);
@@ -420,6 +441,34 @@ export default function ResumeForm() {
         <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
           {!isSuccess ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Authentication Header */}
+              <div className="flex items-center justify-between mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">EZ</span>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-white">Resume Builder</h1>
+                    <p className="text-xs text-gray-400">Create your professional resume with AI assistance</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  {user ? (
+                    <UserMenu onUpgradeClick={() => setShowUpgradeModal(true)} />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Sign In</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {/* Progress Indicator */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -558,7 +607,7 @@ export default function ResumeForm() {
                 <h2 className="text-2xl font-bold text-white mb-4 tracking-tight">What industry are you in?</h2>
                 <div>
                   <IndustryDropdown
-                    userTier={userTier}
+                    userTier={tier}
                     onIndustrySelect={handleIndustrySelect}
                     selectedIndustry={selectedIndustry}
                     onUpgradeClick={handleUpgradeClick}
@@ -588,10 +637,9 @@ export default function ResumeForm() {
                       contentType="summary"
                       onGenerate={generateSummary}
                       loading={aiLoading.summary}
-                      userTier={userTier}
-                      currentUsage={aiUsage.summary}
                       selectedIndustry={selectedIndustry}
                       onUpgradeClick={handleUpgradeClick}
+                      onAuthRequired={() => setShowAuthModal(true)}
                     />
                   </div>
 
@@ -699,21 +747,20 @@ export default function ResumeForm() {
                         placeholder="Describe your responsibilities and achievements..."
                       />
                       
-                      {/* AI Generate Button for Bullet Points */}
-                      <div className="mt-3">
-                        <AIGenerateButton
-                          contentType="bulletPoints"
-                          onGenerate={() => generateBulletPoint(idx, watchedFields.workExperience?.[idx]?.description || '')}
-                          loading={aiLoading.bulletPoint}
-                          userTier={userTier}
-                          currentUsage={aiUsage.bulletPoints}
-                          selectedIndustry={selectedIndustry}
-                          onUpgradeClick={handleUpgradeClick}
-                        />
-                        <p className="text-xs text-gray-400 mt-1">
-                          AI will add a professional bullet point to your existing description
-                        </p>
-                      </div>
+                                             {/* AI Generate Button for Bullet Points */}
+                       <div className="mt-3">
+                         <AIGenerateButton
+                           contentType="bulletPoints"
+                           onGenerate={() => generateBulletPoint(idx, watchedFields.workExperience?.[idx]?.description || '')}
+                           loading={aiLoading.bulletPoint}
+                           selectedIndustry={selectedIndustry}
+                           onUpgradeClick={handleUpgradeClick}
+                           onAuthRequired={() => setShowAuthModal(true)}
+                         />
+                         <p className="text-xs text-gray-400 mt-1">
+                           AI will add a professional bullet point to your existing description
+                         </p>
+                       </div>
                     </div>
                   </div>
                 ))}
@@ -849,10 +896,9 @@ export default function ResumeForm() {
                       contentType="skills"
                       onGenerate={generateSkills}
                       loading={aiLoading.skills}
-                      userTier={userTier}
-                      currentUsage={aiUsage.skills}
                       selectedIndustry={selectedIndustry}
                       onUpgradeClick={handleUpgradeClick}
+                      onAuthRequired={() => setShowAuthModal(true)}
                     />
                   </div>
 
@@ -948,7 +994,7 @@ export default function ResumeForm() {
                 {!selectedIndustry ? (
                   /* No industry selected - Show only Classic template centered */
                   <div className="flex justify-center gap-4 mb-6">
-                    {getTemplatesForUser(selectedIndustry, userTier).map((template) => (
+                    {getTemplatesForUser(selectedIndustry, tier).map((template) => (
                       <TemplateCard
                         key={template.id}
                         template={template}
@@ -970,7 +1016,7 @@ export default function ResumeForm() {
                   /* Industry selected - Show all templates (available + locked) in same row */
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
                     {/* Available templates (Classic) */}
-                    {getTemplatesForUser(selectedIndustry, userTier).map((template) => (
+                    {getTemplatesForUser(selectedIndustry, tier).map((template) => (
                       <TemplateCard
                         key={template.id}
                         template={template}
@@ -989,7 +1035,7 @@ export default function ResumeForm() {
                     ))}
                     
                     {/* Locked premium templates (for free users) in same row */}
-                    {userTier === 'free' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
+                    {tier === 'free' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
                       <TemplateCard
                         key={template.id}
                         template={template}
@@ -1000,7 +1046,7 @@ export default function ResumeForm() {
                     ))}
                     
                     {/* Premium templates (for paid users) in same row */}
-                    {userTier === 'paid' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
+                    {tier === 'paid' && getLockedTemplatesForIndustry(selectedIndustry).map((template) => (
                       <TemplateCard
                         key={template.id}
                         template={template}
@@ -1407,6 +1453,13 @@ export default function ResumeForm() {
         onClose={() => setShowUpgradeModal(false)}
         onUpgrade={handleUpgrade}
         selectedIndustry={selectedIndustry}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultMode="signup"
       />
     </>
   );

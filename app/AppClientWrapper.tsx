@@ -2,11 +2,14 @@
 
 import React from 'react'
 import { ContactModalProvider } from './ContactModalContext'
+import { AuthProvider } from '../contexts/AuthContext'
 
 export default function AppClientWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ContactModalProvider>
-      {children}
-    </ContactModalProvider>
+    <AuthProvider>
+      <ContactModalProvider>
+        {children}
+      </ContactModalProvider>
+    </AuthProvider>
   )
 } 

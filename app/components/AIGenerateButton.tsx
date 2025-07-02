@@ -1,16 +1,16 @@
 import React from 'react';
-import { Sparkles, Loader2, Zap } from 'lucide-react';
-import { FREE_TIER_LIMITS, checkAIUsage } from '../../lib/ai-utils';
+import { Sparkles, Loader2, Zap, User } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAIUsage } from '../../hooks/useAIUsage';
 
 interface AIGenerateButtonProps {
   contentType: 'bulletPoints' | 'summary' | 'skills';
   onGenerate: () => void;
   disabled?: boolean;
   loading?: boolean;
-  userTier: 'free' | 'paid';
-  currentUsage: number;
   selectedIndustry?: string;
   onUpgradeClick: () => void;
+  onAuthRequired: () => void;
   className?: string;
 }
 
@@ -19,13 +19,33 @@ export default function AIGenerateButton({
   onGenerate,
   disabled = false,
   loading = false,
-  userTier,
-  currentUsage,
   selectedIndustry,
   onUpgradeClick,
+  onAuthRequired,
   className = ''
 }: AIGenerateButtonProps) {
-  const usageCheck = checkAIUsage(contentType, currentUsage, userTier);
+  const { user, profile } = useAuth()
+  const { checkUsageLimit, tier } = useAIUsage()
+
+  // If user is not authenticated, show auth required button
+  if (!user) {
+    return (
+      <div className={`ai-generate-section ${className}`}>
+        <button
+          onClick={onAuthRequired}
+          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 text-blue-300 hover:text-blue-200 font-medium py-2.5 px-4 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-all duration-200 transform hover:scale-105"
+        >
+          <User className="h-4 w-4" />
+          <span>Sign In for AI Features</span>
+        </button>
+        <p className="text-xs text-gray-400 mt-2 text-center">
+          Create a free account to use AI-powered content generation
+        </p>
+      </div>
+    )
+  }
+
+  const usageCheck = checkUsageLimit(contentType);
 
   const getDisplayText = () => {
     switch (contentType) {
@@ -42,7 +62,7 @@ export default function AIGenerateButton({
 
   const getIcon = () => {
     if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
-    if (userTier === 'paid') return <Zap className="h-4 w-4" />;
+    if (tier === 'paid') return <Zap className="h-4 w-4" />;
     return <Sparkles className="h-4 w-4" />;
   };
 
@@ -63,10 +83,14 @@ export default function AIGenerateButton({
             >
               Upgrade - $49 AUD
             </button>
-          </div>
-          <p className="text-xs text-gray-400">
-            Free users get {FREE_TIER_LIMITS[contentType]} {contentType} generation{FREE_TIER_LIMITS[contentType] > 1 ? 's' : ''} per session
-          </p>
+                      </div>
+            <p className="text-xs text-gray-400">
+              {tier === 'free' ? (
+                `Free users get ${usageCheck.remaining} ${contentType} generation${usageCheck.remaining !== 1 ? 's' : ''} per session`
+              ) : (
+                'Unlimited AI generations with Pro membership'
+              )}
+            </p>
         </div>
       </div>
     );
@@ -82,7 +106,7 @@ export default function AIGenerateButton({
         >
           {getIcon()}
           <span>{loading ? 'Generating...' : getDisplayText()}</span>
-          {userTier === 'paid' && (
+          {tier === 'paid' && (
             <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-2 py-0.5 rounded-full font-bold">
               PRO
             </span>
@@ -90,7 +114,7 @@ export default function AIGenerateButton({
         </button>
 
         {/* Usage indicator for free users */}
-        {userTier === 'free' && (
+        {tier === 'free' && (
           <div className="flex items-center justify-between text-xs">
             <span className="text-gray-400">
               {usageCheck.remaining} generation{usageCheck.remaining !== 1 ? 's' : ''} remaining
