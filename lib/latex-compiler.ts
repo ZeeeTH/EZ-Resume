@@ -1,10 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as temp from 'temp';
+import * as os from 'os';
 import { spawn } from 'child_process';
-
-// Automatically track and cleanup files at exit
-temp.track();
 
 export interface LaTeXCompilationOptions {
   engine?: 'pdflatex' | 'xelatex' | 'lualatex';
@@ -52,7 +49,7 @@ export class LaTeXCompiler {
     } = options;
 
     // Create temporary directory for compilation
-    const tempDir = temp.mkdirSync('latex-compile');
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'latex-compile-'));
     const texFile = path.join(tempDir, 'document.tex');
     const pdfFile = path.join(tempDir, 'document.pdf');
     const logFile = path.join(tempDir, 'document.log');
@@ -98,7 +95,15 @@ export class LaTeXCompiler {
         error: `LaTeX compilation failed: ${(error as Error).message}`
       };
     } finally {
-      // Cleanup is handled automatically by temp.track()
+      // Clean up temporary directory
+      try {
+        if (fs.existsSync(tempDir)) {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+      } catch (cleanupError) {
+        // Log cleanup error but don't fail the operation
+        console.warn('Failed to cleanup temporary directory:', cleanupError);
+      }
     }
   }
 
