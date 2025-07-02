@@ -4,6 +4,9 @@ export interface ResumeTemplate {
   description: string;
   popularity: number;
   category: string;
+  industries: string[]; // which industries this template serves
+  tier: 'free' | 'premium'; // template tier
+  isUniversal: boolean; // true for templates that work for all industries
   styling: {
     primaryColor: string;
     secondaryColor: string;
@@ -65,6 +68,9 @@ export interface TemplateMetadata {
   description: string;
   popularity: number;
   category: string;
+  industries: string[]; // which industries this template serves
+  tier: 'free' | 'premium'; // template tier
+  isUniversal: boolean; // true for templates that work for all industries
   colorOptions?: {
     allowUserColorOverride: boolean;
     defaultPrimaryColor: string;
