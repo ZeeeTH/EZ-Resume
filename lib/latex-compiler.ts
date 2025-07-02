@@ -224,7 +224,7 @@ export class LaTeXCompiler {
    */
   injectUserData(template: string, userData: any): string {
     // Replace simple {{VARIABLE}} placeholders
-    let result = template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+    let result = template.replace(/\{\{([^}]+)\}\}/g, (match: string, key: string) => {
       const value = this.getNestedValue(userData, key);
       if (typeof value === 'string') {
         return this.escapeLatex(value);
@@ -233,12 +233,12 @@ export class LaTeXCompiler {
     });
 
     // Handle array iterations like {{#WORK_EXPERIENCE}}...{{/WORK_EXPERIENCE}}
-    result = result.replace(/\{\{#([A-Z_]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match, arrayKey, itemTemplate) => {
+    result = result.replace(/\{\{#([A-Z_]+)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (match: string, arrayKey: string, itemTemplate: string) => {
       const array = userData[arrayKey] || userData[arrayKey.toLowerCase()];
       if (!Array.isArray(array)) return '';
       
       return array.map(item => {
-        return itemTemplate.replace(/\{\{([^}]+)\}\}/g, (itemMatch, itemKey) => {
+        return itemTemplate.replace(/\{\{([^}]+)\}\}/g, (itemMatch: string, itemKey: string) => {
           if (itemKey === '.') return this.escapeLatex(item);
           const value = this.getNestedValue(item, itemKey);
           if (typeof value === 'string') {
