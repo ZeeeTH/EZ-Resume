@@ -125,6 +125,7 @@ export function constructWebhookEvent(payload: string, signature: string) {
 export const PRICING = {
   RESUME_ONLY: 1499, // $14.99 AUD in cents
   BOTH: 80, // $0.80 AUD in cents for bundle
+  PREMIUM_UPGRADE: 4900, // $49 AUD for premium upgrade
 }
 
 export function getPriceForDocumentType(documentType: 'resume' | 'both'): number {
@@ -136,4 +137,8 @@ export function getPriceForDocumentType(documentType: 'resume' | 'both'): number
     default:
       return PRICING.RESUME_ONLY
   }
+}
+
+export function getPremiumUpgradePrice(): number {
+  return PRICING.PREMIUM_UPGRADE
 } 

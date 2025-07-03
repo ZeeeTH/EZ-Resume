@@ -395,22 +395,19 @@ export const searchTemplates = (query: string): ResumeTemplate[] => {
 // Industry-specific template filtering functions
 export const getTemplatesForUser = (selectedIndustry: string, userTier: 'free' | 'paid'): ResumeTemplate[] => {
   let availableTemplates: ResumeTemplate[] = [];
-  
   // Always include the free Classic template
   const universalTemplate = templates.find(template => template.isUniversal && template.tier === 'free');
   if (universalTemplate) {
     availableTemplates.push(universalTemplate);
   }
-  
-  // Add industry-specific premium templates for paid users
+  // Add up to 2 industry-specific premium templates for paid users
   if (userTier === 'paid' && selectedIndustry && selectedIndustry !== '') {
     const industryTemplates = templates.filter(template => 
       template.industries.includes(selectedIndustry) && 
       template.tier === 'premium'
-    );
+    ).slice(0, 2); // Only allow 2 premium templates per industry
     availableTemplates = [...availableTemplates, ...industryTemplates];
   }
-  
   return availableTemplates;
 };
 
@@ -418,11 +415,11 @@ export const getLockedTemplatesForIndustry = (selectedIndustry: string): ResumeT
   if (!selectedIndustry || selectedIndustry === '') {
     return [];
   }
-  
+  // Only return up to 2 premium templates per industry
   return templates.filter(template => 
     template.industries.includes(selectedIndustry) && 
     template.tier === 'premium'
-  );
+  ).slice(0, 2);
 };
 
 export const getTemplatesByIndustry = (industry: string): ResumeTemplate[] => {

@@ -1,5 +1,6 @@
-import React from 'react';
-import { X, Crown, CheckCircle, Sparkles, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Crown, CheckCircle, Sparkles, Lock, Loader2 } from 'lucide-react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -20,6 +21,10 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
   trigger = 'general',
   context = {}
 }) => {
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
   if (!isOpen) return null;
 
   const getUpgradeMessage = () => {
@@ -61,6 +66,41 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
     return baseBenefits;
   };
 
+  const handleUpgrade = async () => {
+    if (!user?.email) {
+      setError('Please sign in to upgrade your account');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerEmail: user.email,
+          upgradeType: 'premium'
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.url) {
+        // Redirect to Stripe checkout
+        window.location.href = result.url;
+      } else {
+        setError(result.error || 'Failed to initiate payment');
+      }
+    } catch (error) {
+      console.error('Payment initiation failed:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md w-full shadow-2xl">
@@ -77,6 +117,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
+            disabled={isLoading}
           >
             <X className="h-6 w-6" />
           </button>
@@ -96,12 +137,29 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
             ))}
           </ul>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
           <div className="space-y-4">
             <button 
-              onClick={onUpgrade}
-              className="upgrade-btn-primary w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+              onClick={handleUpgrade}
+              disabled={isLoading || !user?.email}
+              className="upgrade-btn-primary w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
-              Upgrade Now - $49 AUD
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Crown className="h-5 w-5" />
+                  <span>Upgrade Now - $49 AUD</span>
+                </>
+              )}
             </button>
             
             <div className="text-center">

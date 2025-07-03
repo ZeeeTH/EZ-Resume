@@ -34,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "lib/fonts/base64.js"  ],
+  ],
   "exclude": [
     "node_modules"
   ]

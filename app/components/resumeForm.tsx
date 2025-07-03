@@ -21,6 +21,7 @@ import SkillsSuggestions from './SkillsSuggestions';
 import { AIContentResponse } from '../../lib/ai-utils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAIUsage } from '../../hooks/useAIUsage';
+import { useRouter } from 'next/navigation';
 
 // Helper arrays for months and years
 const months = [
@@ -32,6 +33,35 @@ const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
 
 // Helper function
 const isFieldMissing = (value: string | undefined) => !value || value.trim() === '';
+
+// Enhanced sanitization function
+const sanitizeInput = (value: string): string => {
+  if (!value) return '';
+  return value
+    .trim()
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .replace(/[<>]/g, '') // Remove potential XSS characters
+    .slice(0, 2000); // Limit length to prevent abuse
+};
+
+// Enhanced validation helper
+const validateField = (value: any, fieldName: string): { isValid: boolean; error?: string } => {
+  if (!value) return { isValid: false, error: `${fieldName} is required` };
+  
+  const strValue = String(value).trim();
+  
+  // Check for XSS attempts
+  if (/[<>]/.test(strValue)) {
+    return { isValid: false, error: `${fieldName} contains invalid characters` };
+  }
+  
+  // Check for excessive length
+  if (strValue.length > 2000) {
+    return { isValid: false, error: `${fieldName} is too long (max 2000 characters)` };
+  }
+  
+  return { isValid: true };
+};
 
 export default function ResumeForm() {
   // Form state
@@ -57,6 +87,7 @@ export default function ResumeForm() {
   // Authentication
   const { user, profile, updateProfile } = useAuth()
   const { checkUsageLimit, incrementUsage, tier, getCurrentUsage } = useAIUsage()
+  const router = useRouter()
 
   // Industry selector state
   const [selectedIndustry, setSelectedIndustry] = useState('');
@@ -188,47 +219,144 @@ export default function ResumeForm() {
     setError('');
 
     try {
+      // Pre-submission validation and sanitization
+      const sanitizedData = {
+        ...data,
+        name: sanitizeInput(data.name),
+        email: data.email.toLowerCase().trim(),
+        phone: data.phone ? sanitizeInput(data.phone) : undefined,
+        jobTitle: data.jobTitle ? sanitizeInput(data.jobTitle) : undefined,
+        company: data.company ? sanitizeInput(data.company) : undefined,
+        location: data.location ? sanitizeInput(data.location) : undefined,
+        personalSummary: data.personalSummary ? sanitizeInput(data.personalSummary) : undefined,
+        skills: sanitizeInput(data.skills),
+        achievements: sanitizeInput(data.achievements),
+        workExperience: data.workExperience.map(job => ({
+          ...job,
+          title: sanitizeInput(job.title),
+          company: sanitizeInput(job.company),
+          description: sanitizeInput(job.description)
+        })),
+        education: data.education.map(edu => ({
+          ...edu,
+          degree: sanitizeInput(edu.degree),
+          school: sanitizeInput(edu.school)
+        }))
+      };
+
+      // Additional validation checks
+      const validationErrors: string[] = [];
+
+      // Check for required fields
+      if (!sanitizedData.name || sanitizedData.name.length < 2) {
+        validationErrors.push('Name must be at least 2 characters');
+      }
+
+      if (!sanitizedData.email || !sanitizedData.email.includes('@')) {
+        validationErrors.push('Please enter a valid email address');
+      }
+
+      if (!sanitizedData.skills || sanitizedData.skills.length < 2) {
+        validationErrors.push('Please provide at least 2 characters of skills');
+      }
+
+      if (!sanitizedData.achievements || sanitizedData.achievements.length < 2) {
+        validationErrors.push('Please provide at least 2 characters of achievements');
+      }
+
+      // Check work experience
+      if (!sanitizedData.workExperience || sanitizedData.workExperience.length === 0) {
+        validationErrors.push('At least one work experience is required');
+      } else {
+        sanitizedData.workExperience.forEach((job, index) => {
+          if (!job.title || job.title.length < 2) {
+            validationErrors.push(`Work experience ${index + 1}: Job title is required`);
+          }
+          if (!job.company || job.company.length < 2) {
+            validationErrors.push(`Work experience ${index + 1}: Company is required`);
+          }
+          if (!job.description || job.description.length < 10) {
+            validationErrors.push(`Work experience ${index + 1}: Description must be at least 10 characters`);
+          }
+        });
+      }
+
+      // Check education
+      if (!sanitizedData.education || sanitizedData.education.length === 0) {
+        validationErrors.push('At least one education entry is required');
+      } else {
+        sanitizedData.education.forEach((edu, index) => {
+          if (!edu.degree || edu.degree.length < 2) {
+            validationErrors.push(`Education ${index + 1}: Degree is required`);
+          }
+          if (!edu.school || edu.school.length < 2) {
+            validationErrors.push(`Education ${index + 1}: School is required`);
+          }
+        });
+      }
+
+      // Check cover letter requirements
+      if (sanitizedData.coverLetter && (!sanitizedData.company || sanitizedData.company.length < 2)) {
+        validationErrors.push('Target company is required when generating a cover letter');
+      }
+
+      if (validationErrors.length > 0) {
+        throw new Error(`Validation failed:\n${validationErrors.join('\n')}`);
+      }
+
       const selectedTemplateData = templateMetadata.find(t => t.id === selectedTemplate);
       
       const apiData = {
-        ...data,
+        ...sanitizedData,
         template: selectedTemplate,
-        workExperience: data.workExperience,
-        educationData: data.education,
+        workExperience: sanitizedData.workExperience,
+        educationData: sanitizedData.education,
         ...(selectedTemplateData?.colorOptions && {
           colorVariant: selectedColorVariants[selectedTemplate] ?? 0,
           selectedColors: selectedTemplateData.colorOptions.palette[selectedColorVariants[selectedTemplate] ?? 0]
         })
       };
 
-      // Create Stripe checkout session
-      const response = await fetch('/api/payment', {
+      // Generate resume and create account in one step
+      const response = await fetch('/api/resume/generate-and-create-account', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          documentType: data.coverLetter ? 'both' : 'resume',
-          customerEmail: data.email,
-          customerName: data.name,
           formData: apiData
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create payment session');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate resume');
       }
 
-      const { url } = await response.json();
+      const result = await response.json();
       
-      if (!url) {
-        throw new Error('No checkout URL received');
+      if (result.success) {
+        // Show success message
+        setError('');
+        
+        // If new user was created, show account creation message and redirect
+        if (result.user.isNewUser) {
+          // Redirect to success page for new users
+          router.push('/dashboard/success?newResume=true&newUser=true');
+        } else {
+          // Redirect to success page for existing users
+          router.push('/dashboard/success?newResume=true');
+        }
+      } else {
+        throw new Error('Resume generation failed');
       }
-
-      // Redirect to Stripe Checkout
-      window.location.href = url;
     } catch (err) {
-      setError('Failed to create payment session. Please try again.');
+      console.error('Resume generation error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate resume. Please try again.';
+      setError(errorMessage);
+      
+      // Scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsGenerating(false);
     }
@@ -331,8 +459,6 @@ export default function ResumeForm() {
   };
 
   const handleUpgrade = () => {
-    // This would integrate with your payment system
-    console.log('Upgrade clicked - integrate with payment system');
     setShowUpgradeModal(false);
   };
 
@@ -1087,12 +1213,12 @@ export default function ResumeForm() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>Redirecting to secure checkout...</span>
+                      <span>Generating Your Resume...</span>
                     </>
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'}</span>
+                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} (Free)</span>
                     </>
                   )}
                 </button>

@@ -66,6 +66,18 @@ const UserMenu = ({ onUpgradeClick }: UserMenuProps) => {
 
   const usageInfo = getUsageInfo()
 
+  // Get first name from profile or email
+  const getFirstName = () => {
+    if (profile?.email) {
+      return profile.email.split('@')[0];
+    }
+    if (user.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+  const firstName = getFirstName();
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -77,7 +89,7 @@ const UserMenu = ({ onUpgradeClick }: UserMenuProps) => {
             <User className="h-4 w-4 text-white" />
           </div>
           <div className="hidden md:block text-left">
-            <div className="text-sm font-medium">{user.email}</div>
+            <div className="text-sm font-medium">Hi, {firstName}</div>
             <div className={`text-xs px-2 py-0.5 rounded-full inline-flex items-center space-x-1 ${tierInfo.bgColor} ${tierInfo.textColor} font-bold`}>
               {tierInfo.icon}
               <span>{tierInfo.label}</span>
@@ -96,21 +108,14 @@ const UserMenu = ({ onUpgradeClick }: UserMenuProps) => {
                 <User className="h-5 w-5 text-white" />
               </div>
               <div>
-                <div className="text-white font-medium">{user.email}</div>
-                <div className="text-gray-400 text-sm">{tierInfo.description}</div>
-              </div>
-            </div>
-
-            {/* Tier Status */}
-            <div className={`p-3 rounded-lg mb-4 ${tierInfo.bgColor} ${tierInfo.textColor}`}>
-              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  {tierInfo.icon}
-                  <span className="font-bold">{tierInfo.label} MEMBER</span>
+                  <span className="text-white font-medium">{firstName}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full inline-flex items-center space-x-1 ${tierInfo.bgColor} ${tierInfo.textColor} font-bold`}>
+                    {tierInfo.icon}
+                    <span>{tierInfo.label}</span>
+                  </span>
                 </div>
-                {profile?.tier === 'paid' && (
-                  <Zap className="h-4 w-4" />
-                )}
+                <div className="text-gray-400 text-sm">{tierInfo.description}</div>
               </div>
             </div>
 
@@ -171,6 +176,13 @@ const UserMenu = ({ onUpgradeClick }: UserMenuProps) => {
 
             {/* Menu Items */}
             <div className="border-t border-white/10 pt-4">
+              <a
+                href="/dashboard"
+                className="w-full flex items-center space-x-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors mb-2"
+              >
+                <User className="h-4 w-4" />
+                <span>Go to Dashboard</span>
+              </a>
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center space-x-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"

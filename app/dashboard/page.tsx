@@ -14,7 +14,8 @@ import {
   Star,
   TrendingUp,
   Clock,
-  Eye
+  Eye,
+  Download
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -333,6 +334,41 @@ const DashboardOverview = () => {
               <Crown className="h-4 w-4 mr-2" />
               Upgrade to Professional
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Latest Resume Download */}
+      {stats.recentActivity.length > 0 && stats.recentActivity[0].type === 'resume' && (
+        <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-xl rounded-xl border border-green-500/30 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-2">Latest Resume Ready!</h2>
+              <p className="text-gray-300 mb-4">
+                Your most recent resume is ready to download. Click the button below to get your PDF.
+              </p>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => {
+                    const latestResume = stats.recentActivity[0]
+                    window.open(`/api/resume/download/${latestResume.id}`, '_blank')
+                  }}
+                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-blue-500 hover:to-green-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download Latest Resume</span>
+                </button>
+                <Link
+                  href="/dashboard/resumes"
+                  className="text-gray-300 hover:text-white text-sm font-medium"
+                >
+                  View All Resumes →
+                </Link>
+              </div>
+            </div>
+            <div className="w-16 h-16 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <FileText className="h-8 w-8 text-green-400" />
+            </div>
           </div>
         </div>
       )}

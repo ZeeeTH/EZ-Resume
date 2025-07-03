@@ -8,35 +8,41 @@ interface AuthModalProps {
   defaultMode?: 'signin' | 'signup';
 }
 
-const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) => {
-  const [mode, setMode] = useState(defaultMode)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+export default function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) {
+  const [mode, setMode] = useState<'signin' | 'signup'>(defaultMode);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const { signIn, signUp } = useAuth()
 
+  // Debug logging
+  console.log('AuthModal render:', { isOpen, defaultMode, mode });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    console.log('Form submitted in mode:', mode);
+    setIsLoading(true)
     setError('')
-    setSuccess('')
+    setMessage('')
 
     const { data, error } = mode === 'signin' 
       ? await signIn(email, password)
       : await signUp(email, password)
 
     if (error) {
+      console.log('Auth error:', error);
       setError(error.message)
     } else if (data?.user) {
+      console.log('Auth success:', data.user.email);
       if (mode === 'signup') {
-        setSuccess('Account created! Please check your email to verify your account.')
+        setMessage('Account created! Please check your email to verify your account.')
         // Reset form and switch to signin mode after a delay
         setTimeout(() => {
           setMode('signin')
-          setSuccess('')
+          setMessage('')
           setEmail('')
           setPassword('')
         }, 3000)
@@ -47,17 +53,18 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) 
       }
     }
 
-    setLoading(false)
+    setIsLoading(false)
   }
 
   const resetForm = () => {
     setEmail('')
     setPassword('')
     setError('')
-    setSuccess('')
+    setMessage('')
   }
 
   const switchMode = () => {
+    console.log('Switching mode from', mode, 'to', mode === 'signin' ? 'signup' : 'signin');
     setMode(mode === 'signin' ? 'signup' : 'signin')
     resetForm()
   }
@@ -65,7 +72,7 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">
@@ -89,11 +96,11 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) 
             </div>
           )}
 
-          {success && (
+          {message && (
             <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
               <p className="text-green-400 text-sm flex items-center">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                {success}
+                {message}
               </p>
             </div>
           )}
@@ -144,10 +151,10 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) 
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
           >
-            {loading ? (
+            {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span>{mode === 'signin' ? 'Signing In...' : 'Creating Account...'}</span>
@@ -197,6 +204,4 @@ const AuthModal = ({ isOpen, onClose, defaultMode = 'signin' }: AuthModalProps) 
       </div>
     </div>
   )
-}
-
-export default AuthModal 
+} 

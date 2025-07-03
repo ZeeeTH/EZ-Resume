@@ -25,9 +25,9 @@ export default function Home() {
         {/* Top Navigation */}
         <TopNavigation onUpgradeClick={() => setShowUpgradeModal(true)} />
         {/* Hero Section */}
-        <div className="container mx-auto px-4 pt-8 md:pt-12 pb-0 md:pb-0 select-none">
+        <div className="container mx-auto px-4 pt-6 md:pt-10 pb-0 md:pb-0 select-none">
           <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight select-none">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 leading-tight select-none">
               Get Hired Faster with
               <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 AI-Powered Resumes

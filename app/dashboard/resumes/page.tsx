@@ -124,10 +124,33 @@ const ResumesPage = () => {
   }
 
   const downloadResume = async (resume: Resume) => {
-    // This would trigger a PDF download
-    // For now, we'll just show an alert
-    alert(`Downloading ${resume.title}...`)
-    // TODO: Implement PDF download functionality
+    try {
+      // Call the download API endpoint
+      const response = await fetch(`/api/resume/download/${resume.id}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to download resume')
+      }
+      
+      // Get the blob from the response
+      const blob = await response.blob()
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${resume.title || 'resume'}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      
+      // Clean up
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+    } catch (error) {
+      console.error('Error downloading resume:', error)
+      alert('Failed to download resume. Please try again.')
+    }
   }
 
   const viewResume = (resume: Resume) => {
