@@ -3,12 +3,16 @@ import { supabase } from '@/lib/supabase'
 import * as fs from 'fs'
 import * as path from 'path'
 
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
-    const resumeId = params.id
+    const { id: resumeId } = await params
     
     if (!resumeId) {
       return NextResponse.json({ error: 'Resume ID is required' }, { status: 400 })
