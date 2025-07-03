@@ -300,6 +300,18 @@ export default function ResumeForm() {
         validationErrors.push('Target company is required when generating a cover letter');
       }
 
+      // Ensure cover letters are only generated for paid users
+      if (sanitizedData.coverLetter && tier === 'free') {
+        validationErrors.push('Cover letter generation is only available for Professional users');
+      }
+
+      // Auto-uncheck cover letter for free users
+      if (tier === 'free' && sanitizedData.coverLetter) {
+        sanitizedData.coverLetter = false;
+        setCoverLetterChecked(false);
+        setValue('coverLetter', false);
+      }
+
       if (validationErrors.length > 0) {
         throw new Error(`Validation failed:\n${validationErrors.join('\n')}`);
       }
@@ -1060,23 +1072,48 @@ export default function ResumeForm() {
 
               {/* Cover Letter Option */}
               <div className="mb-10">
-                <div className="flex items-center space-x-3 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 ${
+                  tier === 'paid' 
+                    ? 'bg-purple-500/10 border-purple-500/20' 
+                    : 'bg-gray-500/10 border-gray-500/20 opacity-60'
+                }`}>
                   <input
                     {...register('coverLetter')}
                     type="checkbox"
                     id="coverLetter"
-                    className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
+                    className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     checked={coverLetterChecked}
+                    disabled={tier === 'free'}
                     onChange={(e) => {
+                      if (tier === 'free') {
+                        setShowUpgradeModal(true);
+                        return;
+                      }
                       setCoverLetterChecked(e.target.checked);
                       setValue('coverLetter', e.target.checked);
                     }}
                   />
-                  <label htmlFor="coverLetter" className="text-sm text-gray-300">
-                    Also generate a cover letter for this position
+                  <label htmlFor="coverLetter" className="text-sm text-gray-300 flex items-center space-x-2">
+                    <span>Also generate a cover letter for this position</span>
+                    {tier === 'free' && (
+                      <div className="flex items-center space-x-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs px-2 py-1 rounded-full font-bold">
+                        <Crown className="h-3 w-3" />
+                        <span>PRO</span>
+                      </div>
+                    )}
                   </label>
                 </div>
-                {coverLetterChecked && (
+                
+                {tier === 'free' && (
+                  <div className="mt-3 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg">
+                    <p className="text-yellow-200 text-sm flex items-center space-x-2">
+                      <Crown className="h-4 w-4" />
+                      <span>Upgrade to Professional to unlock cover letter generation</span>
+                    </p>
+                  </div>
+                )}
+                
+                {coverLetterChecked && tier === 'paid' && (
                   <div className="mt-6">
                         <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
                           Target Company *
@@ -1213,12 +1250,15 @@ export default function ResumeForm() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="h-6 w-6 animate-spin" />
-                      <span>Generating Your Resume...</span>
+                      <span>Generating Your {coverLetterChecked && tier === 'paid' ? 'Resume & Cover Letter' : 'Resume'}...</span>
                     </>
                   ) : (
                     <>
                       <FileText className="h-6 w-6" />
-                      <span>Generate My {coverLetterChecked ? 'Resume & Cover Letter' : 'Resume'} (Free)</span>
+                      <span>
+                        Generate My {coverLetterChecked && tier === 'paid' ? 'Resume & Cover Letter' : 'Resume'} 
+                        {tier === 'free' ? ' (Free)' : ' (Professional)'}
+                      </span>
                     </>
                   )}
                 </button>
